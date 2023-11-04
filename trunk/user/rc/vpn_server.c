@@ -148,6 +148,9 @@ gen_vpns_pppd_options(int vpns_type)
 	fprintf(fp, "ip-up-script %s\n", VPNS_PPP_UP_SCRIPT);
 	fprintf(fp, "ip-down-script %s\n", VPNS_PPP_DW_SCRIPT);
 	fprintf(fp, "minunit %d\n", VPN_SERVER_PPP_UNIT);
+	
+	fprintf(fp, "ipparam pptp\n");
+	fprintf(fp, "ipv6 ,\n");
 
 	fclose(fp);
 
