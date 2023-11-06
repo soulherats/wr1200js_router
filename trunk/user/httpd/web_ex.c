@@ -1046,6 +1046,14 @@ validate_asp_apply(webs_t wp, int sid)
 				
 				rt_modified |= WIFI_IWPRIV_CHANGE_BIT;
 			}
+			else if (!strcmp(v->name, "rt_pmf"))
+			{
+				rt_modified |= WIFI_IWPRIV_CHANGE_BIT;
+			}
+			else if (!strcmp(v->name, "rt_pmfsha256"))
+			{
+				rt_modified |= WIFI_IWPRIV_CHANGE_BIT;
+			}
 			else if (!strcmp(v->name, "rt_greenap"))
 			{
 				set_wifi_param_int(IFNAME_2G_MAIN, "GreenAP", value, 0, 1);

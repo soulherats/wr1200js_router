@@ -797,7 +797,7 @@ function getHash(){
                             </table>
                             <table class="table" id="tbl_vpn_config" style="display:none">
                                 <tr>
-                                    <th colspan="2" style="background-color: #E3E3E3;"><#VPNS_Base#></th>
+                                    <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#VPNS_Base#></th>
                                 </tr>
                                 <tr>
                                     <th width="50%"><#VPNS_Type#></th>
@@ -963,7 +963,7 @@ function getHash(){
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colspan="2" style="background-color: #E3E3E3;"><#VPNS_CTun#></th>
+                                    <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#VPNS_CTun#></th>
                                 </tr>
                                 <tr id="row_vpns_vuse" style="display:none">
                                     <th><#VPNS_VUse#></th>
@@ -1014,7 +1014,7 @@ function getHash(){
                             </table>
                             <table class="table" id="tbl_vpn_pool" style="display:none">
                                 <tr>
-                                    <th colspan="2" style="background-color: #E3E3E3;"><#VPNS_PInfo#></th>
+                                    <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#VPNS_PInfo#></th>
                                 </tr>
                                 <tr>
                                     <th width="50%"><#VPNS_VAddr#></th>
@@ -1051,7 +1051,7 @@ function getHash(){
                             </table>
                             <table class="table">
                                 <tr>
-                                    <td style="border: 0 none; padding: 0px;"><center><input name="button" type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center></td>
+                                    <td style="border: 0 none; padding-bottom: 10px;"><center><input name="button" type="button" class="btn btn-primary" style="width: 219px" onclick="applyRule();" value="<#CTL_apply#>"/></center></td>
                                 </tr>
                             </table>
                         </div>
@@ -1182,7 +1182,7 @@ function getHash(){
                                     </td>
                                     <td>
                                         <input type="text" size="14" maxlength="15" style="width: 90px;" name="vpns_rnet_x_0" value="<% nvram_get_x("", "vpns_rnet_x_0"); %>" onkeypress="return is_ipaddr(this,event);" />&nbsp;/
-                                        <input type="text" size="14" maxlength="15" style="width: 90px;" name="vpns_rmsk_x_0" value="<% nvram_get_x("", "vpns_rmsk_x_0"); %>" onkeypress="return is_ipaddr(this,event);" />
+                                        <input type="text" size="14" maxlength="15" style="width: 80px;" name="vpns_rmsk_x_0" value="<% nvram_get_x("", "vpns_rmsk_x_0"); %>" onkeypress="return is_ipaddr(this,event);" />
                                     </td>
                                     <td>
                                         <button class="btn" type="submit" onclick="return markGroupACL(this, 50, ' Add ');" name="VPNSACLList2"><i class="icon icon-plus"></i></button>

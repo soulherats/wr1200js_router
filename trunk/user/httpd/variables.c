@@ -925,6 +925,8 @@
 			{"rt_stream_rx", "", NULL, EVM_RESTART_WIFI2},
 			{"rt_preamble", "", NULL, EVM_RESTART_WIFI2},
 			{"rt_greenap", "", NULL, EVM_RESTART_WIFI2},
+			{"rt_pmf", "", NULL, EVM_RESTART_WIFI2},
+			{"rt_pmfsha256", "", NULL, EVM_RESTART_WIFI2},
 			{"rt_ldpc", "", NULL, EVM_RESTART_WIFI2},
 			{"rt_sta_ssid", "", NULL, EVM_RESTART_WIFI2},
 			{"rt_sta_auth_mode", "", NULL, EVM_RESTART_WIFI2},

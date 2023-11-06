@@ -725,9 +725,9 @@ static void rtmp_read_ap_client_from_file(
 #ifdef APCLI_DOT11W_PMF_SUPPORT
 #ifdef DOT11W_PMF_SUPPORT
 	for (i = 0; i < MAX_APCLI_NUM; i++) {
-		pAd->ApCfg.ApCliTab[i].PmfCfg.Desired_MFPC = FALSE;
+		pAd->ApCfg.ApCliTab[i].PmfCfg.Desired_MFPC = TRUE;
 		pAd->ApCfg.ApCliTab[i].PmfCfg.Desired_MFPR = FALSE;
-		pAd->ApCfg.ApCliTab[i].PmfCfg.Desired_PMFSHA256 = FALSE;
+		pAd->ApCfg.ApCliTab[i].PmfCfg.Desired_PMFSHA256 = TRUE;
 	}
 #endif /* DOT11W_PMF_SUPPORT */
 #endif /* APCLI_DOT11W_PMF_SUPPORT */

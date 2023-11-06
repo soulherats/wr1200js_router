@@ -707,7 +707,7 @@ $j(document).ready(function(){
 
                 <div class="row-fluid">
                     <div class="span2">
-                        <div class="well" style="height: 570px; padding-left: 18px;">
+                        <div class="well" style="height: 570px; padding-left: 10px;">
                             <div id="tabMenu"></div>
 
                             <table class="table table-big" style="margin-top: 12px;">
