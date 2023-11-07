@@ -298,6 +298,15 @@ function done_validating(action){
                                             </td>
                                         </tr>
                                         <tr>
+                                            <th><#WIFISTBC#></th>
+                                            <td>
+                                                <select name="wl_STBC" class="input">
+                                                    <option value="0" <% nvram_match_x("","wl_STBC", "0","selected"); %>><#btn_Disable#> (*)</option>
+                                                    <option value="1" <% nvram_match_x("","wl_STBC", "1","selected"); %>><#btn_Enable#> (VHT)</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <th><#WIFIRDG#></th>
                                             <td>
                                                 <select name="wl_HT_RDG" class="input">

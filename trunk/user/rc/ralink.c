@@ -1186,7 +1186,7 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 		fprintf(fp, "Key%dStr%d=%s\n", 4, i, "");
 
 	fprintf(fp, "HSCounter=%d\n", 0);
-
+	
 	//HT_RDG
 	i_val = nvram_wlan_get_int(is_aband, "HT_RDG");
 	if (i_val) i_val = 1;
@@ -1368,10 +1368,11 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 		fprintf(fp, "VHT_LDPC=%d\n", i_val);
 		
 		//VHT_STBC
+		i_val = nvram_wlan_get_int(is_aband, "STBC");
 #if defined (USE_WID_5G) && (USE_WID_5G==7615 || USE_WID_5G == 7915)
 		fprintf(fp, "VHT_STBC=%d\n", i_val);
 #else
-		fprintf(fp, "VHT_STBC=%d\n", 0);
+		fprintf(fp, "VHT_STBC=%d\n", i_val);
 #endif
 	}
 #endif

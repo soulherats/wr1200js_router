@@ -973,6 +973,12 @@ validate_asp_apply(webs_t wp, int sid)
 				
 				wl_modified |= WIFI_IWPRIV_CHANGE_BIT;
 			}
+			else if (!strcmp(v->name, "wl_STBC"))
+			{
+				set_wifi_param_int(IFNAME_5G_MAIN, "STBC", value, 0, 1);
+				
+				wl_modified |= WIFI_IWPRIV_CHANGE_BIT;
+			}
 			else if (!strcmp(v->name, "wl_greenap"))
 			{
 				set_wifi_param_int(IFNAME_5G_MAIN, "GreenAP", value, 0, 1);

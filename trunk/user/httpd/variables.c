@@ -738,6 +738,7 @@
 			{"wl_HT_OpMode", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_HT_BW", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_HT_RDG", "", NULL, EVM_RESTART_WIFI5},
+			{"wl_STBC", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_HT_AMSDU", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_HT_MpduDensity", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_HT_BAWinSize", "", NULL, EVM_RESTART_WIFI5},
