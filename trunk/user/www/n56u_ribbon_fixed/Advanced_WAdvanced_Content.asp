@@ -26,6 +26,8 @@ var $j = jQuery.noConflict();
 
 $j(document).ready(function() {
 	init_itoggle('wl_greenap');
+	init_itoggle('wl_pmf');
+	init_itoggle('wl_pmfsha256');
 	init_itoggle('wl_ap_isolate');
 });
 
@@ -199,6 +201,36 @@ function done_validating(action){
                                                     <option value="3" <% nvram_match_x("","wl_VgaClamp", "3","selected"); %>>-12 dB</option>
                                                     <option value="4" <% nvram_match_x("","wl_VgaClamp", "4","selected"); %>>-16 dB</option>
                                                 </select>
+                                            </td>
+                                        </tr>
+					<tr id="row_pmf">
+                                            <th><#WIFIPMF#></th>
+                                            <td>
+                                                <div class="main_itoggle">
+                                                    <div id="wl_pmf_on_of">
+                                                        <input type="checkbox" id="wl_pmf_fake" <% nvram_match_x("", "wl_pmf", "1", "value=1 checked"); %><% nvram_match_x("", "rt_pmf", "0", "value=0"); %>>
+                                                    </div>
+                                                </div>
+
+                                                <div style="position: absolute; margin-left: -10000px;">
+                                                    <input type="radio" value="1" name="wl_pmf" id="wl_pmf_1" class="input" <% nvram_match_x("", "wl_pmf", "1", "checked"); %>><#checkbox_Yes#>
+                                                    <input type="radio" value="0" name="wl_pmf" id="wl_pmf_0" class="input" <% nvram_match_x("", "wl_pmf", "0", "checked"); %>><#checkbox_No#>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr id="row_pmfsha256">
+                                            <th><#WIFIPMFsha256#></th>
+                                            <td>
+                                                <div class="main_itoggle">
+                                                    <div id="wl_pmfsha256_on_of">
+                                                        <input type="checkbox" id="wl_pmfsha256_fake" <% nvram_match_x("", "wl_pmfsha256", "1", "value=1 checked"); %><% nvram_match_x("", "wl_pmfsha256", "0", "value=0"); %>>
+                                                    </div>
+                                                </div>
+
+                                                <div style="position: absolute; margin-left: -10000px;">
+                                                    <input type="radio" value="1" name="wl_pmfsha256" id="wl_pmfsha256_1" class="input" <% nvram_match_x("", "wl_pmfsha256", "1", "checked"); %>><#checkbox_Yes#>
+                                                    <input type="radio" value="0" name="wl_pmfsha256" id="wl_pmfsha256_0" class="input" <% nvram_match_x("", "wl_pmfsha256", "0", "checked"); %>><#checkbox_No#>
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr id="row_greenap">

@@ -761,6 +761,8 @@
 			{"wl_sta_crypto", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_sta_wpa_psk", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_sta_wisp", "", NULL, EVM_RESTART_WIFI5},
+			{"wl_pmf", "", NULL, EVM_RESTART_WIFI5},
+			{"wl_pmfsha256", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_sta_auto", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_guest_enable", "", NULL, EVM_RESTART_WIFI5},
 			{"wl_guest_date_x", "", NULL, EVM_RESTART_WIFI5},

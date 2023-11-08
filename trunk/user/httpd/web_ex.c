@@ -1016,6 +1016,14 @@ validate_asp_apply(webs_t wp, int sid)
 				
 				wl_modified |= WIFI_IWPRIV_CHANGE_BIT;
 			}
+			else if (!strcmp(v->name, "wl_pmf"))
+			{
+				wl_modified |= WIFI_IWPRIV_CHANGE_BIT;
+			}
+			else if (!strcmp(v->name, "wl_pmfsha256"))
+			{
+				wl_modified |= WIFI_IWPRIV_CHANGE_BIT;
+			}
 			else if (!strcmp(v->name, "wl_guest_enable") ||
 			         !strcmp(v->name, "wl_guest_time_x") ||
 			         !strcmp(v->name, "wl_guest_time2_x") ||

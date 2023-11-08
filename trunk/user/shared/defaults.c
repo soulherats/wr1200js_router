@@ -197,6 +197,8 @@ struct nvram_pair router_defaults[] = {
 	{ "wl_PktAggregate", "1" },
 	{ "wl_APSDCapable", "0" },
 	{ "wl_HT_OpMode", "0" },
+	{ "wl_pmf", "0" },
+	{ "wl_pmfsha256", "0" },
 #if BOARD_HAS_5G_11AC
 	{ "wl_HT_BW", "2" },
 #else
