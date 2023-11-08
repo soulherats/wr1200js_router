@@ -10142,6 +10142,8 @@ VOID Trigger_Sounding_Packet(
 	IN	UCHAR			SndgMcs,
 	IN  MAC_TABLE_ENTRY *pEntry);
 
+int ate_txbf_get_chan_idx(IN RTMP_ADAPTER *pAd, UCHAR channel, UCHAR flag);
+int ate_txbf_chan_group_base_idx(IN RTMP_ADAPTER *pAd, UCHAR channel);
 VOID rtmp_asic_set_bf(RTMP_ADAPTER *pAd);
 BOOLEAN rtmp_chk_itxbf_calibration(RTMP_ADAPTER *pAd);
 

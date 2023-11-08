@@ -707,12 +707,8 @@ DBGPRINT(RT_DEBUG_OFF, ("%s(): AP Set CentralFreq at %d(Prim=%d, HT-CentCh=%d, V
 #ifdef MT76x2
 	if (IS_MT76x2(pAd))
 	{
-#ifdef TXBF_SUPPORT
-        if (pAd->hw_cfg.cent_ch > 14) 
-           rtmp_ate_txbf_fix_tank_code(pAd, pAd->hw_cfg.cent_ch, 0);  // load tank code from efuse, iBF only for A band
-#endif /*TXBF_SUPPORT*/
 		mt76x2_calibration(pAd, pAd->hw_cfg.cent_ch);
-    }
+    	}
 #endif /* MT76x2 */
 
 	/* start sending BEACON out */

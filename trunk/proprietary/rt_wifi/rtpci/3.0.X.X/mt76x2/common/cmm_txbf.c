@@ -132,6 +132,42 @@ UINT dataRate[] = {65, 130, 195, 260, 390, 520, 585, 650,
 				190, 390, 585, 780, 1170, 1560, 1755, 1950};
 #endif /* ETXBF_EN_COND3_SUPPORT */
 
+int ate_txbf_get_chan_idx(IN RTMP_ADAPTER *pAd, UCHAR channel, UCHAR flag)
+{
+	int idx = -1, i;
+	UCHAR ch[13] = {36, 44, 52, 60, 100, 108, 116, 120, 132, 140, 149, 157, 165};
+	UCHAR ch_group[5] = {44, 60, 108, 132, 157};
+	if (flag) {
+		for (i = 0; i < 13; i++) {
+			if (channel == ch[i]) {
+				idx = i;
+				break;
+			}
+		}
+	} else {
+	        for (i = 0; i < 5; i++) {
+                        if (channel == ch_group[i]) {
+                                idx = i;
+                                break;
+                        }
+                }
+	}
+	return idx;
+}
+
+int ate_txbf_chan_group_base_idx(IN RTMP_ADAPTER *pAd, UCHAR channel)
+{
+	int idx = -1, i;
+	UCHAR ch_group[5] = {48, 64, 118, 144, 173};
+	if (channel < 36) return idx;
+	for (i = 0; i < 5; i++) {
+		if (channel <= ch_group[i]) {
+			idx = i;
+			break;
+		}
+	}
+	return idx;
+}
 
 VOID rtmp_asic_set_bf(
 	IN RTMP_ADAPTER *pAd)

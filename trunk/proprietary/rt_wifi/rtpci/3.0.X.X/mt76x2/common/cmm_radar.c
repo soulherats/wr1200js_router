@@ -66,11 +66,7 @@ VOID RadarDetectPeriodic(
 	        if (IS_MT76x2(pAd)) {
 			    
 			    mt76x2_tssi_calibration(pAd, pAd->hw_cfg.cent_ch);
-#ifdef TXBF_SUPPORT			    
-			    if (pAd->hw_cfg.cent_ch > 14) 
-			        rtmp_ate_txbf_fix_tank_code(pAd, pAd->hw_cfg.cent_ch, 0);  // load tank code from efuse, iBF only for A band
-#endif /* TXBF_SUPPORT */
-				mt76x2_calibration(pAd, pAd->hw_cfg.cent_ch);
+			    mt76x2_calibration(pAd, pAd->hw_cfg.cent_ch);
 			}
 #endif /* MT76x2 */
 			pAd->Dot11_H.RDCount = 0;

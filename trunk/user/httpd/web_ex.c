@@ -2376,7 +2376,11 @@ ej_firmware_caps_hook(int eid, webs_t wp, int argc, char **argv)
 #endif
 #else
 	int has_5g_mumimo = 0;
+#if defined (USE_WID_5G) && (USE_WID_5G==7612)
+	int has_5g_txbf = 1;
+#else	
 	int has_5g_txbf = 0;
+#endif
 	int has_5g_160mhz = 0;
 #endif
 #if defined (USE_WID_2G) && (USE_WID_2G==7615 || USE_WID_2G==7915)

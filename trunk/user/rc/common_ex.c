@@ -363,7 +363,7 @@ get_eeprom_params(void)
 			}
 		}
 		
-		nvram_wlan_set_int(1, "txbf_en", (count_0xff == 33) ? 0 : 1);
+		nvram_wlan_set_int(1, "txbf_en", (count_0xff == 33) ? 1 : 1);
 	}
 
 }
