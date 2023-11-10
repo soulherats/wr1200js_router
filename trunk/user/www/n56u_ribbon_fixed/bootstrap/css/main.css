@@ -640,4 +640,10 @@ textarea[readonly] {
     height: 36px;
 }
 
+#LANIP {
+    height: 26px;
+}
 
+#MAC {
+    height: 26px;
+}

@@ -26,7 +26,7 @@ var $j = jQuery.noConflict();
 
 $j(document).ready(function() {
 	init_itoggle('wl_greenap');
-	init_itoggle('wl_pmf');
+	init_itoggle('wl_pmf', pmf_handle);
 	init_itoggle('wl_pmfsha256');
 	init_itoggle('wl_ap_isolate');
 });
@@ -74,6 +74,17 @@ function initial(){
 	load_body();
 
 	change_wmm();
+	pmf_handle();
+}
+
+function pmf_handle() {
+        var m = document.form.wl_pmf[0].checked;
+        var n = document.form.wl_pmfsha256[0].checked;
+	if (m && !n) {
+		document.form.wl_pmfsha256[0].checked=true;
+		document.form.wl_pmfsha256[1].checked=false;
+	}
+	showhide_div("row_pmfsha256", !m);
 }
 
 function change_wmm() {
@@ -208,7 +219,7 @@ function done_validating(action){
                                             <td>
                                                 <div class="main_itoggle">
                                                     <div id="wl_pmf_on_of">
-                                                        <input type="checkbox" id="wl_pmf_fake" <% nvram_match_x("", "wl_pmf", "1", "value=1 checked"); %><% nvram_match_x("", "rt_pmf", "0", "value=0"); %>>
+                                                        <input type="checkbox" id="wl_pmf_fake" <% nvram_match_x("", "wl_pmf", "1", "value=1 checked"); %><% nvram_match_x("", "wl_pmf", "0", "value=0"); %>>
                                                     </div>
                                                 </div>
 
