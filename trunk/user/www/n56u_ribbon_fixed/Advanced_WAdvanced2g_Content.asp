@@ -26,7 +26,7 @@ var $j = jQuery.noConflict();
 
 $j(document).ready(function() {
 	init_itoggle('rt_greenap');
-	init_itoggle('rt_pmf');
+	init_itoggle('rt_pmf', pmf_handle);
 	init_itoggle('rt_pmfsha256');
 	init_itoggle('rt_ap_isolate');
 });
@@ -82,6 +82,17 @@ function initial(){
 	load_body();
 
 	change_wmm();
+	pmf_handle();
+}
+
+function pmf_handle() {
+	var v = document.form.rt_pmf[0].checked;
+	var p = document.form.rt_pmfsha256[0].checked;
+	if (v && !p) {
+		document.form.rt_pmfsha256[0].checked=true;
+		document.form.rt_pmfsha256[1].checked=false;
+	}
+	showhide_div("row_pmfsha256", !v);
 }
 
 function change_wmm() {
