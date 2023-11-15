@@ -333,6 +333,7 @@ VPNS_Enable=启用 VPN 服务器
 VPNS_Base=服务器设置
 VPNS_Type=VPN 协议:
 VPNS_Auth=认证算法:
+VPNS_IPSEC=IPSEC支持:
 VPNS_Ciph=加密算法:
 VPNS_Cast=广播中继:
 VPNS_VUse=分配子网:

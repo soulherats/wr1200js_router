@@ -563,6 +563,7 @@
 			{"vpns_type", "", NULL, EVM_RESTART_VPNSVR},
 			{"vpns_cast", "", NULL, FALSE},
 			{"vpns_auth", "", NULL, EVM_REAPPLY_VPNSVR},
+			{"vpns_ipsec", "", NULL, EVM_REAPPLY_VPNSVR},
 			{"vpns_mppe", "", NULL, EVM_REAPPLY_VPNSVR},
 			{"vpns_mtu", "", NULL, EVM_REAPPLY_VPNSVR},
 			{"vpns_mru", "", NULL, EVM_REAPPLY_VPNSVR},

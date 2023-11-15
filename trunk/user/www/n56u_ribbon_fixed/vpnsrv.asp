@@ -271,6 +271,7 @@ function change_vpns_type(){
 
 	showhide_div('tab_vpns_ssl', is_ov);
 
+	showhide_div('row_vpns_ipsec', (mode == "1") ? 1 : 0);
 	showhide_div('row_vpns_auth', !is_ov);
 	showhide_div('row_vpns_mppe', !is_ov);
 	showhide_div('row_vpns_mtu', !is_ov);
@@ -808,6 +809,15 @@ function getHash(){
                                             <option value="2" <% nvram_match_x("", "vpns_type", "2","selected"); %>>OpenVPN</option>
                                         </select>
                                         <span id="certs_hint" style="display:none" class="label label-warning"><#OVPN_Hint#></span>
+                                    </td>
+                                </tr>
+                                <tr id="row_vpns_ipsec">
+                                    <th><#VPNS_IPSEC#></th>
+                                    <td>
+                                        <select name="vpns_ipsec" class="input">
+                                            <option value="0" <% nvram_match_x("", "vpns_ipsec", "0","selected"); %>>L2TP only (*)</option>
+                                            <option value="1" <% nvram_match_x("", "vpns_ipsec", "1","selected"); %>>L2TP/IPSEC</option>
+                                        </select>
                                     </td>
                                 </tr>
                                 <tr id="row_vpns_auth">

@@ -814,6 +814,7 @@ struct nvram_pair router_defaults[] = {
 	{ "vpns_type", "0" },
 	{ "vpns_cast", "0" },
 	{ "vpns_auth", "0" },
+	{ "vpns_ipsec", "0" },
 	{ "vpns_mppe", "1" },
 	{ "vpns_mtu", "1450" },
 	{ "vpns_mru", "1450" },

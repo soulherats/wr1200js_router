@@ -64,7 +64,7 @@ safe_start_xl2tpd(void)
 
 	if (nvram_match("vpns_enable", "1") && nvram_match("vpns_type", "1")) {
 		char sa_v[INET_ADDRSTRLEN], sp_b[INET_ADDRSTRLEN], sp_e[INET_ADDRSTRLEN];
-		unsigned int vaddr, vmask, vp_b, vp_e;
+		unsigned int vaddr, vmask, vp_b, vp_e, vipsec;
 		struct in_addr pool_in;
 		
 		get_vpns_pool(nvram_get_int("vpns_vuse"), &vaddr, &vmask, &vp_b, &vp_e);
@@ -78,12 +78,13 @@ safe_start_xl2tpd(void)
 		pool_in.s_addr = htonl((vaddr & vmask) | vp_e);
 		strcpy(sp_e, inet_ntoa(pool_in));
 		
+		vipsec=nvram_get_int("vpns_ipsec");
 		fprintf(fp, "[lns default]\n");
 		fprintf(fp, "hostname = %s\n", get_our_hostname());
 		fprintf(fp, "local ip = %s\n", sa_v);
 		fprintf(fp, "ip range = %s-%s\n", sp_b, sp_e);
 		fprintf(fp, "pppoptfile = %s\n", VPN_SERVER_PPPD_OPTIONS);
-		fprintf(fp, "require authentication = no\n");
+		fprintf(fp, "require authentication = %s\n", vipsec?"yes":"no");
 		fprintf(fp, "tunnel rws = %d\n", 8);
 		fprintf(fp,
 			    "pass peer = yes\n"
