@@ -23,6 +23,11 @@ obj-$(CONFIG_NET_IPGRE) += ip_gre.o
 obj-$(CONFIG_SYN_COOKIES) += syncookies.o
 obj-$(CONFIG_INET_AH) += ah4.o
 obj-$(CONFIG_INET_ESP) += esp4.o
+ifeq ($(CONFIG_RALINK_HWCRYPTO),m)
+ifeq ($(CONFIG_INET_ESP), y)
+obj-$(CONFIG_INET_ESP) += mtk_esp4.o
+endif
+endif
 obj-$(CONFIG_INET_IPCOMP) += ipcomp.o
 obj-$(CONFIG_INET_XFRM_TUNNEL) += xfrm4_tunnel.o
 obj-$(CONFIG_INET_XFRM_MODE_BEET) += xfrm4_mode_beet.o
