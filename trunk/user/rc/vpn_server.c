@@ -165,9 +165,13 @@ start_vpn_server(void)
 	FILE *fp;
 	int i, i_type, i_vuse;
 	char *vpns_cfg = "/etc/pptpd.conf";
+	char *ipsec_cfg = "/etc/storage/strongswan/ipsec.secrets";
+	char *tmp_cfg = "/etc/storage/strongswan/.ipsec.secrets";
 	const char *vpns_sec = "/tmp/ppp/chap-secrets";
 	unsigned int vaddr, vmask, vp_b, vp_e;
 	struct in_addr pool_in;
+
+	doSystem("modprobe crypto_k");
 
 	if (nvram_invmatch("vpns_enable", "1") || get_ap_mode())
 		return 0;
@@ -241,6 +245,34 @@ start_vpn_server(void)
 
 	if (i_type == 1) {
 		nvram_set_int_temp("l2tp_srv_t", 1);
+		if (nvram_get_int("vpns_ipsec")) {
+			fp = fopen(ipsec_cfg, "r");
+			FILE* fp2 = fopen(tmp_cfg, "a");
+			if (fp) {
+				char buf[128];
+				int flag = 0;
+				while (fgets(buf, 128, fp)) {
+					char* ptr=strstr(buf, "PSK ");
+					if (!ptr) {
+						fprintf(fp2, buf);
+						continue;
+					} else {
+						flag = 1;
+						buf[ptr - buf + 4] = '\0';
+						fprintf(fp2, "%s\"%s\"\n", buf, nvram_safe_get("ipsec_psk"));
+					}
+				}
+				if (!flag) fprintf(fp2, ": PSK \"%s\"\n", nvram_safe_get("ipsec_psk"));
+			}
+			fclose(fp);
+			fclose(fp2);
+
+			remove(ipsec_cfg);
+			rename(tmp_cfg, ipsec_cfg);
+			chmod(ipsec_cfg, 0644);
+			doSystem("mtd_storage save");
+			doSystem("ipsec start");
+		}
 		
 		safe_start_xl2tpd();
 	} else {
@@ -262,6 +294,7 @@ stop_vpn_server(void)
 
 	if (get_xl2tpd_vpns_active()) {
 		svcs[2] = "xl2tpd";
+		doSystem("ipsec stop");
 		xl2tpd_killed_vpns = 1;
 	}
 
@@ -319,6 +352,8 @@ reapply_vpn_server(void)
 #if defined(APP_OPENVPN)
 	if (i_type == 2)
 		restart_openvpn_server();
+	else if (i_type == 1) 
+		restart_vpn_server();
 	else
 #endif
 		gen_vpns_pppd_options(i_type);

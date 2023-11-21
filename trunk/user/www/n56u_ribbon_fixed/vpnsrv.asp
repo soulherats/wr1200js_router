@@ -258,10 +258,23 @@ function change_vpns_enabled(){
 	}
 }
 
+function change_ipsec(){
+	var mode = document.form.vpns_type.value;
+	var ipsec = document.form.vpns_ipsec.value;
+	if (mode == "1" && ipsec == "1") {
+		document.form.vpns_mppe.value=3;
+	} else {
+		document.form.vpns_mppe.value=1;
+	}
+        showhide_div('row_IPSEC', (mode == "1" && ipsec == "1") ? 1 : 0);
+        showhide_div('row_ipsec_psk', (mode == "1" && ipsec == "1") ? 1 : 0);
+        showhide_div('row_vpns_ipsec_script', (mode == "1" && ipsec == "1") ? 1 : 0);
+}
+
 function change_vpns_type(){
 	var mode = document.form.vpns_type.value;
 	var is_ov = (mode == "2") ? 1 : 0;
-
+	var ipsec_cap = document.form.vpns_ipsec.value;
 	var o = document.form.vpns_vuse;
 	free_options(o);
 	if (!is_ov)
@@ -277,6 +290,9 @@ function change_vpns_type(){
 	showhide_div('row_vpns_mtu', !is_ov);
 	showhide_div('row_vpns_mru', !is_ov);
 	showhide_div('row_vpns_script', 1);
+	showhide_div('row_IPSEC', (mode == "1" && ipsec_cap == "1") ? 1 : 0);
+	showhide_div('row_ipsec_psk', (mode == "1" && ipsec_cap == "1") ? 1 : 0);
+	showhide_div('row_vpns_ipsec_script', (mode == "1" && ipsec_cap == "1") ? 1 : 0);
 
 	showhide_div('row_vpns_ov_mode', is_ov);
 	showhide_div('row_vpns_ov_prot', is_ov);
@@ -630,7 +646,7 @@ function showACLList(vnet_show,rnet_show,is_openvpn){
 }
 
 function changeBgColor(obj, num){
-	$("row" + num).style.background=(obj.checked)?'#D9EDF7':'whiteSmoke';
+	$("row" + num).style.background=(obj.checked)?'#6d69715c':'transparent';
 }
 
 function createBodyTable(){
@@ -811,7 +827,7 @@ function getHash(){
                                         <span id="certs_hint" style="display:none" class="label label-warning"><#OVPN_Hint#></span>
                                     </td>
                                 </tr>
-                                <tr id="row_vpns_ipsec">
+                                <tr id="row_vpns_ipsec" onchange="change_ipsec();">
                                     <th><#VPNS_IPSEC#></th>
                                     <td>
                                         <select name="vpns_ipsec" class="input">
@@ -969,6 +985,26 @@ function getHash(){
                                         <a href="javascript:spoiler_toggle('spoiler_script')"><span><#RunPostVPNS#></span></a>
                                         <div id="spoiler_script" style="display:none;">
                                             <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="scripts.vpns_client_script.sh" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("scripts.vpns_client_script.sh",""); %></textarea>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="row_IPSEC">
+                                    <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#VPNS_IPSECL#></th>
+                                </tr>
+				<tr id="row_ipsec_psk">
+				    <th><#VPNS_PSKKey#></th>
+                                    <td>
+                                       <div class="input-append">
+                                          <input type="password" name="ipsec_psk" id="ipsec_psk" class="input" maxlength="64" size="32" style="width: 175px;" value="<% nvram_get_x("", "ipsec_psk"); %>">
+                                          <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('ipsec_psk')"><i class="icon-eye-close"></i></button>
+                                       </div>
+                                     </td>
+                                 </tr>
+                                <tr id="row_vpns_ipsec_script">
+                                    <td colspan="2" style="padding-bottom: 15px;">
+                                        <a href="javascript:spoiler_toggle('sswan_script')"><span><#RunIPSECVPNS#></span></a>
+                                        <div id="sswan_script" style="display:none;">
+                                            <textarea rows="16" wrap="off" spellcheck="false" maxlength="8192" class="span12" name="strswan.ipsec.conf" style="font-family:'Courier New'; font-size:12px;"><% nvram_dump("strswan.ipsec.conf",""); %></textarea>
                                         </div>
                                     </td>
                                 </tr>

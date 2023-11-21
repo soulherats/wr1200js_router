@@ -31,6 +31,7 @@
 #define STORAGE_OVPNSVR_DIR	"/etc/storage/openvpn/server"
 #define STORAGE_OVPNCLI_DIR	"/etc/storage/openvpn/client"
 #define STORAGE_DNSMASQ_DIR	"/etc/storage/dnsmasq"
+#define STORAGE_SSWAN_DIR	"/etc/storage/strongswan"
 #define STORAGE_SCRIPTS_DIR	"/etc/storage"
 #define STORAGE_CRONTAB_DIR	"/etc/storage/cron/crontabs"
 

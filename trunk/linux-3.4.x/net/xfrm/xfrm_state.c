@@ -31,8 +31,10 @@
 #if IS_ENABLED(CONFIG_RALINK_HWCRYPTO)
 #include "xfrm_hwcrypto.h"
 
-void (*ipsec_spi_free_hook)(unsigned int spi) = NULL;
-EXPORT_SYMBOL(ipsec_spi_free_hook);
+extern void
+ipsec_eip93Adapter_free(
+		    unsigned int spi
+		);
 #endif
 
 /* Each xfrm_state may be linked to two tables:
@@ -576,13 +578,7 @@ int __xfrm_state_delete(struct xfrm_state *x)
 			    x->type->description[3] == '4')
 #endif
 			{
-				typeof(ipsec_spi_free_hook) ipsec_spi_free;
-
-				rcu_read_lock();
-				ipsec_spi_free = rcu_dereference(ipsec_spi_free_hook);
-				if (ipsec_spi_free)
-					ipsec_spi_free(x->id.spi);
-				rcu_read_unlock();
+				ipsec_eip93Adapter_free(x->id.spi);
 			}
 		}
 #endif

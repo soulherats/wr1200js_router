@@ -981,6 +981,12 @@ ipt_filter_rules(char *man_if, char *wan_if, char *lan_if, char *lan_ip,
 			if (i_vpns_type == 1) {
 				/* accept L2TP */
 				fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 1701, logaccept);
+				if (nvram_get_int("vpns_ipsec")) {
+					/* accept L2TP IPSEC */
+					fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 500, logaccept);
+					fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 4500, logaccept);
+					fprintf(fp, "-A %s -p %s -j %s\n", dtype, "esp", logaccept);
+				}
 			} else {
 				/* accept PPTP */
 				fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "tcp", 1723, logaccept);
@@ -1516,6 +1522,11 @@ ip6t_filter_rules(char *man_if, char *wan_if, char *lan_if,
 #endif
 			if (i_vpns_type == 1) {
 				fprintf(fp, "-A %s -p udp --dport %d -j %s\n", dtype, 1701, logaccept);
+				if (nvram_get_int("vpns_ipsec")) {
+                                        fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 500, logaccept);
+                                        fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 4500, logaccept);
+                                        fprintf(fp, "-A %s -p %s -j %s\n", dtype, "esp", logaccept);
+                                }
 			} else {
 				fprintf(fp, "-A %s -p tcp --dport %d -j %s\n", dtype, 1723, logaccept);
 				fprintf(fp, "-A %s -p %d -j %s\n", dtype, 47, logaccept);
@@ -2013,6 +2024,10 @@ ipt_nat_rules(char *man_if, char *man_ip,
 #endif
 			if (vpn_proto_mask & 0x02) {
 				fprintf(fp, "-A %s -p %s --dport %d -j RETURN\n", dtype, "udp", 1701);
+				if (nvram_get_int("vpns_ipsec")) {
+					fprintf(fp, "-A %s -p %s --dport %d -j RETURN\n", dtype, "udp", 500);
+					fprintf(fp, "-A %s -p %s --dport %d -j RETURN\n", dtype, "udp", 4500);
+				}
 			}
 			
 			if (vpn_proto_mask & 0x01) {

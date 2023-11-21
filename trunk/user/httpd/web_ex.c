@@ -712,6 +712,8 @@ ej_dump(int eid, webs_t wp, int argc, char **argv)
 		snprintf(filename, sizeof(filename), "%s/%s", STORAGE_OVPNSVR_DIR, file+8);
 	else if (strncmp(file, "ovpncli.", 8)==0)
 		snprintf(filename, sizeof(filename), "%s/%s", STORAGE_OVPNCLI_DIR, file+8);
+	else if (strncmp(file, "strswan.", 8)==0)
+		snprintf(filename, sizeof(filename), "%s/%s", STORAGE_SSWAN_DIR, file+8);
 	else if (strncmp(file, "dnsmasq.", 8)==0)
 		snprintf(filename, sizeof(filename), "%s/%s", STORAGE_DNSMASQ_DIR, file+8);
 	else if (strncmp(file, "scripts.", 8)==0)
@@ -917,6 +919,10 @@ validate_asp_apply(webs_t wp, int sid)
 					restart_needed_bits |= event_mask;
 			}
 #endif
+			else if (!strncmp(v->name, "strswan.", 8)) {
+				if (write_textarea_to_file(value, STORAGE_SSWAN_DIR, file_name))
+					restart_needed_bits |= event_mask;
+			}
 			continue;
 		}
 		

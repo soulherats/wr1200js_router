@@ -824,6 +824,7 @@ struct nvram_pair router_defaults[] = {
 	{ "vpns_cli0", "245" },
 	{ "vpns_cli1", "254" },
 	{ "vpns_num_x", "0" },
+	{ "ipsec_psk", "VPN" },
 
 	{ "vpnc_enable", "0" },
 	{ "vpnc_type", "0" },
