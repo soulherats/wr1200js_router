@@ -295,4 +295,7 @@ extern void udp_init(void);
 extern int udp4_ufo_send_check(struct sk_buff *skb);
 extern struct sk_buff *udp4_ufo_fragment(struct sk_buff *skb,
 	netdev_features_t features);
+#if IS_ENABLED(CONFIG_IPV6)
+extern void udpv6_encap_enable(void);
+#endif
 #endif	/* _UDP_H */

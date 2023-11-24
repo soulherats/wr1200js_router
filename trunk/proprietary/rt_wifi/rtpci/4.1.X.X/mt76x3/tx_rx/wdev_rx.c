@@ -1891,7 +1891,7 @@ DBGPRINT(RT_DEBUG_OFF, ("%s():  Not my bss! pRxInfo->MyBss=%d\n", __FUNCTION__, 
 
 	/* Drop NULL, CF-ACK(no data), CF-POLL(no data), and CF-ACK+CF-POLL(no data) data frame */
 	if ((pFmeCtrl->SubType & 0x04)) /* bit 2 : no DATA */ {
-		DBGPRINT(RT_DEBUG_OFF, ("%s():  No DATA!\n", __FUNCTION__));
+		// DBGPRINT(RT_DEBUG_OFF, ("%s():  No DATA!\n", __FUNCTION__));
 		return FALSE;
 }
 
