@@ -1411,31 +1411,66 @@ static int l2tp_tunnel_sock_create(u32 tunnel_id, u32 peer_tunnel_id, struct l2t
 {
 	int err = -EINVAL;
 	struct sockaddr_in udp_addr;
+#if IS_ENABLED(CONFIG_IPV6)
+	struct sockaddr_in6 udp6_addr;
+	struct sockaddr_l2tpip6 ip6_addr;
+#endif
 	struct sockaddr_l2tpip ip_addr;
 	struct socket *sock = NULL;
 
 	switch (cfg->encap) {
 	case L2TP_ENCAPTYPE_UDP:
-		err = sock_create(AF_INET, SOCK_DGRAM, 0, sockp);
-		if (err < 0)
-			goto out;
+#if IS_ENABLED(CONFIG_IPV6)
+		if (cfg->local_ip6 && cfg->peer_ip6) {
+			err = sock_create(AF_INET6, SOCK_DGRAM, 0, sockp);
+			if (err < 0)
+				goto out;
 
-		sock = *sockp;
+			sock = *sockp;
 
-		memset(&udp_addr, 0, sizeof(udp_addr));
-		udp_addr.sin_family = AF_INET;
-		udp_addr.sin_addr = cfg->local_ip;
-		udp_addr.sin_port = htons(cfg->local_udp_port);
-		err = kernel_bind(sock, (struct sockaddr *) &udp_addr, sizeof(udp_addr));
-		if (err < 0)
-			goto out;
+			memset(&udp6_addr, 0, sizeof(udp6_addr));
+			udp6_addr.sin6_family = AF_INET6;
+			memcpy(&udp6_addr.sin6_addr, cfg->local_ip6,
+				sizeof(udp6_addr.sin6_addr));
+			udp6_addr.sin6_port = htons(cfg->local_udp_port);
+			err = kernel_bind(sock, (struct sockaddr *) &udp6_addr,
+					sizeof(udp6_addr));
+			if (err < 0)
+				goto out;
 
-		udp_addr.sin_family = AF_INET;
-		udp_addr.sin_addr = cfg->peer_ip;
-		udp_addr.sin_port = htons(cfg->peer_udp_port);
-		err = kernel_connect(sock, (struct sockaddr *) &udp_addr, sizeof(udp_addr), 0);
-		if (err < 0)
-			goto out;
+			udp6_addr.sin6_family = AF_INET6;
+			memcpy(&udp6_addr.sin6_addr, cfg->peer_ip6,
+				 sizeof(udp6_addr.sin6_addr));
+			udp6_addr.sin6_port = htons(cfg->peer_udp_port);
+			err = kernel_connect(sock,
+					(struct sockaddr *) &udp6_addr,
+					sizeof(udp6_addr), 0);
+			if (err < 0)
+				goto out;
+		} else
+#endif
+		{
+			err = sock_create(AF_INET, SOCK_DGRAM, 0, sockp);
+			if (err < 0)
+				goto out;
+
+			sock = *sockp;
+
+			memset(&udp_addr, 0, sizeof(udp_addr));
+			udp_addr.sin_family = AF_INET;
+			udp_addr.sin_addr = cfg->local_ip;
+			udp_addr.sin_port = htons(cfg->local_udp_port);
+			err = kernel_bind(sock, (struct sockaddr *) &udp_addr, sizeof(udp_addr));
+			if (err < 0)
+				goto out;
+
+			udp_addr.sin_family = AF_INET;
+			udp_addr.sin_addr = cfg->peer_ip;
+			udp_addr.sin_port = htons(cfg->peer_udp_port);
+			err = kernel_connect(sock, (struct sockaddr *) &udp_addr, sizeof(udp_addr), 0);
+			if (err < 0)
+				goto out;
+		}
 
 		if (!cfg->use_udp_checksums)
 			sock->sk->sk_no_check = UDP_CSUM_NOXMIT;
@@ -1568,12 +1603,11 @@ int l2tp_tunnel_create(struct net *net, int fd, int version, u32 tunnel_id, u32 
 		/* Mark socket as an encapsulation socket. See net/ipv4/udp.c */
 		udp_sk(sk)->encap_type = UDP_ENCAP_L2TPINUDP;
 		udp_sk(sk)->encap_rcv = l2tp_udp_encap_recv;
-	}
 #if IS_ENABLED(CONFIG_IPV6)
 		if (sk->sk_family == PF_INET6)
 			udpv6_encap_enable();
-		else
 #endif
+	}
 
 	sk->sk_user_data = tunnel;
 

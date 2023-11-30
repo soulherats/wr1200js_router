@@ -215,6 +215,7 @@ INT Set_AP_PKT_PWR(RTMP_ADAPTER *pAd, RTMP_STRING *arg);
 INT Set_AP_TEST2_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg);
 INT Set_AP_TEST3_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg);
 INT Set_AP_SSID_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg);
+INT Set_Broadcast_deauth_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg);
 INT Set_AP_SSIDSingle_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg);
 
 #ifdef CONFIG_SNIFFER_SUPPORT
@@ -664,7 +665,8 @@ static struct {
 		{"StaRxPktDetectPeriod",	SetStaRxPktDetectPeriodProc},
 		{"StaRxPktDetectThrd",		SetStaRxPacketDetectThresholdProc},
 #endif /* WH_EVENT_NOTIFIER */
-	{"SSID",						Set_AP_SSID_Proc},
+	{"Deauth",					Set_Broadcast_deauth_Proc},
+	{"SSID",					Set_AP_SSID_Proc},
 	{"SSIDSingle",					Set_AP_SSIDSingle_Proc},
 #ifdef CONFIG_SNIFFER_SUPPORT
 	{"Monitor",						Set_AP_Monitor_Proc},
@@ -5838,6 +5840,34 @@ INT	Set_AP_SSID_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg)
 		success = FALSE;
 
 	return success;
+}
+
+/*
+    ==========================================================================
+    Description:
+        Send braodcast Deauth
+    Return:
+        TRUE if all parameters are OK, FALSE otherwise
+    ==========================================================================
+*/
+INT     Set_Broadcast_deauth_Proc(RTMP_ADAPTER *pAd, RTMP_STRING *arg)
+{
+	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
+
+	BSS_STRUCT *mbss;
+	struct wifi_dev *wdev = NULL;
+
+	if(((pObj->ioctl_if < HW_BEACON_MAX_NUM)) && (strlen(arg) <= MAX_LEN_OF_SSID))
+	{
+		mbss = &pAd->ApCfg.MBSSID[pObj->ioctl_if];
+		wdev = &mbss->wdev;
+		if (wdev == NULL)
+			return FALSE;
+		ap_send_broadcast_deauth(pAd, wdev);
+		printk("send Broadcast Deauth\n");
+	}
+
+	return TRUE;
 }
 
 /*

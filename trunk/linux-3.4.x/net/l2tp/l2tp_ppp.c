@@ -727,10 +727,7 @@ static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 		tunnel->recv_payload_hook = pppol2tp_recv_payload_hook;
 
 	if (tunnel->peer_tunnel_id == 0) {
-		if (ver == 2)
-			tunnel->peer_tunnel_id = sp->pppol2tp.d_tunnel;
-		else
-			tunnel->peer_tunnel_id = sp3->pppol2tp.d_tunnel;
+		tunnel->peer_tunnel_id = peer_tunnel_id;
 	}
 
 	session = l2tp_session_get(sock_net(sk), tunnel, session_id, false);

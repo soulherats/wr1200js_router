@@ -72,10 +72,13 @@ VOID ap_mlme_broadcast_deauth_req_action(
 	ULONG					FrameLen = 0;
 	MAC_TABLE_ENTRY			*pEntry;
 	UCHAR					apidx = 0;
+	UCHAR					mmie[LEN_PMF_MMIE+2];
 	struct wifi_dev *wdev;
 	int wcid, startWcid;
 
 	startWcid = 1;
+	mmie[0] = 76;
+	mmie[1] = LEN_PMF_MMIE;
 	pInfo = (PMLME_BROADCAST_DEAUTH_REQ_STRUCT)Elem->Msg;
 	if (!MAC_ADDR_EQUAL(pInfo->Addr, BROADCAST_ADDR))
 		return;
@@ -99,7 +102,9 @@ VOID ap_mlme_broadcast_deauth_req_action(
 	MakeOutgoingFrame(pOutBuffer,				&FrameLen,
 					  sizeof(HEADER_802_11), &Hdr,
 					  2, &pInfo->Reason,
+					  LEN_PMF_MMIE+2, mmie,
 					  END_OF_ARGS);
+	PMF_EncapBIPAction(pAd, pOutBuffer, FrameLen);
 	MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 	MlmeFreeMemory(pAd, pOutBuffer);
 }

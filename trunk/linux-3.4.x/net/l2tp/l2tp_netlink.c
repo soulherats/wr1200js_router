@@ -137,6 +137,15 @@ static int l2tp_nl_cmd_tunnel_create(struct sk_buff *skb, struct genl_info *info
 	if (info->attrs[L2TP_ATTR_FD]) {
 		fd = nla_get_u32(info->attrs[L2TP_ATTR_FD]);
 	} else {
+#if IS_ENABLED(CONFIG_IPV6)
+		if (info->attrs[L2TP_ATTR_IP6_SADDR] &&
+		info->attrs[L2TP_ATTR_IP6_DADDR]) {
+		cfg.local_ip6 = nla_data(
+			info->attrs[L2TP_ATTR_IP6_SADDR]);
+		cfg.peer_ip6 = nla_data(
+			info->attrs[L2TP_ATTR_IP6_DADDR]);
+	} else
+#endif
 		if (info->attrs[L2TP_ATTR_IP_SADDR])
 			cfg.local_ip.s_addr = nla_get_be32(info->attrs[L2TP_ATTR_IP_SADDR]);
 		if (info->attrs[L2TP_ATTR_IP_DADDR])
@@ -746,6 +755,14 @@ static struct nla_policy l2tp_nl_policy[L2TP_ATTR_MAX + 1] = {
 	[L2TP_ATTR_MTU]			= { .type = NLA_U16, },
 	[L2TP_ATTR_MRU]			= { .type = NLA_U16, },
 	[L2TP_ATTR_STATS]		= { .type = NLA_NESTED, },
+	[L2TP_ATTR_IP6_SADDR] = {
+		.type = NLA_BINARY,
+		.len = sizeof(struct in6_addr),
+	},
+	[L2TP_ATTR_IP6_DADDR] = {
+		.type = NLA_BINARY,
+		.len = sizeof(struct in6_addr),
+	},
 	[L2TP_ATTR_IFNAME] = {
 		.type = NLA_NUL_STRING,
 		.len = IFNAMSIZ - 1,
