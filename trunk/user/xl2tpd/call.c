@@ -39,11 +39,30 @@ struct buffer *new_payload (struct sockaddr_in peer)
     return tmp;
 }
 
+struct buffer *new_payload6 (struct sockaddr_in6 peer)
+{
+    struct buffer *tmp = new_buf (MAX_RECV_SIZE);
+    if (!tmp)
+        return NULL;
+    tmp->peer6 = peer;
+    tmp->start += sizeof (struct payload_hdr);
+    tmp->len = 0;
+    tmp->ipv6 = 1;
+    return tmp;
+}
+
 inline void recycle_payload (struct buffer *buf, struct sockaddr_in peer)
 {
     buf->start = buf->rstart + sizeof (struct payload_hdr);
     buf->len = 0;
     buf->peer = peer;
+}
+
+inline void recycle_payload6 (struct buffer *buf, struct sockaddr_in6 peer6)
+{
+    buf->start = buf->rstart + sizeof (struct payload_hdr);
+    buf->len = 0;
+    buf->peer6 = peer6;
 }
 
 void add_payload_hdr (struct tunnel *t, struct call *c, struct buffer *buf)
@@ -210,6 +229,7 @@ void call_close (struct call *c)
     struct buffer *buf;
     struct schedule_entry *se, *ose;
     struct call *tmp, *tmp2;
+
     if (!c || !c->container)
     {
         l2tp_log (LOG_DEBUG, "%s: called on null call or containerless call\n",
@@ -509,7 +529,10 @@ struct call *new_call (struct tunnel *parent)
     tmp->error = -1;
     tmp->result = -1;
     tmp->container = parent;
-    tmp->ppp_buf = new_payload (parent->peer);
+    if (parent->ipv6)
+	tmp->ppp_buf = new_payload6 (parent->peer6);
+    else
+	tmp->ppp_buf = new_payload (parent->peer);
 
     /* Inherit LAC and LNS from parent */
     tmp->lns = parent->lns;
@@ -518,7 +541,7 @@ struct call *new_call (struct tunnel *parent)
     return tmp;
 }
 
-struct call *get_tunnel (int tunnel, unsigned int addr, int port)
+struct call *get_tunnel (int tunnel)
 {
     struct tunnel *st;
     if (tunnel)
@@ -606,7 +629,7 @@ struct call *get_call (int tunnel, int call,  struct in_addr addr, int port,
                  "%s: allocating new tunnel for host %s, port %d.\n",
                  __FUNCTION__, IPADDY (addr), ntohs (port));
         }
-        if (!(st = new_tunnel ()))
+        if (!(st = new_tunnel (0)))
         {
             l2tp_log (LOG_WARNING,
                  "%s: unable to allocate new tunnel for host %s, port %d.\n",
@@ -619,7 +642,101 @@ struct call *get_call (int tunnel, int call,  struct in_addr addr, int port,
 	st->refhim = refhim;
         st->udp_fd = -1;
         st->pppox_fd = -1;
+	st->ipv6 = 0;
         bcopy (&addr, &st->peer.sin_addr, sizeof (addr));
+        st->next = tunnels.head;
+        tunnels.head = st;
+        tunnels.count++;
+        return st->self;
+    }
+}
+
+struct call *get_call6 (int tunnel, int call,  struct in6_addr addr, int port,
+		       IPsecSAref_t refme, IPsecSAref_t refhim)
+{
+    /*
+     * Figure out which call struct should handle this.
+     * If we have tunnel and call ID's then they are unique.
+     * Otherwise, if the tunnel is 0, look for an existing connection
+     * or create a new tunnel.
+     */
+    struct tunnel *st;
+    struct call *sc;
+    if (tunnel)
+    {
+        st = tunnels.head;
+        while (st)
+        {
+	    if (st->ourtid == tunnel &&
+		(gconfig.ipsecsaref==0 ||
+		 (st->refhim == refhim
+		  || refhim==IPSEC_SAREF_NULL
+		  || st->refhim==IPSEC_SAREF_NULL)))
+            {
+                if (call)
+                {
+                    sc = st->call_head;
+                    while (sc)
+                    {
+			/* confirm that this is in fact a call with the right SA! */
+			if (sc->ourcid == call) return sc;
+                        sc = sc->next;
+                    }
+                    if (gconfig.debug_tunnel)
+			l2tp_log (LOG_DEBUG, "%s: can't find call %d in tunnel %d (ref=%d/%d)\n",
+				__FUNCTION__, call, tunnel, refme, refhim);
+                    return NULL;
+                }
+                else
+                {
+                    return st->self;
+                }
+            }
+            st = st->next;
+        }
+#ifdef DEBUG_MORE
+        l2tp_log (LOG_INFO, "Can not find tunnel %u (refhim=%u)\n", tunnel, refhim);
+#endif
+        return NULL;
+    }
+    else
+    {
+        /* You can't specify a call number if you haven't specified
+           a tunnel silly! */
+
+        if (call)
+        {
+            l2tp_log (LOG_WARNING,
+                 "%s: call ID specified, but no tunnel ID specified.  tossing.\n",
+                 __FUNCTION__);
+            return NULL;
+        }
+        /*
+         * Well, nothing appropriate...  Let's add a new tunnel, if
+         * we are not at capacity.
+         */
+        if (gconfig.debug_tunnel)
+        {
+            l2tp_log (LOG_DEBUG,
+                 "%s: allocating new tunnel for host %s, port %d.\n",
+                 __FUNCTION__, IPADDY6 (addr), ntohs (port));
+        }
+        if (!(st = new_tunnel (1)))
+        {
+            //l2tp_log (LOG_WARNING,
+            l2tp_log (LOG_ERR,
+                 "%s: unable to allocate new tunnel for host %s, port %d.\n",
+                 __FUNCTION__, IPADDY6 (addr), ntohs (port));
+            return NULL;
+        };
+        st->peer6.sin6_family = AF_INET6;
+        st->peer6.sin6_port = port;
+	st->refme  = refme;
+	st->refhim = refhim;
+        st->udp_fd = -1;
+        st->pppox_fd = -1;
+	st->ipv6 = 1; /* ipv6 */
+        bcopy (&addr, &st->peer6.sin6_addr, sizeof (addr));
         st->next = tunnels.head;
         tunnels.head = st;
         tunnels.count++;

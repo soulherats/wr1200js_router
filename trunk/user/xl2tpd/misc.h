@@ -31,9 +31,11 @@ struct buffer
     int port;
 #else
     struct sockaddr_in peer;
+    struct sockaddr_in6 peer6;
 #endif
     struct tunnel *tunnel;      /* Who owns this packet, if it's a control */
     int retries;                /* Again, if a control packet, how many retries? */
+    int ipv6;                /*ipv6 protocol*/
 };
 
 struct ppp_opts
@@ -42,7 +44,10 @@ struct ppp_opts
     struct ppp_opts *next;
 };
 
+extern char ipaddy_buf[];
+extern socklen_t ipaddr_len;
 #define IPADDY(a) inet_ntoa(*((struct in_addr *)&(a)))
+#define IPADDY6(a) (char *)(inet_ntop(AF_INET6, (struct in6_addr*)&(a), ipaddy_buf, ipaddr_len))
 
 #define DEBUG c ? c->debug || t->debug : t->debug
 

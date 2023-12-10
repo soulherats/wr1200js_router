@@ -303,6 +303,7 @@ void death_handler (int signal)
 
     free(dial_no_tmp);
     close(server_socket);
+    close(server_socket6);
     close(control_fd);
     closelog();
 
@@ -350,6 +351,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     char *stropt[80];
 #ifdef USE_KERNEL
     struct sockaddr_pppol2tp sax;
+    struct sockaddr_pppol2tpin6 sax6;
     int flags;
 #endif
     int pos = 1;
@@ -390,22 +392,42 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
            close(fd2);
            return -EINVAL;
        }
-       memset(&sax, 0, sizeof(sax));
-       sax.sa_family = AF_PPPOX;
-       sax.sa_protocol = PX_PROTO_OL2TP;
-       sax.pppol2tp.fd = c->container->udp_fd;
-       sax.pppol2tp.addr.sin_addr.s_addr = c->container->peer.sin_addr.s_addr;
-       sax.pppol2tp.addr.sin_port = c->container->peer.sin_port;
-       sax.pppol2tp.addr.sin_family = AF_INET;
-       sax.pppol2tp.s_tunnel  = c->container->ourtid;
-       sax.pppol2tp.s_session = c->ourcid;
-       sax.pppol2tp.d_tunnel  = c->container->tid;
-       sax.pppol2tp.d_session = c->cid;
-       if (connect(fd2, (struct sockaddr *)&sax, sizeof(sax)) < 0) {
-           l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket.\n",
-                __FUNCTION__);
-           close(fd2);
-           return -EINVAL;
+       if (c->container->ipv6) {
+           memset(&sax6, 0, sizeof(sax6));
+           sax6.sa_family = AF_PPPOX;
+           sax6.sa_protocol = PX_PROTO_OL2TP;
+           sax6.pppol2tp.fd = c->container->udp_fd;
+           sax6.pppol2tp.addr.sin6_addr = c->container->peer6.sin6_addr;
+           sax6.pppol2tp.addr.sin6_port = c->container->peer6.sin6_port;
+           sax6.pppol2tp.addr.sin6_family = AF_INET6;
+           sax6.pppol2tp.s_tunnel  = c->container->ourtid;
+           sax6.pppol2tp.s_session = c->ourcid;
+           sax6.pppol2tp.d_tunnel  = c->container->tid;
+           sax6.pppol2tp.d_session = c->cid;
+           if (connect(fd2, (struct sockaddr *)&sax6, sizeof(sax6)) < 0) {
+               l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket.\n",
+                         __FUNCTION__);
+               close(fd2);
+               return -EINVAL;
+           }
+       } else {
+           memset(&sax, 0, sizeof(sax));
+           sax.sa_family = AF_PPPOX;
+           sax.sa_protocol = PX_PROTO_OL2TP;
+           sax.pppol2tp.fd = c->container->udp_fd;
+           sax.pppol2tp.addr.sin_addr.s_addr = c->container->peer.sin_addr.s_addr;
+           sax.pppol2tp.addr.sin_port = c->container->peer.sin_port;
+           sax.pppol2tp.addr.sin_family = AF_INET;
+           sax.pppol2tp.s_tunnel  = c->container->ourtid;
+           sax.pppol2tp.s_session = c->ourcid;
+           sax.pppol2tp.d_tunnel  = c->container->tid;
+           sax.pppol2tp.d_session = c->cid;
+           if (connect(fd2, (struct sockaddr *)&sax, sizeof(sax)) < 0) {
+                l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket.\n",
+                     __FUNCTION__);
+                close(fd2);
+            return -EINVAL;
+           }
        }
        stropt[pos++] = strdup ("plugin");
        stropt[pos++] = strdup ("pppol2tp.so");
@@ -471,7 +493,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     for (x = 0; stropt[x]; x++)
     {
         l2tp_log (LOG_DEBUG, "\"%s\" \n", stropt[x]);
-    };
+    }
 #endif
 #ifdef __uClinux__
     c->pppd = vfork ();
@@ -532,6 +554,11 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
             close (server_socket);
             server_socket = -1;
         }
+
+	if (server_socket6 != -1) {
+	    close (server_socket6);
+	    server_socket6 = -1;
+	}
 
         /* close the control pipe fd */
         if (control_fd != -1) {
@@ -682,6 +709,9 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
     struct call *tmp = NULL;
     struct hostent *hp;
     struct in_addr addr;
+    struct in6_addr addr6;
+    int rv;
+    struct addrinfo hints, *si;
     port = htons (port);
 
     hp = gethostbyname (host);
@@ -692,6 +722,21 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
         return NULL;
     }
     bcopy (hp->h_addr, &addr.s_addr, hp->h_length);
+
+    /*ipv6*/
+    if (lac && lac->t->ipv6) {
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET6;
+    hints.ai_flags = AI_ADDRCONFIG;
+    if ((rv = getaddrinfo(host, NULL, &hints, &si)) != 0)
+    {
+        l2tp_log (LOG_WARNING, "Host name lookup failed for %s: %s.\n",
+             host, gai_strerror(rv));
+        return NULL;
+    }
+    addr6 = ((struct sockaddr_in6 *)si->ai_addr)->sin6_addr;
+    }
+
     /* Force creation of a new tunnel
        and set it's tid to 0 to cause
        negotiation to occur */
@@ -700,7 +745,11 @@ struct tunnel *l2tp_call (char *host, int port, struct lac *lac,
      * and/or communicate with pluto.
      */
 
-    tmp = get_call (0, 0, addr, port, IPSEC_SAREF_NULL, IPSEC_SAREF_NULL);
+    if (lac && lac->t->ipv6) {
+	tmp = get_call6 (0, 0, addr6, port, IPSEC_SAREF_NULL, IPSEC_SAREF_NULL);
+    } else {
+	tmp = get_call (0, 0, addr, port, IPSEC_SAREF_NULL, IPSEC_SAREF_NULL);
+    }
     if (!tmp)
     {
         l2tp_log (LOG_WARNING, "%s: Unable to create tunnel to %s.\n", __FUNCTION__,
@@ -874,7 +923,7 @@ void lac_disconnect (int tid)
     return;
 }
 
-struct tunnel *new_tunnel ()
+struct tunnel *new_tunnel (int ipv6)
 {
     struct tunnel *tmp = calloc (1, sizeof (struct tunnel));
     unsigned char entropy_buf[2] = "\0";
@@ -902,6 +951,8 @@ struct tunnel *new_tunnel ()
 #endif
     tmp->peer.sin_family = AF_INET;
     bzero (&(tmp->peer.sin_addr), sizeof (tmp->peer.sin_addr));
+    tmp->peer6.sin6_family = AF_INET6;
+    bzero (&(tmp->peer6.sin6_addr), sizeof (tmp->peer6.sin6_addr));
 #ifdef SANITY
     tmp->sanity = -1;
 #endif
@@ -910,6 +961,7 @@ struct tunnel *new_tunnel ()
     tmp->ourtb = (((_u64) rand ()) << 32) | ((_u64) rand ());
     tmp->fc = -1;               /* These really need to be specified by the peer */
     tmp->bc = -1;               /* And we want to know if they forgot */
+    tmp->ipv6 = ipv6;
     if (!(tmp->self = new_call (tmp)))
     {
         free (tmp);
@@ -1014,7 +1066,7 @@ void do_control ()
 
     bzero(buf, sizeof(buf));
     buf[0]='\0';
-    
+
     char* res_filename; /* name of file to write result of command */
     FILE* resf; /* stream for write result of command */
 
@@ -1072,7 +1124,7 @@ void do_control ()
 #ifdef DEBUG_CONTROL
             l2tp_log (LOG_DEBUG, "%s: Attempting to tunnel to %s\n",
                       __FUNCTION__, host);
-#endif            
+#endif
             if (l2tp_call (host, UDP_LISTEN_PORT, NULL, NULL))
                 write_res (resf, "%02i OK\n", 0);
             else
@@ -1080,7 +1132,7 @@ void do_control ()
             break;
         case 'c':
             switch_io = 1;  /* jz: Switch for Incoming - Outgoing Calls */
-            
+
             tunstr = strtok (&bufp[1], delims);
 
             /* Are these passed on the command line? */
@@ -1130,15 +1182,15 @@ void do_control ()
             else
                 write_res (resf, "%02i Error\n", 1);
             break;
-            
+
        case 'o':          /* jz: option 'o' for doing a outgoing call */
             switch_io = 0;  /* jz: Switch for incoming - outgoing Calls */
-            
+
             sub_str = strchr (bufp, ' ') + 1;
             tunstr = strtok (sub_str, " "); /* jz: using strtok function to get */
             tmp_ptr = strtok (NULL, " ");   /*     params out of the pipe       */
             strcpy (dial_no_tmp, tmp_ptr);
-            
+
             lac = laclist;
             while (lac && strcasecmp (lac->entname, tunstr)!=0)
             {
@@ -1155,7 +1207,7 @@ void do_control ()
                 } else {
                     l2tp_log (LOG_DEBUG, "Session '%s' already active!\n",
                               lac->entname);
-                    write_res (resf, "%02i Session '%s' already active!\n", 1, 
+                    write_res (resf, "%02i Session '%s' already active!\n", 1,
                                lac->entname);
                 }
                 break;
@@ -1178,7 +1230,7 @@ void do_control ()
             else
                 write_res (resf, "%02i Error\n", 1);
             break;
-            
+
         case 'h':
             callstr = strchr (bufp, ' ') + 1;
             call = atoi (callstr);
@@ -1234,8 +1286,8 @@ void do_control ()
             break;
         case 'a':
             /* add new or modify existing lac configuration */
-            {               
-                int create_new_lac = 0; 
+            {
+                int create_new_lac = 0;
                 tunstr = strtok (&bufp[1], delims);
                 if ((!tunstr) || (!strlen (tunstr)))
                 {
@@ -1245,7 +1297,7 @@ void do_control ()
                     break;
                 }
                 /* go to the end  of tunnel name*/
-                bufp = tunstr + strlen (tunstr) + 1; 
+                bufp = tunstr + strlen (tunstr) + 1;
                 /* try to find lac with _tunstr_ name in laclist */
                 lac = laclist;
                 while (lac)
@@ -1325,13 +1377,13 @@ void do_control ()
                 prev_lac->next = lac->next;
             free(lac);
             lac = NULL;
-            write_res (resf, "%02i OK\n", 0);            
+            write_res (resf, "%02i OK\n", 0);
             break;
         default:
             l2tp_log (LOG_DEBUG, "Unknown command %c\n", bufp[0]);
             write_res (resf, "%02i Unknown command %c\n", 1, bufp[0]);
         }
-        
+
         if (resf)
         {
             fclose (resf);
@@ -1442,11 +1494,13 @@ void daemonize() {
     if((pid = fork()) < 0) {
         l2tp_log(LOG_INFO, "%s: Unable to fork ()\n",__FUNCTION__);
         close(server_socket);
+        close(server_socket6);
         exit(1);
     }
     else if (pid)
     {
         close(server_socket);
+        close(server_socket6);
         closelog();
         exit(0);
     }
@@ -1494,6 +1548,7 @@ static void consider_pidfile() {
                     "%s: There's already a xl2tpd server running.\n",
                     __FUNCTION__);
             close(server_socket);
+            close(server_socket6);
             exit(1);
         }
     }
@@ -1523,7 +1578,7 @@ static void open_controlfd()
              __FUNCTION__, gconfig.controlfile);
         exit (1);
     }
-   
+
     /* turn off O_NONBLOCK */
     if(fcntl(control_fd, F_SETFL, O_RDONLY)==-1) {
        l2tp_log(LOG_CRIT, "Can not turn off nonblocking mode for controlfd: %s\n",
@@ -1656,10 +1711,10 @@ route_add(const struct in_addr inetaddr, int any_dgw, struct rtentry *rt)
 		if (sscanf(buf, "%63s %x %x %x %*s %*s %d %x",
 			dev, &dest, &gateway, &flags, &metric, &mask) != 6)
 			continue;
-		
+
 		if ((flags & RTF_UP) != RTF_UP)
 			continue;
-		
+
 		if (!any_dgw) {
 			/* use only physical WAN/MAN interface */
 			if (strncmp(dev, "eth", 3) != 0 &&
@@ -1667,7 +1722,7 @@ route_add(const struct in_addr inetaddr, int any_dgw, struct rtentry *rt)
 			    strncmp(dev, "wwan", 4) != 0 &&
 			    strncmp(dev, "weth", 4) != 0)
 				continue;
-			
+
 			if ( (inetaddr.s_addr & mask) == dest && gateway ) {
 				if ((mask | bestmask) == bestmask && rt->rt_gateway.sa_family)
 					continue;
@@ -1688,7 +1743,7 @@ route_add(const struct in_addr inetaddr, int any_dgw, struct rtentry *rt)
 			if (strcmp(dev, "lo") == 0 ||
 			    strcmp(dev, "br0") == 0)
 				continue;
-			
+
 			if ( !dest && !mask && gateway && metric < metric_min ) {
 				metric_min = metric;
 				

@@ -33,6 +33,7 @@
 
 char hostname[256];
 int server_socket = -1;         /* Server socket */
+int server_socket6 = -1;         /* Server socket */
 #ifdef USE_KERNEL
 int kernel_support;             /* Kernel Support there or not? */
 #endif
@@ -40,15 +41,22 @@ int kernel_support;             /* Kernel Support there or not? */
 int init_network (void)
 {
     long arg;
+    int flag = 1;
     struct sockaddr_in server;
-    unsigned int length = sizeof (server);
+    struct sockaddr_in6 server_addr6;
+    unsigned int length = sizeof (server), length6 = sizeof(server_addr6);
 
     gethostname (hostname, sizeof (hostname));
 
     /* create server socket only has lns */
     server.sin_family = AF_INET;
-    server.sin_addr.s_addr = gconfig.listenaddr; 
+    server.sin_addr.s_addr = gconfig.listenaddr;
     server.sin_port = htons (gconfig.port);
+
+    server_addr6.sin6_family = AF_INET6;
+    //server.sin6_addr.s_addr = gconfig.listenaddr;
+    server_addr6.sin6_addr = in6addr_any;
+    server_addr6.sin6_port = htons (gconfig.port);
 
     if ((server_socket = socket (PF_INET, SOCK_DGRAM, 0)) < 0)
     {
@@ -56,10 +64,18 @@ int init_network (void)
         return -EINVAL;
     }
 
+    if ((server_socket6 = socket (PF_INET6, SOCK_DGRAM, 0)) < 0)
+    {
+	flag = 0;
+        l2tp_log (LOG_CRIT, "%s: Unable to allocate socket6. Terminating.\n", __FUNCTION__);
+    }
+
     arg=1;
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
+    flag && setsockopt(server_socket6, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
 #ifdef SO_NO_CHECK
     setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &arg, sizeof(arg));
+    flag && setsockopt(server_socket6, SOL_SOCKET, SO_NO_CHECK, &arg, sizeof(arg));
 #endif
 
     if (bind (server_socket, (struct sockaddr *) &server, sizeof (server)))
@@ -76,6 +92,20 @@ int init_network (void)
         return -EINVAL;
     }
 
+    if (flag && bind (server_socket6, (struct sockaddr *) &server_addr6, sizeof (server_addr6)))
+    {
+        close (server_socket6);
+	flag = 0;
+        l2tp_log (LOG_CRIT, "%s: Unable to bind socket6: %s. Terminating.\n", __FUNCTION__, strerror(errno), errno);
+    }
+
+    if (flag && getsockname (server_socket6, (struct sockaddr *) &server_addr6, &length6))
+    {
+	close (server_socket6);
+	flag = 0;
+	l2tp_log (LOG_CRIT, "%s: Unable to read socket name.Terminating.\n", __FUNCTION__);
+    }
+
 #ifdef LINUX
     /*
      * For L2TP/IPsec with KLIPSng, set the socket to receive IPsec REFINFO
@@ -88,10 +118,20 @@ int init_network (void)
 #endif
         gconfig.ipsecsaref=0;
     }
-    
+
+    if(flag && setsockopt(server_socket6, IPPROTO_IP, gconfig.sarefnum, &arg, sizeof(arg)) != 0) {
+#ifdef DEBUG_MORE
+        l2tp_log(LOG_CRIT, "setsockopt6 recvref[%d]: %s\n", gconfig.sarefnum, strerror(errno));
+#endif
+        gconfig.ipsecsaref=0;
+    }
+
     arg=1;
     if(setsockopt(server_socket, IPPROTO_IP, IP_PKTINFO, (char*)&arg, sizeof(arg)) != 0) {
 	    l2tp_log(LOG_CRIT, "setsockopt IP_PKTINFO: %s\n", strerror(errno));
+    }
+    if(flag && setsockopt(server_socket6, IPPROTO_IP, IP_PKTINFO, (char*)&arg, sizeof(arg)) != 0) {
+	    l2tp_log(LOG_CRIT, "setsockopt6 IP_PKTINFO: %s\n", strerror(errno));
     }
 #else
     l2tp_log(LOG_INFO, "No attempt being made to use IPsec SAref's since we're not on a Linux machine.\n");
@@ -125,6 +165,12 @@ int init_network (void)
     arg = fcntl (server_socket, F_GETFL);
     arg |= O_NONBLOCK;
     fcntl (server_socket, F_SETFL, arg);
+
+    if (flag) {
+    	arg = fcntl (server_socket6, F_GETFL);
+    	arg |= O_NONBLOCK;
+    	fcntl (server_socket6, F_SETFL, arg);
+    }
     gconfig.port = ntohs (server.sin_port);
 
     return 0;
@@ -283,13 +329,13 @@ void control_xmit (void *b)
 void udp_xmit (struct buffer *buf, struct tunnel *t)
 {
     struct cmsghdr *cmsg = NULL;
-    char cbuf[CMSG_SPACE(sizeof (unsigned int) + sizeof (struct in_pktinfo))];
+    char cbuf[CMSG_SPACE(sizeof (unsigned int) + sizeof (struct in6_pktinfo))];
     unsigned int *refp;
     struct msghdr msgh;
     int err;
     struct iovec iov;
-    struct in_pktinfo *pktinfo;
     int finallen = 0;
+    int csocket = t->ipv6 ? server_socket6 : server_socket;
 
     /*
      * OKAY, now send a packet with the right SAref values.
@@ -309,11 +355,12 @@ void udp_xmit (struct buffer *buf, struct tunnel *t)
 	}
 	refp = (unsigned int *)CMSG_DATA(cmsg);
 	*refp = t->refhim;
-	
+
 	finallen = cmsg->cmsg_len;
     }
 
-    if (t->my_addr.ipi_addr.s_addr){
+   if (!t->ipv6 && t->my_addr.ipi_addr.s_addr){
+    	struct in_pktinfo *pktinfo;
 
 	if ( ! cmsg) {
 		cmsg = CMSG_FIRSTHDR(&msgh);
@@ -321,14 +368,32 @@ void udp_xmit (struct buffer *buf, struct tunnel *t)
 	else {
 		cmsg = CMSG_NXTHDR(&msgh, cmsg);
 	}
-	
+
 	cmsg->cmsg_level = IPPROTO_IP;
 	cmsg->cmsg_type = IP_PKTINFO;
 	cmsg->cmsg_len = CMSG_LEN(sizeof(struct in_pktinfo));
 
 	pktinfo = (struct in_pktinfo*) CMSG_DATA(cmsg);
 	*pktinfo = t->my_addr;
-	
+
+	finallen += cmsg->cmsg_len;
+    } else if (t->ipv6 && t->my_addr6.ipi6_addr.s6_addr){
+	struct in6_pktinfo *pktinfo;
+
+	if ( ! cmsg) {
+		cmsg = CMSG_FIRSTHDR(&msgh);
+	}
+	else {
+		cmsg = CMSG_NXTHDR(&msgh, cmsg);
+	}
+
+	cmsg->cmsg_level = IPPROTO_IPV6;
+	cmsg->cmsg_type = IPV6_PKTINFO;
+	cmsg->cmsg_len = CMSG_LEN(sizeof(struct in6_pktinfo));
+
+	pktinfo = (struct in6_pktinfo*) CMSG_DATA(cmsg);
+	*pktinfo = t->my_addr6;
+
 	finallen += cmsg->cmsg_len;
     }
 
@@ -346,17 +411,23 @@ void udp_xmit (struct buffer *buf, struct tunnel *t)
     iov.iov_len  = buf->len;
 
     /* return packet from whence it came */
-    msgh.msg_name    = &buf->peer;
-    msgh.msg_namelen = sizeof(buf->peer);
+    if (t->ipv6) {
+    	msgh.msg_name    = &buf->peer6;
+    	msgh.msg_namelen = sizeof(buf->peer6);
+    } else {
+    	msgh.msg_name    = &buf->peer;
+    	msgh.msg_namelen = sizeof(buf->peer);
+    }
 
     msgh.msg_iov  = &iov;
     msgh.msg_iovlen = 1;
     msgh.msg_flags = 0;
 
     /* Receive one packet. */
-    if ((err = sendmsg(server_socket, &msgh, 0)) < 0) {
-	l2tp_log(LOG_ERR, "udp_xmit failed to %s:%d with err=%d:%s\n",
-		 IPADDY(t->peer.sin_addr), ntohs(t->peer.sin_port),
+    if ((err = sendmsg(csocket, &msgh, 0)) < 0) {
+	l2tp_log(LOG_DEBUG, "udp_xmit failed to %s:%d with err=%d:%s\n",
+		 t->ipv6 ? IPADDY6(t->peer6.sin6_addr) : IPADDY(t->peer.sin_addr), 
+		 t->ipv6 ? ntohs(t->peer6.sin6_port) : ntohs(t->peer.sin_port),
 		 err,strerror(errno));
     }
 }
@@ -418,8 +489,11 @@ int build_fdset (fd_set *readfds)
 		tun = tun->next;
 	}
 	FD_SET (server_socket, readfds);
+	FD_SET (server_socket6, readfds);
 	if (server_socket > max)
 		max = server_socket;
+	if (server_socket6 > max)
+		max = server_socket6;
 	FD_SET (control_fd, readfds);
 	if (control_fd > max)
 		max = control_fd;
@@ -434,6 +508,8 @@ void network_thread ()
      */
     struct sockaddr_in from;
     struct in_pktinfo to;
+    struct sockaddr_in6 from6;
+    struct in6_pktinfo to6;
     unsigned int fromlen;
     int tunnel, call;           /* Tunnel and call */
     int recvsize;               /* Length of data received */
@@ -448,7 +524,7 @@ void network_thread ()
     char cbuf[256];
     unsigned int refme, refhim;
     int * currentfd;
-    int server_socket_processed;
+    int server_socket_processed, res;
 
 #ifdef HIGH_PRIO
     /* set high priority */
@@ -464,7 +540,7 @@ void network_thread ()
 
     for (;;)
     {
-        int ret;
+        int ret, flag = 0; /* flag indicate ipv6 */
         process_signal();
         max = build_fdset (&readfds);
         ptv = process_schedule(&tv);
@@ -507,11 +583,19 @@ void network_thread ()
             }
             if (st) {
                 currentfd = &st->udp_fd;
-            } else {
+		flag = st->ipv6;
+            } else if (FD_ISSET (server_socket, &readfds)) {
                 currentfd = &server_socket;
+		flag = 0;
+		server_socket_processed = 1;
+	    } else {
+                currentfd = &server_socket6;
+		flag = 1;
                 server_socket_processed = 1;
             }
-            if (FD_ISSET (*currentfd, &readfds))
+
+	    res = FD_ISSET (*currentfd, &readfds);
+            if (res)
         {
             /*
              * Okay, now we're ready for reading and processing new data.
@@ -522,22 +606,27 @@ void network_thread ()
             buf->start += PAYLOAD_BUF;
             buf->len -= PAYLOAD_BUF;
 
-	    memset(&from, 0, sizeof(from));
-	    memset(&to,   0, sizeof(to));
-	    
-	    fromlen = sizeof(from);
-	    
+	    if (flag) {
+		memset(&from6, 0, sizeof(from6));
+		memset(&to6,   0, sizeof(to6));
+		fromlen = sizeof(from6);
+	    } else {
+		memset(&from, 0, sizeof(from));
+		memset(&to,   0, sizeof(to));
+		fromlen = sizeof(from);
+	    }
+
 	    memset(&msgh, 0, sizeof(struct msghdr));
 	    iov.iov_base = buf->start;
 	    iov.iov_len  = buf->len;
 	    msgh.msg_control = cbuf;
 	    msgh.msg_controllen = sizeof(cbuf);
-	    msgh.msg_name = &from;
+	    msgh.msg_name = flag ? &from6 : &from;
 	    msgh.msg_namelen = fromlen;
 	    msgh.msg_iov  = &iov;
 	    msgh.msg_iovlen = 1;
 	    msgh.msg_flags = 0;
-	    
+
 	    /* Receive one packet. */
 	    recvsize = recvmsg(*currentfd, &msgh, 0);
 
@@ -579,7 +668,10 @@ void network_thread ()
 			if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_PKTINFO) {
 				struct in_pktinfo* pktInfo = ((struct in_pktinfo*)CMSG_DATA(cmsg));
 				to = *pktInfo;
-			}
+			} else if (cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == IPV6_PKTINFO) {
+                		struct in6_pktinfo* pktInfo = ((struct in6_pktinfo*)CMSG_DATA(cmsg));
+                		to6 = *pktInfo;
+            		}
 			/* extract IPsec info out */
 			else if (gconfig.ipsecsaref && cmsg->cmsg_level == IPPROTO_IP
 			&& cmsg->cmsg_type == gconfig.sarefnum) {
@@ -604,7 +696,7 @@ void network_thread ()
 	    {
 		l2tp_log(LOG_DEBUG, "%s: recv packet from %s, size = %d, "
 			 "tunnel = %d, call = %d ref=%u refhim=%u\n",
-			 __FUNCTION__, inet_ntoa (from.sin_addr),
+			 __FUNCTION__, flag ? IPADDY6 (from6.sin6_addr) : inet_ntoa (from.sin_addr),
 			 recvsize, tunnel, call, refme, refhim);
 	    }
 
@@ -612,10 +704,19 @@ void network_thread ()
 	    {
 		do_packet_dump (buf);
 	    }
-			if (!(c = get_call (tunnel, call, from.sin_addr,
-			       from.sin_port, refme, refhim)))
+
+
+	    if (flag) {
+		c = get_call6 (tunnel, call, from6.sin6_addr,
+				from6.sin6_port, refme, refhim);
+	    } else {
+		c = get_call (tunnel, call, from.sin_addr,
+                               from.sin_port, refme, refhim);
+	    }
+
+	    if (!c)
 	    {
-				if ((c = get_tunnel (tunnel, from.sin_addr.s_addr, from.sin_port)))
+		if ((c = get_tunnel (tunnel)))
 		{
 		    /*
 		     * It is theoretically possible that we could be sent
@@ -644,10 +745,17 @@ void network_thread ()
 	    else
 	    {
 		if (c->container) {
-			c->container->my_addr = to;
+			if (flag)
+				c->container->my_addr6 = to6;
+			else
+				c->container->my_addr = to;
 		}
 
-		buf->peer = from;
+		if (flag)
+			buf->peer6 = from6;
+		else
+			buf->peer = from;
+
 		/* Handle the packet */
 		c->container->chal_us.vector = NULL;
 		if (handle_packet (buf, c->container, c))
@@ -698,7 +806,10 @@ void network_thread ()
                         sc->tx_bytes += sc->ppp_buf->len;
                         sc->tx_pkts++;
                         udp_xmit (sc->ppp_buf, st);
-                        recycle_payload (sc->ppp_buf, sc->container->peer);
+			if (sc->container->ipv6)
+				recycle_payload6 (sc->ppp_buf, sc->container->peer6);
+			else
+                        	recycle_payload (sc->ppp_buf, sc->container->peer);
                     }
                     if (result != 0)
                     {
@@ -723,19 +834,34 @@ int connect_pppol2tp(struct tunnel *t) {
             int ufd = -1, fd2 = -1;
             int flags;
             struct sockaddr_pppol2tp sax;
+            struct sockaddr_pppol2tpin6 sax6;
 
             struct sockaddr_in server;
+            struct sockaddr_in6 server6;
 
-            memset(&server, 0, sizeof(struct sockaddr_in));
-            server.sin_family = AF_INET;
-            server.sin_addr.s_addr = gconfig.listenaddr;
-            server.sin_port = htons (gconfig.port);
-            if ((ufd = socket (PF_INET, SOCK_DGRAM, 0)) < 0)
-            {
-                l2tp_log (LOG_CRIT, "%s: Unable to allocate UDP socket. Terminating.\n",
-                    __FUNCTION__);
-                return -EINVAL;
-            }
+	    if (t->ipv6) {
+		memset(&server6, 0, sizeof(struct sockaddr_in6));
+		server6.sin6_family = AF_INET6;
+		server6.sin6_addr = in6addr_any;
+		server6.sin6_port = htons (gconfig.port);
+		if ((ufd = socket (PF_INET6, SOCK_DGRAM, 0)) < 0)
+		{
+			l2tp_log (LOG_CRIT, "%s: Unable to allocate UDP6 socket. Terminating.\n",
+				__FUNCTION__);
+			 return -EINVAL;
+		}
+	     } else {
+		memset(&server, 0, sizeof(struct sockaddr_in));
+		server.sin_family = AF_INET;
+		server.sin_addr.s_addr = gconfig.listenaddr;
+		server.sin_port = htons (gconfig.port);
+		if ((ufd = socket (PF_INET, SOCK_DGRAM, 0)) < 0)
+		{
+			l2tp_log (LOG_CRIT, "%s: Unable to allocate UDP socket. Terminating.\n",
+				__FUNCTION__);
+			 return -EINVAL;
+		}
+	     }
 
             flags=1;
             setsockopt(ufd, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
@@ -743,14 +869,25 @@ int connect_pppol2tp(struct tunnel *t) {
             setsockopt(ufd, SOL_SOCKET, SO_NO_CHECK, &flags, sizeof(flags));
 #endif
 
-            if (bind (ufd, (struct sockaddr *) &server, sizeof (server)))
-            {
-                l2tp_log (LOG_CRIT, "%s: Unable to bind UDP socket: %s. Terminating.\n",
-                     __FUNCTION__, strerror(errno), errno);
-                close (ufd);
-                return -EINVAL;
-            }
-            server = t->peer;
+	    if (t->ipv6) {
+		if (bind (ufd, (struct sockaddr *) &server6, sizeof (server6)))
+		{
+			l2tp_log (LOG_CRIT, "%s: Unable to bind UDP socket: %s. Terminating.\n",
+				__FUNCTION__, strerror(errno), errno);
+			close (ufd);
+			return -EINVAL;
+		}
+		server6 = t->peer6;
+	    } else {
+		if (bind (ufd, (struct sockaddr *) &server, sizeof (server)))
+		{
+			l2tp_log (LOG_CRIT, "%s: Unable to bind UDP socket: %s. Terminating.\n",
+				__FUNCTION__, strerror(errno), errno);
+			close (ufd);
+			return -EINVAL;
+		}
+		server = t->peer;
+	    }
             flags = fcntl(ufd, F_GETFL);
             if (flags == -1 || fcntl(ufd, F_SETFL, flags | O_NONBLOCK) == -1) {
                 l2tp_log (LOG_WARNING, "%s: Unable to set UDP socket nonblock.\n",
@@ -758,12 +895,22 @@ int connect_pppol2tp(struct tunnel *t) {
                 close (ufd);
                 return -EINVAL;
             }
-            if (connect (ufd, (struct sockaddr *) &server, sizeof(server)) < 0) {
-                l2tp_log (LOG_CRIT, "%s: Unable to connect UDP peer. Terminating.\n",
-                 __FUNCTION__);
-                close(ufd);
-                return -EINVAL;
-            }
+
+	    if (t->ipv6) {
+		if (connect (ufd, (struct sockaddr *) &server6, sizeof(server6)) < 0) {
+			l2tp_log (LOG_CRIT, "%s: Unable to connect UDP peer6. Terminating.\n",
+			__FUNCTION__);
+			close(ufd);
+			return -EINVAL;
+		}
+	    } else {
+		if (connect (ufd, (struct sockaddr *) &server, sizeof(server)) < 0) {
+			l2tp_log (LOG_CRIT, "%s: Unable to connect UDP peer. Terminating.\n",
+			__FUNCTION__);
+			close(ufd);
+			return -EINVAL;
+		}
+	    }
 
             t->udp_fd=ufd;
 
@@ -780,21 +927,39 @@ int connect_pppol2tp(struct tunnel *t) {
                 close(fd2);
                 return -EINVAL;
             }
-            memset(&sax, 0, sizeof(sax));
-            sax.sa_family = AF_PPPOX;
-            sax.sa_protocol = PX_PROTO_OL2TP;
-            sax.pppol2tp.fd = t->udp_fd;
-            sax.pppol2tp.addr.sin_addr.s_addr = t->peer.sin_addr.s_addr;
-            sax.pppol2tp.addr.sin_port = t->peer.sin_port;
-            sax.pppol2tp.addr.sin_family = AF_INET;
-            sax.pppol2tp.s_tunnel  = t->ourtid;
-            sax.pppol2tp.d_tunnel  = t->tid;
-            if ((connect(fd2, (struct sockaddr *)&sax, sizeof(sax))) < 0) {
-                l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket. %d %s\n",
-                     __FUNCTION__, errno, strerror(errno));
-                close(fd2);
-                return -EINVAL;
-            }
+	    if (t->ipv6) {
+		memset(&sax6, 0, sizeof(sax6));
+		sax6.sa_family = AF_PPPOX;
+		sax6.sa_protocol = PX_PROTO_OL2TP;
+		sax6.pppol2tp.fd = t->udp_fd;
+		sax6.pppol2tp.addr.sin6_addr = t->peer6.sin6_addr;
+		sax6.pppol2tp.addr.sin6_port = t->peer6.sin6_port;
+		sax6.pppol2tp.addr.sin6_family = AF_INET6;
+		sax6.pppol2tp.s_tunnel  = t->ourtid;
+		sax6.pppol2tp.d_tunnel  = t->tid;
+		if ((connect(fd2, (struct sockaddr *)&sax6, sizeof(sax6))) < 0) {
+			l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP6 socket. %d %s\n",
+				__FUNCTION__, errno, strerror(errno));
+			close(fd2);
+			return -EINVAL;
+		}
+	     } else {
+		memset(&sax, 0, sizeof(sax));
+		sax.sa_family = AF_PPPOX;
+		sax.sa_protocol = PX_PROTO_OL2TP;
+		sax.pppol2tp.fd = t->udp_fd;
+		sax.pppol2tp.addr.sin_addr.s_addr = t->peer.sin_addr.s_addr;
+		sax.pppol2tp.addr.sin_port = t->peer.sin_port;
+		sax.pppol2tp.addr.sin_family = AF_INET;
+		sax.pppol2tp.s_tunnel  = t->ourtid;
+		sax.pppol2tp.d_tunnel  = t->tid;
+		if ((connect(fd2, (struct sockaddr *)&sax, sizeof(sax))) < 0) {
+			l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket. %d %s\n",
+				__FUNCTION__, errno, strerror(errno));
+			close(fd2);
+			return -EINVAL;
+		}
+	     }
             t->pppox_fd = fd2;
         }
 

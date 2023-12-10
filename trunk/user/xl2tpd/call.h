@@ -102,7 +102,10 @@ extern void toss (struct buffer *);
 extern struct call *get_call (int tunnel, int call, struct in_addr addr,
 			      int port,
 			      IPsecSAref_t refme, IPsecSAref_t refhim);
-extern struct call *get_tunnel (int, unsigned int, int);
+extern struct call *get_call6 (int tunnel, int call, struct in6_addr addr,
+			      int port,
+			      IPsecSAref_t refme, IPsecSAref_t refhim);
+extern struct call *get_tunnel (int);
 extern void destroy_call (struct call *);
 extern struct call *new_call (struct tunnel *);
 extern void set_error (struct call *, int, const char *, ...);

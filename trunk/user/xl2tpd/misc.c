@@ -50,10 +50,13 @@ static int syslog_nesting = 0;
     --syslog_nesting;               \
 } while(0)
 
+char ipaddy_buf[1024];
+socklen_t ipaddr_len = sizeof(ipaddy_buf);
+
 void init_log()
 {
     static int logopen=0;
-    
+
     if(!logopen) {
 	SYSLOG_CALL( openlog (BINARY, LOG_PID, LOG_DAEMON) );
 	logopen=1;
@@ -67,7 +70,7 @@ void l2tp_log (int level, const char *fmt, ...)
     va_start (args, fmt);
     vsnprintf (buf, sizeof (buf), fmt, args);
     va_end (args);
-    
+
     if(gconfig.syslog) {
 	init_log();
 	SYSLOG_CALL( syslog (level, "%s", buf) );
@@ -110,6 +113,7 @@ struct buffer *new_buf (int size)
     b->rend = b->rstart + size - 1;
     b->len = size;
     b->maxlen = size;
+    b->ipv6 = 0;
     return b;
 }
 

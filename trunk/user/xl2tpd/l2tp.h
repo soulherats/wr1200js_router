@@ -171,6 +171,9 @@ struct tunnel
     struct challenge chal_us;   /* Their Challenge to us */
     struct challenge chal_them; /* Our challenge to them */
     char secret[MAXSTRLEN];     /* Secret to use */
+    int  ipv6;			/* ipv6 flag */
+    struct sockaddr_in6 peer6;  /* Peer's Address */
+    struct in6_pktinfo my_addr6;/* Address of my endpoint */
 };
 
 struct tunnel_list
@@ -208,11 +211,14 @@ extern void tunnel_close (struct tunnel *t);
 extern void network_thread ();
 extern int init_network ();
 extern int server_socket;
-extern struct tunnel *new_tunnel ();
+extern int server_socket6;
+extern struct tunnel *new_tunnel (int ipv6);
 extern struct packet_queue xmit_udp;
 extern void destroy_tunnel (struct tunnel *);
 extern struct buffer *new_payload (struct sockaddr_in);
+extern struct buffer *new_payload6 (struct sockaddr_in6);
 extern void recycle_payload (struct buffer *, struct sockaddr_in);
+extern void recycle_payload6 (struct buffer *, struct sockaddr_in6);
 extern void add_payload_hdr (struct tunnel *, struct call *, struct buffer *);
 extern int read_packet (struct call *);
 extern void udp_xmit (struct buffer *buf, struct tunnel *t);
