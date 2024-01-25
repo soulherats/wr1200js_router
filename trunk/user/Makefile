@@ -24,7 +24,7 @@ OPENSSH_ENABLED=n
 DROPBEAR_ENABLED=n
 SAMBA_ENABLED=n
 SOFTETHERVPN_ENABLE=n
-SHADOWSOCKS_ENABLE=y
+SHADOWSOCKS_ENABLE=n
 FRP_ENABLE=n
 TROJAN_ENABLE=n
 
@@ -119,6 +119,7 @@ dir_y						+= infosvr
 dir_y						+= inadyn
 dir_y						+= miniupnpd
 dir_y						+= dnsmasq
+dir_y						+= chinadns-ng
 dir_y						+= igmpproxy
 dir_y						+= udpxy
 dir_y						+= utils

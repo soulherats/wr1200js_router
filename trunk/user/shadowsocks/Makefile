@@ -7,7 +7,7 @@ SRC_SSR_NAME=shadowsocksr-libev-master
 ARCHIVE_SSR_NAME=shadowsocksr-libev-master-e2373d7
 #https://github.com/shadowsocksr-backup/shadowsocksr-libev.git
 
-GFWLIST_NAME=dnsmasq_gfwlist.conf
+GFWLIST_NAME=gfwlist_domain.txt
 GFWLIST_URL=https://cokebar.github.io/gfwlist2dnsmasq/$(GFWLIST_NAME)
 GFWLIST_DIR=gfwlist
 

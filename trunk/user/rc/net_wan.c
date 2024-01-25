@@ -1684,7 +1684,7 @@ update_resolvconf(int is_first_run, int do_not_notify)
 	fp = fopen((is_first_run) ? DNS_RESOLV_CONF : resolv_temp, "w+");
 	if (fp) {
 		/* dnsmasq will resolve localhost DNS queries */
-		fprintf(fp, "nameserver %s\n", "127.0.0.1");
+		// fprintf(fp, "nameserver %s\n", "127.0.0.1");
 		
 		/* DNS servers for static VPN client */
 		if (!is_first_run && i_pdns > 0) {

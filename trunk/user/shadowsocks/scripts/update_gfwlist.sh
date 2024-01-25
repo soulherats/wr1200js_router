@@ -8,10 +8,10 @@ GFWLIST_URL="$(nvram get gfwlist_url)"
 logger -st "gfwlist" "Starting update..."
 
 rm -f /tmp/dnsmasq_gfwlist.conf
-curl -k -s -o /tmp/dnsmasq_gfwlist.conf --connect-timeout 5 --retry 3 ${GFWLIST_URL:-"https://cokebar.github.io/gfwlist2dnsmasq/dnsmasq_gfwlist.conf"}
+curl -k -s -o /tmp/dnsmasq_gfwlist.conf --connect-timeout 5 --retry 3 ${GFWLIST_URL:-"https://cokebar.github.io/gfwlist2dnsmasq/gfwlist_domain.txt"}
 
 mkdir -p /etc/storage/gfwlist/
-mv -f /tmp/dnsmasq_gfwlist.conf /etc/storage/gfwlist/dnsmasq_gfwlist.conf
+mv -f /tmp/gfwlist_domain.txt /etc/storage/gfwlist/gfwlist_domain.txt
 
 mtd_storage.sh save >/dev/null 2>&1
 
