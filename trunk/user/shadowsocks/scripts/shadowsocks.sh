@@ -3,6 +3,7 @@
 ss_bin="ss-redir"
 ss_json_file="/tmp/ss-redir.json"
 ss_proc="/var/ss-redir"
+gfwlist="/etc/storage/gfwlist/gfwlist_domain.txt"
 
 #/usr/bin/ss-redir -> /var/ss-redir -> /usr/bin/ss-orig-redir or /usr/bin/ssr-redir
 
@@ -92,8 +93,38 @@ cat > "$ss_json_file" <<EOF
     "local_port": $ss_local_port,
     "mtu": $ss_mtu
 }
+EOF
+}
+
+func_start_ss_dns(){
+	dns=` awk '{print $2}' /etc/resolv.conf| head -n 1`
+	[ "$dns" == "8.8.8.8" ] && { sed -i '/Chinadns/,+4d' /etc/storage/dnsmasq/dnsmasq.conf; return 1; }
+	if [ $(awk '{print $2}' /etc/resolv.conf | wc -l) -gt 1 ]; then
+		dns=`awk '{print $2}' /etc/resolv.conf | head -n2 | sed '1s/$/,/' | tr -d "\n"`
+	fi
+	if [ -z `grep Chinadns /etc/storage/dnsmasq/dnsmasq.conf` ];  then
+		cat >> /etc/storage/dnsmasq/dnsmasq.conf <<EOF
+### Chinadns
+no-resolv
+no-poll
+server=127.0.0.1#65353
 
 EOF
+		restart_dhcpd
+	fi
+	sh -c "chinadns-ng -g $gfwlist -d chn -t tcp://8.8.8.8,8.8.4.4 -c $dns --no-ipv6=gt &"
+}
+
+func_stop_ss_dns(){
+	sed -i '/Chinadns/,+4d' /etc/storage/dnsmasq/dnsmasq.conf
+	restart_dns
+	killall -q chinadns-ng
+}
+
+func_stop(){
+	func_stop_ss_dns
+	killall -q $ss_bin
+	ss-rules -f && loger $ss_bin "stop"
 }
 
 func_start(){
@@ -101,13 +132,9 @@ func_start(){
 	func_gen_ss_json && \
 	func_start_ss_redir && \
 	func_start_ss_rules && \
+	func_start_ss_dns && \
 	restart_firewall && \
-	loger $ss_bin "start done" || { ss-rules -f && loger $ss_bin "start fail!";}
-}
-
-func_stop(){
-	killall -q $ss_bin
-	ss-rules -f && loger $ss_bin "stop"
+	loger $ss_bin "start done" || { ss-rules -f && func_stop && loger $ss_bin "start fail!";}
 }
 
 case "$1" in

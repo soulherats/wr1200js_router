@@ -34,7 +34,6 @@ $j(document).ready(function(){
 	init_itoggle('ss_watchcat');
 	init_itoggle('ss_update_chnroute');
 	init_itoggle('ss_update_gfwlist');
-	init_itoggle('ss-tunnel_enable');
 });
 
 function initial(){
@@ -55,7 +54,6 @@ function initial(){
 	o6.value = '<% nvram_get_x("","ss_type"); %>';
 	change_ss_watchcat_display();
 	fill_ss_status(shadowsocks_status());
-	fill_ss_tunnel_status(shadowsocks_tunnel_status());
 	$("chnroute_count").innerHTML = '<#menu5_17_3#>' + chnroute_count() ;
 	$("gfwlist_count").innerHTML = '<#menu5_17_3#>' + gfwlist_count() ;
 	switch_ss_type();
@@ -96,15 +94,6 @@ function fill_ss_status(status_code){
 	else if (status_code == 1)
 		stext = "<#Running#>";
 	$("ss_status").innerHTML = '<span class="label label-' + (status_code != 0 ? 'success' : 'warning') + '">' + stext + '</span>';
-}
-
-function fill_ss_tunnel_status(status_code){
-	var stext = "Unknown";
-	if (status_code == 0)
-		stext = "<#Stopped#>";
-	else if (status_code == 1)
-		stext = "<#Running#>";
-	$("ss_tunnel_status").innerHTML = '<span class="label label-' + (status_code != 0 ? 'success' : 'warning') + '">' + stext + '</span>';
 }
 
 </script>
@@ -313,52 +302,7 @@ function fill_ss_tunnel_status(status_code){
                                             </td>
                                         </tr>
 
-                                        <tr> <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#menu5_16_12#></th> </tr>
-
-                                        <tr> <th width="50%"><#InetControl#></th>
-                                            <td style="border-top: 0 none;" colspan="2">
-                                                <input type="button" id="btn_connect_2" class="btn btn-info" value=<#Connect#> onclick="submitInternet('Reconnect_ss_tunnel');">
-                                            </td>
-                                        </tr>
-
-                                        <tr> <th><#menu5_16_13#></th>
-                                            <td>
-                                                <div class="main_itoggle">
-                                                    <div id="ss-tunnel_enable_on_of">
-                                                        <input type="checkbox" id="ss-tunnel_enable_fake" <% nvram_match_x("", "ss-tunnel_enable", "1", "value=1 checked"); %><% nvram_match_x("", "ss-tunnel_enable", "0", "value=0"); %>>
-                                                    </div>
-                                                </div>
-
-                                                <div style="position: absolute; margin-left: -10000px;">
-                                                    <input type="radio" value="1" name="ss-tunnel_enable" id="ss-tunnel_enable_1" <% nvram_match_x("", "ss-tunnel_enable", "1", "checked"); %>><#checkbox_Yes#>
-                                                    <input type="radio" value="0" name="ss-tunnel_enable" id="ss-tunnel_enable_0" <% nvram_match_x("", "ss-tunnel_enable", "0", "checked"); %>><#checkbox_No#>
-                                                </div>
-                                            </td>
-                                        </tr>
-
-                                        <tr> <th><#running_status#></th>
-                                            <td id="ss_tunnel_status" colspan="3"></td>
-                                        </tr>
-
-                                        <tr> <th width="50%"><#menu5_16_14#></th>
-                                            <td>
-                                                <input type="text" maxlength="32" class="input" size="64" name="ss-tunnel_remote" value="<% nvram_get_x("","ss-tunnel_remote"); %>" />
-                                            </td>
-                                        </tr>
-
-                                        <tr> <th width="50%"><#menu5_16_15#></th>
-                                            <td>
-                                                <input type="text" maxlength="6" class="input" size="15" name="ss-tunnel_local_port" style="width: 145px" value="<% nvram_get_x("", "ss-tunnel_local_port"); %>">
-                                            </td>
-                                        </tr>
-
-                                        <tr> <th width="50%">MTU:</th>
-                                            <td>
-                                                <input type="text" maxlength="6" class="input" size="15" name="ss-tunnel_mtu" style="width: 145px" value="<% nvram_get_x("", "ss-tunnel_mtu"); %>">
-                                            </td>
-                                        </tr>
-
-                                        <tr> <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#menu5_1_6#></th> </tr>										
+                                        <tr> <th colspan="2" style="background-color: rgba(171, 168, 167,0.2);"><#menu5_1_6#></th> </tr>
 
                                         <tr> <th><#menu5_16_16#></th>
                                             <td>
