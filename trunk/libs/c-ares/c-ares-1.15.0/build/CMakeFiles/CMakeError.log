@@ -1,0 +1,926 @@
+Determining if the function res_servicename exists in the resolv failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_657e2/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_657e2.dir/build.make CMakeFiles/cmTC_657e2.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_657e2.dir/CheckFunctionExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=res_servicename   -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_657e2.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_657e2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_657e2.dir/link.txt --verbose=1
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=res_servicename  -L/opt/rt-n56u/trunk/stage/lib -Wl,--gc-sections  -rdynamic CMakeFiles/cmTC_657e2.dir/CheckFunctionExists.c.o  -o cmTC_657e2 -lresolv 
+/opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x/bin/../lib/gcc/mipsel-linux-uclibc/7.4.0/../../../../mipsel-linux-uclibc/bin/ld: CMakeFiles/cmTC_657e2.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text.startup.main+0x10): undefined reference to `res_servicename'
+/opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x/bin/../lib/gcc/mipsel-linux-uclibc/7.4.0/../../../../mipsel-linux-uclibc/bin/ld: CheckFunctionExists.c:(.text.startup.main+0x28): undefined reference to `res_servicename'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_657e2.dir/build.make:97: recipe for target 'cmTC_657e2' failed
+make[5]: *** [cmTC_657e2] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_657e2/fast' failed
+make[4]: *** [cmTC_657e2/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethostbyname exists in the socket failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_355da/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_355da.dir/build.make CMakeFiles/cmTC_355da.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_355da.dir/CheckFunctionExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=gethostbyname   -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_355da.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_355da
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_355da.dir/link.txt --verbose=1
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=gethostbyname  -L/opt/rt-n56u/trunk/stage/lib -Wl,--gc-sections  -rdynamic CMakeFiles/cmTC_355da.dir/CheckFunctionExists.c.o  -o cmTC_355da -lsocket 
+/opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x/bin/../lib/gcc/mipsel-linux-uclibc/7.4.0/../../../../mipsel-linux-uclibc/bin/ld: cannot find -lsocket
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_355da.dir/build.make:97: recipe for target 'cmTC_355da' failed
+make[5]: *** [cmTC_355da] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_355da/fast' failed
+make[4]: *** [cmTC_355da/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function socket exists in the socket failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_52de4/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_52de4.dir/build.make CMakeFiles/cmTC_52de4.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_52de4.dir/CheckFunctionExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=socket   -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_52de4.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_52de4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_52de4.dir/link.txt --verbose=1
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=socket  -L/opt/rt-n56u/trunk/stage/lib -Wl,--gc-sections  -rdynamic CMakeFiles/cmTC_52de4.dir/CheckFunctionExists.c.o  -o cmTC_52de4 -lsocket 
+/opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x/bin/../lib/gcc/mipsel-linux-uclibc/7.4.0/../../../../mipsel-linux-uclibc/bin/ld: cannot find -lsocket
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_52de4.dir/build.make:97: recipe for target 'cmTC_52de4' failed
+make[5]: *** [cmTC_52de4] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_52de4/fast' failed
+make[4]: *** [cmTC_52de4/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+
+Determining if files socket.h exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_8fa2d/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_8fa2d.dir/build.make CMakeFiles/cmTC_8fa2d.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8fa2d.dir/CheckIncludeFiles.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_8fa2d.dir/CheckIncludeFiles.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c:2:10: fatal error: socket.h: No such file or directory
+ #include <socket.h>
+          ^~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_8fa2d.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_8fa2d.dir/CheckIncludeFiles.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_8fa2d.dir/CheckIncludeFiles.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8fa2d/fast' failed
+make[4]: *** [cmTC_8fa2d/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source:
+/* */
+#include <socket.h>
+
+
+int main(void){return 0;}
+
+Determining if files stropts.h exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1b60c/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_1b60c.dir/build.make CMakeFiles/cmTC_1b60c.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1b60c.dir/CheckIncludeFiles.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_1b60c.dir/CheckIncludeFiles.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c:2:10: fatal error: stropts.h: No such file or directory
+ #include <stropts.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_1b60c.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_1b60c.dir/CheckIncludeFiles.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_1b60c.dir/CheckIncludeFiles.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_1b60c/fast' failed
+make[4]: *** [cmTC_1b60c/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source:
+/* */
+#include <stropts.h>
+
+
+int main(void){return 0;}
+
+Determining if files winsock2.h;windows.h exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_0aa2c/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_0aa2c.dir/build.make CMakeFiles/cmTC_0aa2c.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0aa2c.dir/CheckIncludeFiles.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_0aa2c.dir/CheckIncludeFiles.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c:2:10: fatal error: winsock2.h: No such file or directory
+ #include <winsock2.h>
+          ^~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_0aa2c.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_0aa2c.dir/CheckIncludeFiles.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_0aa2c.dir/CheckIncludeFiles.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_0aa2c/fast' failed
+make[4]: *** [cmTC_0aa2c/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source:
+/* */
+#include <winsock2.h>
+#include <windows.h>
+
+
+int main(void){return 0;}
+
+Determining if files winsock2.h;ws2tcpip.h;windows.h exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_24dd7/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_24dd7.dir/build.make CMakeFiles/cmTC_24dd7.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_24dd7.dir/CheckIncludeFiles.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_24dd7.dir/CheckIncludeFiles.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c:2:10: fatal error: winsock2.h: No such file or directory
+ #include <winsock2.h>
+          ^~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_24dd7.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_24dd7.dir/CheckIncludeFiles.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_24dd7.dir/CheckIncludeFiles.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_24dd7/fast' failed
+make[4]: *** [cmTC_24dd7/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source:
+/* */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+
+
+int main(void){return 0;}
+
+Determining if files winsock.h;windows.h exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1a9bf/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_1a9bf.dir/build.make CMakeFiles/cmTC_1a9bf.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1a9bf.dir/CheckIncludeFiles.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_1a9bf.dir/CheckIncludeFiles.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c:2:10: fatal error: winsock.h: No such file or directory
+ #include <winsock.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_1a9bf.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_1a9bf.dir/CheckIncludeFiles.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_1a9bf.dir/CheckIncludeFiles.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_1a9bf/fast' failed
+make[4]: *** [cmTC_1a9bf/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source:
+/* */
+#include <winsock.h>
+#include <windows.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1dc1a/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_1dc1a.dir/build.make CMakeFiles/cmTC_1dc1a.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1dc1a.dir/CheckIncludeFiles.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc   -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_1dc1a.dir/CheckIncludeFiles.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckIncludeFiles.c:2:10: fatal error: windows.h: No such file or directory
+ #include <windows.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_1dc1a.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_1dc1a.dir/CheckIncludeFiles.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_1dc1a.dir/CheckIncludeFiles.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_1dc1a/fast' failed
+make[4]: *** [cmTC_1dc1a/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source:
+/* */
+#include <windows.h>
+
+
+int main(void){return 0;}
+
+Performing C SOURCE FILE Test HAVE_TYPE_SOCKET failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_69489/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_69489.dir/build.make CMakeFiles/cmTC_69489.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_69489.dir/src.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DHAVE_TYPE_SOCKET   -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_69489.dir/src.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/src.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/src.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/src.c:26:4: error: unknown type name 'SOCKET'; did you mean 'LOCK_EX'?
+    SOCKET var_exists;
+    ^~~~~~
+    LOCK_EX
+CMakeFiles/cmTC_69489.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_69489.dir/src.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_69489.dir/src.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_69489/fast' failed
+make[4]: *** [cmTC_69489/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+Source file was:
+
+		#include <stdio.h>
+		#include <stdlib.h>
+	
+		#include <stdbool.h>
+		#include <sys/types.h>
+		#include <arpa/inet.h>
+		#include <arpa/nameser.h>
+		#include <netdb.h>
+		#include <net/if.h>
+		#include <netinet/in.h>
+		#include <netinet/tcp.h>
+		#include <signal.h>
+		#include <stdlib.h>
+		#include <string.h>
+		#include <strings.h>
+		#include <sys/ioctl.h>
+		#include <sys/select.h>
+		#include <sys/socket.h>
+		#include <sys/time.h>
+		#include <sys/uio.h>
+		#include <time.h>
+		#include <fcntl.h>
+		#include <unistd.h>
+		int main() {
+			SOCKET var_exists;
+			(void)var_exists;
+			return 0;
+		}
+	
+Determining if the SO_NONBLOCK exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_05f7d/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_05f7d.dir/build.make CMakeFiles/cmTC_05f7d.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_05f7d.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_05f7d.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'SO_NONBLOCK' undeclared (first use in this function); did you mean 'O_NONBLOCK'?
+   return ((int*)(&SO_NONBLOCK))[argc];
+                   ^~~~~~~~~~~
+                   O_NONBLOCK
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_05f7d.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_05f7d.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_05f7d.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_05f7d/fast' failed
+make[4]: *** [cmTC_05f7d/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef SO_NONBLOCK
+  return ((int*)(&SO_NONBLOCK))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the bitncmp exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d300c/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_d300c.dir/build.make CMakeFiles/cmTC_d300c.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d300c.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_d300c.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'bitncmp' undeclared (first use in this function); did you mean 'bcmp'?
+   return ((int*)(&bitncmp))[argc];
+                   ^~~~~~~
+                   bcmp
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_d300c.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_d300c.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_d300c.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_d300c/fast' failed
+make[4]: *** [cmTC_d300c/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef bitncmp
+  return ((int*)(&bitncmp))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the closesocket exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ebbd5/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_ebbd5.dir/build.make CMakeFiles/cmTC_ebbd5.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ebbd5.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_ebbd5.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'closesocket' undeclared (first use in this function); did you mean 'socket'?
+   return ((int*)(&closesocket))[argc];
+                   ^~~~~~~~~~~
+                   socket
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_ebbd5.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_ebbd5.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_ebbd5.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_ebbd5/fast' failed
+make[4]: *** [cmTC_ebbd5/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef closesocket
+  return ((int*)(&closesocket))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the CloseSocket exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_e3bc4/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_e3bc4.dir/build.make CMakeFiles/cmTC_e3bc4.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e3bc4.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_e3bc4.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'CloseSocket' undeclared (first use in this function); did you mean 'socket'?
+   return ((int*)(&CloseSocket))[argc];
+                   ^~~~~~~~~~~
+                   socket
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_e3bc4.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_e3bc4.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_e3bc4.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_e3bc4/fast' failed
+make[4]: *** [cmTC_e3bc4/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef CloseSocket
+  return ((int*)(&CloseSocket))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the inet_net_pton exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_3ed7a/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_3ed7a.dir/build.make CMakeFiles/cmTC_3ed7a.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3ed7a.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_3ed7a.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'inet_net_pton' undeclared (first use in this function); did you mean 'inet_pton'?
+   return ((int*)(&inet_net_pton))[argc];
+                   ^~~~~~~~~~~~~
+                   inet_pton
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_3ed7a.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_3ed7a.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_3ed7a.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_3ed7a/fast' failed
+make[4]: *** [cmTC_3ed7a/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef inet_net_pton
+  return ((int*)(&inet_net_pton))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the ioctlsocket exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_32ed8/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_32ed8.dir/build.make CMakeFiles/cmTC_32ed8.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_32ed8.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_32ed8.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'ioctlsocket' undeclared (first use in this function); did you mean 'socket'?
+   return ((int*)(&ioctlsocket))[argc];
+                   ^~~~~~~~~~~
+                   socket
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_32ed8.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_32ed8.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_32ed8.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_32ed8/fast' failed
+make[4]: *** [cmTC_32ed8/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef ioctlsocket
+  return ((int*)(&ioctlsocket))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the IoctlSocket exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_00cff/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_00cff.dir/build.make CMakeFiles/cmTC_00cff.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_00cff.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_00cff.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'IoctlSocket' undeclared (first use in this function); did you mean 'clock_t'?
+   return ((int*)(&IoctlSocket))[argc];
+                   ^~~~~~~~~~~
+                   clock_t
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_00cff.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_00cff.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_00cff.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_00cff/fast' failed
+make[4]: *** [cmTC_00cff/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef IoctlSocket
+  return ((int*)(&IoctlSocket))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the strcmpi exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_f370a/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_f370a.dir/build.make CMakeFiles/cmTC_f370a.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f370a.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_f370a.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'strcmpi' undeclared (first use in this function); did you mean 'strcmp'?
+   return ((int*)(&strcmpi))[argc];
+                   ^~~~~~~
+                   strcmp
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_f370a.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_f370a.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_f370a.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_f370a/fast' failed
+make[4]: *** [cmTC_f370a/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strcmpi
+  return ((int*)(&strcmpi))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the stricmp exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_eb4ec/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_eb4ec.dir/build.make CMakeFiles/cmTC_eb4ec.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_eb4ec.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_eb4ec.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'stricmp' undeclared (first use in this function); did you mean 'strncmp'?
+   return ((int*)(&stricmp))[argc];
+                   ^~~~~~~
+                   strncmp
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_eb4ec.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_eb4ec.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_eb4ec.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_eb4ec/fast' failed
+make[4]: *** [cmTC_eb4ec/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef stricmp
+  return ((int*)(&stricmp))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the strncmpi exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_9c0eb/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_9c0eb.dir/build.make CMakeFiles/cmTC_9c0eb.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_9c0eb.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_9c0eb.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'strncmpi' undeclared (first use in this function); did you mean 'strncmp'?
+   return ((int*)(&strncmpi))[argc];
+                   ^~~~~~~~
+                   strncmp
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_9c0eb.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_9c0eb.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_9c0eb.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_9c0eb/fast' failed
+make[4]: *** [cmTC_9c0eb/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strncmpi
+  return ((int*)(&strncmpi))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the strnicmp exist failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_de661/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_de661.dir/build.make CMakeFiles/cmTC_de661.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_de661.dir/CheckSymbolExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections    -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_de661.dir/CheckSymbolExists.c.o   -c /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function 'main':
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: 'strnicmp' undeclared (first use in this function); did you mean 'strncmp'?
+   return ((int*)(&strnicmp))[argc];
+                   ^~~~~~~~
+                   strncmp
+/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_de661.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_de661.dir/CheckSymbolExists.c.o' failed
+make[5]: *** [CMakeFiles/cmTC_de661.dir/CheckSymbolExists.c.o] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_de661/fast' failed
+make[4]: *** [cmTC_de661/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+File /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdbool.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/uio.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strnicmp
+  return ((int*)(&strnicmp))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function __system_property_get exists failed with the following output:
+Change Dir: /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_aa483/fast"
+make[4]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+/usr/bin/make -f CMakeFiles/cmTC_aa483.dir/build.make CMakeFiles/cmTC_aa483.dir/build
+make[5]: Entering directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_aa483.dir/CheckFunctionExists.c.o
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=__system_property_get   -mips32r2 -march=mips32r2 -mtune=1004kc -o CMakeFiles/cmTC_aa483.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_aa483
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_aa483.dir/link.txt --verbose=1
+/opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -DCHECK_FUNCTION_EXISTS=__system_property_get  -L/opt/rt-n56u/trunk/stage/lib -Wl,--gc-sections  -rdynamic CMakeFiles/cmTC_aa483.dir/CheckFunctionExists.c.o  -o cmTC_aa483 -lnsl -lrt 
+/opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x/bin/../lib/gcc/mipsel-linux-uclibc/7.4.0/../../../../mipsel-linux-uclibc/bin/ld: CMakeFiles/cmTC_aa483.dir/CheckFunctionExists.c.o: in function `main':
+CheckFunctionExists.c:(.text.startup.main+0x10): undefined reference to `__system_property_get'
+/opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x/bin/../lib/gcc/mipsel-linux-uclibc/7.4.0/../../../../mipsel-linux-uclibc/bin/ld: CheckFunctionExists.c:(.text.startup.main+0x28): undefined reference to `__system_property_get'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_aa483.dir/build.make:97: recipe for target 'cmTC_aa483' failed
+make[5]: *** [cmTC_aa483] Error 1
+make[5]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_aa483/fast' failed
+make[4]: *** [cmTC_aa483/fast] Error 2
+make[4]: Leaving directory '/opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0/build/CMakeFiles/CMakeTmp'
+
+
