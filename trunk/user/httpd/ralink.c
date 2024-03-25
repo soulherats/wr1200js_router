@@ -1645,7 +1645,7 @@ ej_wl_auth_list(int eid, webs_t wp, int argc, char **argv)
 
 
 #define SSURV_LINE_LEN		(4+33+20+23+9+12+7+3)		// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType
-#define SSURV_LINE_LEN_WPS	(4+33+20+23+9+7+7+3+4+5)	// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType+WPS+PIN
+#define SSURV_LINE_LEN_WPS	(4+33+20+23+9+13+7+3+4+4)	// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType+WPS+PIN
 
 #if BOARD_HAS_5G_RADIO
 int
@@ -1757,7 +1757,7 @@ ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 	char data[8192];
 	char ssid_str[128];
 #if (defined (USE_WSC_WPS) || defined(USE_RT3352_MII))
-	char site_line[SSURV_LINE_LEN_WPS+1];
+	char site_line[SSURV_LINE_LEN+1];
 #else
 	char site_line[SSURV_LINE_LEN+1];
 #endif
@@ -1796,7 +1796,7 @@ ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 	}
 
 #if (defined (USE_WSC_WPS) || defined(USE_RT3352_MII))
-	line_len = SSURV_LINE_LEN_WPS;
+	line_len = SSURV_LINE_LEN;
 #else
 	line_len = SSURV_LINE_LEN;
 #endif
