@@ -11,6 +11,26 @@ fi
 echo "-------------CLEAN-ALL---------------"
 make clean
 
+rm -rf /opt/rt-n56u/trunk/libs/libssl/openssl-1.1.1k
+rm -rf /opt/rt-n56u/trunk/libs/libusb-1.0/libusb-1.0.23
+rm -rf /opt/rt-n56u/trunk/libs/libudns/udns-0.4
+rm -rf /opt/rt-n56u/trunk/libs/mbedtls/mbedtls-2.7.12
+rm -rf /opt/rt-n56u/trunk/libs/libcurl/curl-7.75.0
+rm -rf /opt/rt-n56u/trunk/libs/libmnl/libmnl-1.0.4
+rm -rf /opt/rt-n56u/trunk/libs/libxml2/libxml2-2.9.9
+rm -rf /opt/rt-n56u/trunk/libs/c-ares/c-ares-1.15.0
+rm -rf /opt/rt-n56u/trunk/user/openssh/openssh-8.1p1
+rm -rf /opt/rt-n56u/trunk/user/htop/htop-3.0.2
+rm -rf /opt/rt-n56u/trunk/user/openvpn/openvpn-2.5.2
+rm -rf /opt/rt-n56u/trunk/user/samba36/samba-3.6.25
+rm -rf /opt/rt-n56u/trunk/user/socat/socat-1.7.4.4
+rm -rf /opt/rt-n56u/trunk/user/socat/config_done
+rm -rf /opt/rt-n56u/trunk/user/samba36/config_done
+rm -rf /opt/rt-n56u/trunk/user/shadowsocks/shadowsocks-libev-3.3.5
+rm -rf /opt/rt-n56u/trunk/user/shadowsocks/shadowsocksr-libev-master
+rm -rf /opt/rt-n56u/trunk/user/parted/parted-3.2
+rm -rf /opt/rt-n56u/trunk/user/aria2/aria2-1.35.0
+
 rm -rf $ROOTDIR/stage
 rm -rf $ROOTDIR/romfs
 rm -rf $ROOTDIR/images
