@@ -2049,8 +2049,8 @@ REPEATER_CLIENT_ENTRY *pReptEntry = NULL;
 #ifdef APCLI_SUPPORT
         if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
         {
-            INC_COUNTER64(pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
-            pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
         }    
 #endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
