@@ -1643,6 +1643,23 @@ static INT rtmp_chk_rx_err(RTMP_ADAPTER *pAd, RX_BLK *pRxBlk, HEADER_802_11 *pHd
 #endif /* STATS_COUNT_SUPPORT */
 #endif /* WDS_SUPPORT */
 
+#ifdef APCLI_SUPPORT
+#ifdef STATS_COUNT_SUPPORT
+            if ((pHdr->FC.FrDs == 1) && (pHdr->FC.ToDs == 0) && (pRxInfo->U2M))
+            {
+                MAC_TABLE_ENTRY *pMacEntry = NULL;
+            
+                if (VALID_WCID(pRxBlk->wcid))
+                    pMacEntry = &pAd->MacTab.Content[pRxBlk->wcid];
+                else
+                    pMacEntry = MacTableLookup(pAd, pHdr->Addr2);
+                            
+                if (pMacEntry && IS_ENTRY_APCLI(pMacEntry))
+                    pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.RxErrors++;
+            }
+#endif /* STATS_COUNT_SUPPORT */
+#endif /* APCLI_SUPPORT */
+
 			DBGPRINT(RT_DEBUG_INFO, ("%s(): pRxInfo:Crc=%d, CipherErr=%d, U2M=%d, Wcid=%d\n",
 						__FUNCTION__, pRxInfo->Crc, pRxInfo->CipherErr, pRxInfo->U2M, pRxBlk->wcid));
 			return NDIS_STATUS_FAILURE;
@@ -1753,6 +1770,19 @@ DBGPRINT(RT_DEBUG_INFO, ("-->%s():pRxBlk->wcid=%d\n", __FUNCTION__, pRxBlk->wcid
 			pEntry = &pAd->MacTab.Content[pRxBlk->wcid];
 		}
 #endif /* CLIENT_WDS */
+        if (pEntry && IS_ENTRY_APCLI(pEntry))
+        {
+#ifdef STATS_COUNT_SUPPORT
+            pAd->ApCfg.ApCliTab[pEntry->func_tb_idx].ApCliCounter.ReceivedByteCount += pRxBlk->MPDUtotalByteCnt;
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pEntry->func_tb_idx].ApCliCounter.ReceivedFragmentCount);
+#endif /* STATS_COUNT_SUPPORT */
+        }
+        if (pRxInfo->Mcast || pRxInfo->Bcast)
+        {
+#ifdef STATS_COUNT_SUPPORT                        
+                INC_COUNTER64(pAd->ApCfg.ApCliTab[pEntry->func_tb_idx].ApCliCounter.MulticastReceivedFrameCount);
+#endif /* STATS_COUNT_SUPPORT */
+        }
 #ifdef APCLI_SUPPORT
 #ifdef A4_CONN
 		if (IS_ENTRY_A4(pEntry)) {

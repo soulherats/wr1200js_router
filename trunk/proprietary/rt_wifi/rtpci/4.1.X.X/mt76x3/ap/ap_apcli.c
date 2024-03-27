@@ -3304,6 +3304,7 @@ VOID APCli_Init(RTMP_ADAPTER *pAd, RTMP_OS_NETDEV_OP_HOOK *pNetDevOps)
 #endif /* HOSTAPD_SUPPORT */
 
 		pApCliEntry = &pAd->ApCfg.ApCliTab[idx];
+		NdisZeroMemory(&pApCliEntry->ApCliCounter, sizeof(APCLI_COUNTER));
 #ifdef APCLI_SAE_SUPPORT
 		pApCliEntry->sae_cfg_group = SAE_DEFAULT_GROUP;
 #endif
@@ -4957,5 +4958,47 @@ VOID apcli_reset_owe_parameters(
 
 #endif
 
+BOOLEAN ApCli_StatsGet(
+    IN    PRTMP_ADAPTER pAd,
+    IN    RT_CMD_STATS *pStats)
+{
+    INT ifIndex = 0, index;
 
+    /*struct net_device_stats    stats; */
+    for(index = 0; index < MAX_APCLI_NUM; index++)
+    {
+        if (pAd->ApCfg.ApCliTab[index].wdev.if_dev == (PNET_DEV)(pStats->pNetDev))
+        {
+            ifIndex = index;
+            break;
+        }
+    }
+
+    if(index >= MAX_APCLI_NUM)
+    {
+        MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF,("rt28xx_ioctl apcli_statsGet can not find apcli I/F\n"));
+        return FALSE;
+    }
+
+    pStats->pStats = pAd->stats;
+
+    pStats->rx_packets = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.ReceivedFragmentCount.QuadPart;
+    pStats->tx_packets = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TransmittedFragmentCount.QuadPart;
+
+    pStats->rx_bytes = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.ReceivedByteCount;
+    pStats->tx_bytes = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TransmittedByteCount;
+
+    pStats->rx_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.RxErrors;
+    pStats->tx_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.TxErrors;
+
+    pStats->multicast = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.MulticastReceivedFrameCount.QuadPart;   /* multicast packets received */
+    pStats->collisions = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.OneCollision + pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.MoreCollisions;  /* Collision packets */
+
+    pStats->rx_over_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.RxNoBuffer;                   /* receiver ring buff overflow */
+    pStats->rx_crc_errors = 0;/*pAd->WlanCounters.FCSErrorCount;     // recved pkt with crc error */
+    pStats->rx_frame_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.RcvAlignmentErrors;          /* recv'd frame alignment error */
+    pStats->rx_fifo_errors = pAd->ApCfg.ApCliTab[ifIndex].ApCliCounter.RxNoBuffer;                   /* recv'r fifo overrun */
+
+    return TRUE;
+}
 #endif /* APCLI_SUPPORT */

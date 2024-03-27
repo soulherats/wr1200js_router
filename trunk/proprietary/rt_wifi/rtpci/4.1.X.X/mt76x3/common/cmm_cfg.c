@@ -1281,6 +1281,18 @@ INT RTMP_COM_IoctlHandle(
 			break;
 #endif /* WDS_SUPPORT */
 
+#ifdef APCLI_SUPPORT
+		case CMD_RTPRIV_IOCTL_APCLI_STATS_GET:
+		    if (Data == INT_APCLI)
+		    {
+			if (ApCli_StatsGet(pAd, pData) != TRUE)
+			    return NDIS_STATUS_FAILURE;
+		    }
+		    else
+			return NDIS_STATUS_FAILURE;
+		    break;
+#endif /* APCLI_SUPPORT */
+
 #ifdef CONFIG_ATE
 #ifdef CONFIG_QA
 		case CMD_RTPRIV_IOCTL_ATE:

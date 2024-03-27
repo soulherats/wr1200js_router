@@ -1591,6 +1591,13 @@ VOID AP_AMPDU_Frame_Tx(RTMP_ADAPTER *pAd, TX_BLK *pTxBlk)
 			pAd->WdsTab.WdsEntry[pMacEntry->func_tb_idx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
 		}
 #endif /* WDS_SUPPORT */
+#ifdef APCLI_SUPPORT
+        if (pMacEntry && IS_ENTRY_APCLI(pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }
+#endif /*APCLI_SUPPORT*/
 #endif /* STATS_COUNT_SUPPORT */
 
 	HAL_WriteTxResource(pAd, pTxBlk, TRUE, &freeCnt);
@@ -1744,7 +1751,7 @@ VOID AP_AMPDU_Frame_Tx_Hdr_Trns(
 #ifdef WAPI_SUPPORT
 		if (IS_ENTRY_CLIENT(pMacEntry))
 		{
-		if (pMacEntry->WapiUskRekeyTimerRunning && 
+		if (IS_ENTRY_CLIENT(pMacEntry) && pMacEntry->WapiUskRekeyTimerRunning && 
 			pAd->CommonCfg.wapi_usk_rekey_method == REKEY_METHOD_PKT)
 			pMacEntry->wapi_usk_rekey_cnt += pTxBlk->SrcBufLen;
 		}
@@ -2038,6 +2045,14 @@ REPEATER_CLIENT_ENTRY *pReptEntry = NULL;
 			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->func_tb_idx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
 		}	
 #endif /* WDS_SUPPORT */
+
+#ifdef APCLI_SUPPORT
+        if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }    
+#endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
 	}
 
@@ -2264,6 +2279,14 @@ DBGPRINT(RT_DEBUG_TRACE, ("<--%s(%d): ##########Fail#########\n", __FUNCTION__, 
 			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->func_tb_idx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
 		}
 #endif /* WDS_SUPPORT */
+
+#ifdef APCLI_SUPPORT
+        if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }    
+#endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
 
 	/*
@@ -2415,6 +2438,14 @@ VOID AP_Legacy_Frame_Tx_Hdr_Trns(
 			pMacEntry->OneSecTxBytes+=pTxBlk->SrcBufLen;
 		}
 	}
+
+#ifdef APCLI_SUPPORT
+        if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->wdev_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->wdev_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }    
+#endif /* APCLI_SUPPORT */
 
 #endif /* STATS_COUNT_SUPPORT */
 
@@ -2690,7 +2721,7 @@ DBGPRINT(RT_DEBUG_TRACE, ("%s(): Before Frag, pTxBlk->MpduHeaderLen=%d, wifi_hdr
 		if (pTxBlk->pMacEntry && IS_ENTRY_CLIENT(pTxBlk->pMacEntry))
 		{
 		if (pTxBlk->pMacEntry->WapiUskRekeyTimerRunning && pAd->CommonCfg.wapi_usk_rekey_method == REKEY_METHOD_PKT)
-			pTxBlk->pMacEntry->wapi_usk_rekey_cnt += pTxBlk->SrcBufLen;
+			pTxBlk->pMacEntry->wapi_usk_rekey_cnt += totalMPDUSize;
 		}
 #endif /* WAPI_SUPPORT */
 	
@@ -2728,6 +2759,14 @@ DBGPRINT(RT_DEBUG_TRACE, ("%s(): Before Frag, pTxBlk->MpduHeaderLen=%d, wifi_hdr
 			pAd->WdsTab.WdsEntry[pTxBlk->pMacEntry->func_tb_idx].WdsCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
 		}
 #endif /* WDS_SUPPORT */
+
+#ifdef APCLI_SUPPORT
+        if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }    
+#endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
 
 	/*
@@ -3086,6 +3125,13 @@ VOID AP_ARalink_Frame_Tx(RTMP_ADAPTER *pAd, TX_BLK *pTxBlk)
 		}
 #endif /* WDS_SUPPORT */
 
+#ifdef APCLI_SUPPORT
+        if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);                
+            pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }    
+#endif /* APCLI_SUPPORT */
 #endif /* STATS_COUNT_SUPPORT */
 	}
 

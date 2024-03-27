@@ -3621,6 +3621,20 @@ typedef struct _TIMER_INFO {
 /***************************************************************************
   *	AP APCLI related data structures
   **************************************************************************/
+ typedef struct _APCLI_COUNTER {
+    LARGE_INTEGER ReceivedFragmentCount;
+    LARGE_INTEGER TransmittedFragmentCount;
+    ULONG ReceivedByteCount;
+    ULONG TransmittedByteCount;
+    ULONG RxErrors;
+    ULONG TxErrors;
+    LARGE_INTEGER MulticastReceivedFrameCount;
+    ULONG OneCollision;
+    ULONG MoreCollisions;
+    ULONG RxNoBuffer;
+    ULONG RcvAlignmentErrors;
+} APCLI_COUNTER, *PAPCLI_COUNTER;
+
 typedef struct _APCLI_STRUCT {
 	struct wifi_dev wdev;
 
@@ -3766,6 +3780,7 @@ typedef struct _APCLI_STRUCT {
 	UCHAR a4_init;
 	UCHAR a4_apcli;
 #endif
+	APCLI_COUNTER ApCliCounter;
 } APCLI_STRUCT, *PAPCLI_STRUCT;
 
 

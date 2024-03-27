@@ -52,6 +52,7 @@
 #include "rt_os_util.h"
 #include "rt_os_net.h"
 
+NET_DEV_STATS *RT28xx_get_apcli_ether_stats(PNET_DEV net_dev);
 
 /*
 ========================================================================
@@ -80,6 +81,8 @@ VOID RT28xx_ApCli_Init(VOID *pAd, PNET_DEV main_dev_p)
 	netDevOpHook.stop = ApCli_VirtualIF_Close;
 	netDevOpHook.xmit = rt28xx_send_packets;
 	netDevOpHook.ioctl = rt28xx_ioctl;
+	netDevOpHook.get_stats = RT28xx_get_apcli_ether_stats;
+
 	RTMP_AP_IoctlHandle(pAd, NULL, CMD_RTPRIV_IOCTL_APC_INIT,
 						0, &netDevOpHook, 0);
 }

@@ -113,6 +113,9 @@ VOID ApCli_Remove(
 VOID RT28xx_ApCli_Close(
 	IN PRTMP_ADAPTER 	pAd);
 
+BOOLEAN ApCli_StatsGet(
+    IN    PRTMP_ADAPTER pAd,
+    IN    RT_CMD_STATS *pStats);
 
 
 INT ApCliIfLookUp(
