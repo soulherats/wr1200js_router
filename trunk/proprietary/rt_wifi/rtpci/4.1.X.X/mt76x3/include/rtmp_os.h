@@ -77,6 +77,7 @@ typedef struct _RTMP_OS_NETDEV_OP_HOOK_ {
 	void *xmit;
 	void *ioctl;
 	void *get_stats;
+	void *get_stats64;
 	void *priv;
 	void *get_wstats;
 	void *iw_handler;

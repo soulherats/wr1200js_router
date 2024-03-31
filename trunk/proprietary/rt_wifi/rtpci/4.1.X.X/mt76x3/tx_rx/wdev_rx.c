@@ -2151,6 +2151,9 @@ VOID rx_data_frm_announce(
 					pMbss->mcPktsRx++;
 			} else
 				pMbss->ucPktsRx++;
+		} else if (IS_ENTRY_APCLI(pEntry)) {
+			INC_COUNTER64(pAd->ApCfg.ApCliTab[0].ApCliCounter.ReceivedFragmentCount);
+			pAd->ApCfg.ApCliTab[0].ApCliCounter.ReceivedByteCount+=pRxBlk->DataSize;
 		}
 #endif /* STATS_COUNT_SUPPORT */
 #endif /* CONFIG_AP_SUPPORT */
@@ -2448,8 +2451,9 @@ VOID dev_rx_data_frm(RTMP_ADAPTER *pAd, RX_BLK *pRxBlk)
 				FromDS = 0, ToDS = 1 : drop
 				FromDS = 0, ToDS = 0 : AdHoc/TDLS Rx
 	*/
-	if (pEntry && pEntry->wdev && pEntry->wdev->rx_pkt_allowed)
+	if (pEntry && pEntry->wdev && pEntry->wdev->rx_pkt_allowed) {
 		hdr_len = pEntry->wdev->rx_pkt_allowed(pAd, pRxBlk);
+	}
 	else {
 		if (pEntry) {
 			DBGPRINT(RT_DEBUG_INFO, ("invalid hdr_len, wdev=%p! ", pEntry->wdev));

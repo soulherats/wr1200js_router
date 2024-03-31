@@ -1742,7 +1742,16 @@ VOID AP_AMPDU_Frame_Tx_Hdr_Trns(
 
 #ifdef STATS_COUNT_SUPPORT
 	pAd->RalinkCounters.TransmittedMPDUsInAMPDUCount.u.LowPart ++;
-	pAd->RalinkCounters.TransmittedOctetsInAMPDUCount.QuadPart += pTxBlk->SrcBufLen;		
+	pAd->RalinkCounters.TransmittedOctetsInAMPDUCount.QuadPart += pTxBlk->SrcBufLen;
+
+#ifdef APCLI_SUPPORT
+        if (pTxBlk->pMacEntry && IS_ENTRY_APCLI(pTxBlk->pMacEntry))
+        {
+            INC_COUNTER64(pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedFragmentCount);
+            pAd->ApCfg.ApCliTab[pTxBlk->pMacEntry->func_tb_idx].ApCliCounter.TransmittedByteCount+= pTxBlk->SrcBufLen;
+        }
+#endif /* APCLI_SUPPORT */
+
 
 	/* calculate Tx count and ByteCount per BSS */
 	{
@@ -1751,12 +1760,11 @@ VOID AP_AMPDU_Frame_Tx_Hdr_Trns(
 #ifdef WAPI_SUPPORT
 		if (IS_ENTRY_CLIENT(pMacEntry))
 		{
-		if (IS_ENTRY_CLIENT(pMacEntry) && pMacEntry->WapiUskRekeyTimerRunning && 
+		if (pMacEntry->WapiUskRekeyTimerRunning && 
 			pAd->CommonCfg.wapi_usk_rekey_method == REKEY_METHOD_PKT)
 			pMacEntry->wapi_usk_rekey_cnt += pTxBlk->SrcBufLen;
 		}
 #endif /* WAPI_SUPPORT */
-			
 		if (pMbss != NULL)
 		{
 			pMbss->TransmittedByteCount += pTxBlk->SrcBufLen;

@@ -1689,7 +1689,9 @@ int RtmpOSNetDevAttach(
 		 */
 		if (pDevOpHook->get_stats)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)
-			pNetDevOps->ndo_get_stats64 = pDevOpHook->get_stats;
+			pNetDevOps->ndo_get_stats = pDevOpHook->get_stats;
+		else if (pDevOpHook->get_stats64)
+			pNetDevOps->ndo_get_stats64 = pDevOpHook->get_stats64;
 #endif
 
 		/* OS specific flags, here we used to indicate if we are virtual interface */
