@@ -72,9 +72,13 @@ function initial(){
 
 	if(document.form.rt_auth_mode.value == "psk"){
 		if(document.form.rt_wpa_mode.value == "0")
-			document.form.rt_auth_mode[4].selected = true;
+			document.form.rt_auth_mode[5].selected = true;
 		else if(document.form.rt_wpa_mode.value == "1")
 			document.form.rt_auth_mode[2].selected = true;
+		else if(document.form.rt_wpa_mode.value == "5")
+			document.form.rt_auth_mode[4].selected = true;
+		else if(document.form.rt_wpa_mode.value == "6")
+			document.form.rt_auth_mode[6].selected = true;
 		else
 			document.form.rt_auth_mode[3].selected = true;
 	}
@@ -535,9 +539,9 @@ function nmode_limitation2(){
 			document.form.rt_auth_mode.selectedIndex = 3;
 			document.form.rt_wpa_mode.value = 2;
 		}
-		else if(document.form.rt_auth_mode.selectedIndex == 5){
+		else if(document.form.rt_auth_mode.selectedIndex == 7){
 			alert("<#WLANConfig11n_nmode_limition_hint#>");
-			document.form.rt_auth_mode.selectedIndex = 6;
+			document.form.rt_auth_mode.selectedIndex = 8;
 		}
 		rt_auth_mode_change(1);
 	}
