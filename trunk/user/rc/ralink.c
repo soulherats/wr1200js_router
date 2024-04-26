@@ -565,7 +565,7 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 {
 	FILE *fp;
 	char list[2048], *p_str, *c_val_mbss[2];
-	int i_pmfr, i_pmfsha256;
+	int i_pmfr;
 	int i, i_num,  i_val, i_wmm, i_ldpc;
 	int i_mode_x, i_phy_mode, i_gfe, i_auth, i_encr, i_wep, i_wds;
 	int i_ssid_num, i_channel, i_channel_max, i_HTBW_MAX;
@@ -681,10 +681,9 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 
 	//PMF Capbility and required
 	i_pmfr = nvram_wlan_get_int(is_aband, "pmf");
-	i_pmfsha256 = nvram_wlan_get_int(is_aband, "pmfsha256");
-	fprintf(fp, "PMFMFPC=%d\n", 1);
-	fprintf(fp, "PMFMFPR=%d\n", i_pmfr);
-	fprintf(fp, "PMFSHA256=%d\n", i_pmfsha256);
+	fprintf(fp, "PMFMFPC=%d\n", i_pmfr ? 1 : 0);
+	fprintf(fp, "PMFMFPR=%d\n", (i_pmfr & 2) ? 1 : 0);
+	fprintf(fp, "PMFSHA256=%d\n", i_pmfr ? 1 : 0);
 
 	fprintf(fp, "AutoProvisionEn=%d\n", 0);
 	fprintf(fp, "CalCacheApply=%d\n", 0);
@@ -1039,9 +1038,15 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 		} else if (i_val == 2) {
 			i_auth = 3; // WPA2 PSK
 			c_val_mbss[0] = "WPA2PSK";
-		} else {
+		} else if (i_val == 3) {
 			i_auth = 4; // WPA PSK or WPA2 PSK
 			c_val_mbss[0] = "WPAPSKWPA2PSK";
+		} else if (i_val == 5) {
+			i_auth = 9; // WPA3 PSK
+			c_val_mbss[0] = "WPA3PSK";
+		} else if (i_val == 6){
+			i_auth = 10; // WPA2 PSK or WPA3 PSK
+			c_val_mbss[0] = "WPA2PSKWPA3PSK";
 		}
 	}
 	else if (!strcmp(p_str, "wpa"))
@@ -1072,8 +1077,12 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 			c_val_mbss[1] = "WPAPSK";
 		else if (i_val == 2)
 			c_val_mbss[1] = "WPA2PSK";
-		else
+		else if (i_val == 3)
 			c_val_mbss[1] = "WPAPSKWPA2PSK";
+		else if (i_val == 5)
+			c_val_mbss[1] = "WPA3PSK";
+		else if (i_val == 6)
+			c_val_mbss[1] = "WPA2PSKWPA3PSK";
 	}
 	fprintf(fp, "AuthMode=%s;%s\n", c_val_mbss[0], c_val_mbss[1]);
 

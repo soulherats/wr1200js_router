@@ -345,7 +345,7 @@ function done_validating(action){
                                             <td>
                                                 <select name="wl_STBC" class="input">
                                                     <option value="0" <% nvram_match_x("","wl_STBC", "0","selected"); %>><#btn_Disable#> (*)</option>
-                                                    <option value="1" <% nvram_match_x("","wl_STBC", "1","selected"); %>><#btn_Enable#> (VHT)</option>
+                                                    <option value="1" <% nvram_match_x("","wl_STBC", "1","selected"); %>><#btn_Enable#></option>
                                                 </select>
                                             </td>
                                         </tr>

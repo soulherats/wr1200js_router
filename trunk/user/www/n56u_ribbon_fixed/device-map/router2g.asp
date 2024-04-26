@@ -104,8 +104,12 @@ function show_middle_status_router(){
 			security_mode = "WPA-Personal";
 		else if(wpa_mode == "2")
 			security_mode = "WPA2-Personal";
+		else if(wpa_mode == "5")
+			security_mode = "WPA3-Personal";
 		else if(wpa_mode == "0")
 			security_mode = "WPA-Auto-Personal";
+		else if(wpa_mode == "6")
+			security_mode = "WPA2-WPA3-Mixed";
 	}
 	else if(auth_mode == "wpa"){
 		if(wpa_mode == "3")
@@ -168,6 +172,12 @@ function rt_auth_mode_change(isload){
 	else
 		$("rt_wpa_psk").style.display = "none";
 
+	if(opts[opts.selectedIndex].text == "Open System" || opts[opts.selectedIndex].text == "Shared Key" ||
+		opts[opts.selectedIndex].text == "WPA-Personal" || opts[opts.selectedIndex].text == "WPA-Enterprise (Radius)")
+		$("rt_pmf").style.display = "none";
+	else
+		$("rt_pmf").style.display = "";
+
 	for(var i = 0; i < document.form.rt_crypto.length; ++i)
 		if(document.form.rt_crypto[i].selected){
 			cur_crypto = document.form.rt_crypto[i].value;
@@ -177,7 +187,7 @@ function rt_auth_mode_change(isload){
 	if(mode == "psk"){
 		if(opts[opts.selectedIndex].text == "WPA-Personal")
 			new_array = new Array("TKIP");
-		else if(opts[opts.selectedIndex].text == "WPA2-Personal")
+		else if(opts[opts.selectedIndex].text == "WPA2-Personal" || opts[opts.selectedIndex].text == "WPA3-Personal" || opts[opts.selectedIndex].text == "WPA2-WPA3-Mixed")
 			new_array = new Array("AES");
 		else
 			new_array = new Array("AES", "TKIP+AES");
@@ -346,8 +356,12 @@ function change_auth_mode(auth_mode_obj){
 			document.form.rt_wpa_mode.value = "1";
 		else if(opts[opts.selectedIndex].text == "WPA2-Personal")
 			document.form.rt_wpa_mode.value="2";
+		else if(opts[opts.selectedIndex].text == "WPA3-Personal")
+			document.form.rt_wpa_mode.value="5";
 		else if(opts[opts.selectedIndex].text == "WPA-Auto-Personal")
 			document.form.rt_wpa_mode.value="0";
+		else if(opts[opts.selectedIndex].text == "WPA2-WPA3-Mixed")
+			document.form.rt_wpa_mode.value="6";
 		else if(opts[opts.selectedIndex].text == "WPA-Enterprise (Radius)")
 			document.form.rt_wpa_mode.value="3";
 		else if(opts[opts.selectedIndex].text == "WPA-Auto-Enterprise (Radius)")
@@ -644,7 +658,9 @@ window.onunload  = function(){
 		<option value="shared" <% nvram_match_x("","rt_auth_mode", "shared","selected"); %>>Shared Key</option>
 		<option value="psk" <% nvram_double_match_x("", "rt_auth_mode", "psk", "", "rt_wpa_mode", "1", "selected"); %>>WPA-Personal</option>
 		<option value="psk" <% nvram_double_match_x("", "rt_auth_mode", "psk", "", "rt_wpa_mode", "2", "selected"); %>>WPA2-Personal</option>
+		<option value="psk" <% nvram_double_match_x("", "rt_auth_mode", "psk", "", "rt_wpa_mode", "5", "selected"); %>>WPA3-Personal</option>
 		<option value="psk" <% nvram_double_match_x("", "rt_auth_mode", "psk", "", "rt_wpa_mode", "0", "selected"); %>>WPA-Auto-Personal</option>
+		<option value="psk" <% nvram_double_match_x("", "rt_auth_mode", "psk", "", "rt_wpa_mode", "6", "selected"); %>>WPA2-WPA3-Mixed</option>
 		<option value="wpa" <% nvram_double_match_x("", "rt_auth_mode", "wpa", "", "rt_wpa_mode", "3", "selected"); %>>WPA-Enterprise (Radius)</option>
 		<option value="wpa2" <% nvram_match_x("", "rt_auth_mode", "wpa2", "selected"); %>>WPA2-Enterprise (Radius)</option>
 		<option value="wpa" <% nvram_double_match_x("", "rt_auth_mode", "wpa", "", "rt_wpa_mode", "4", "selected"); %>>WPA-Auto-Enterprise (Radius)</option>
@@ -700,6 +716,17 @@ window.onunload  = function(){
           <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('sta_wpa_psk')"><i class="icon-eye-close"></i></button>
       </div>
     </td>
+  </tr>
+
+  <tr id='rt_pmf' style='display:none;'>
+	<th width="110"><#WLANConfig11b_PMFType_itemname#></th>
+	<td>
+	  <select name="rt_pmf" class="input" onchange="rt_auth_mode_change(0);">
+		<option value="0" <% nvram_match_x("", "rt_pmf", "0", "selected"); %>><#PMF_Disabled#></option>
+		<option value="1" <% nvram_match_x("", "rt_pmf", "1", "selected"); %>><#PMF_Capable#></option>
+		<option value="2" <% nvram_match_x("", "rt_pmf", "2", "selected"); %>><#PMF_Mandatory#></option>
+	  </select>
+	</td>
   </tr>
   <tr>
       <th>&nbsp;</th>

@@ -122,6 +122,10 @@ function show_middle_status(){
 			security_mode = "WPA-Personal";
 		else if(wpa_mode == "2")
 			security_mode = "WPA2-Personal";
+		else if(wpa_mode == "5")
+			security_mode = "WPA3-Personal";
+		else if(wpa_mode == "6")
+			security_mode = "WPA2-WPA3-Mixed";
 		else if(wpa_mode == "0")
 			security_mode = "WPA-Auto-Personal";
 		else
