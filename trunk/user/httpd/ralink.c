@@ -1646,6 +1646,7 @@ ej_wl_auth_list(int eid, webs_t wp, int argc, char **argv)
 
 #define SSURV_LINE_LEN		(4+33+20+23+9+12+7+3)		// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType
 #define SSURV_LINE_LEN_WPS	(4+33+20+23+9+13+7+3+4+4)	// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType+WPS+PIN
+#define SSURV_LINE_LEN_OWE	(4+33+20+23+9+13+7+3+4+5+9)	// Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType+WPS+PIN
 
 #if BOARD_HAS_5G_RADIO
 int
@@ -1734,7 +1735,7 @@ ej_wl_scan_5g(int eid, webs_t wp, int argc, char **argv)
 			
 //			dbg("%s\n", site_line);
 			
-			sp+=line_len+1; // skip \n
+			sp+=line_len + 1; // skip \n
 			apCount++;
 		}
 	}
@@ -1750,14 +1751,14 @@ ej_wl_scan_5g(int eid, webs_t wp, int argc, char **argv)
 }
 #endif
 
-int 
+int
 ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 {
 	int retval = 0, apCount = 0;
 	char data[8192];
 	char ssid_str[128];
 #if (defined (USE_WSC_WPS) || defined(USE_RT3352_MII))
-	char site_line[SSURV_LINE_LEN+1];
+	char site_line[SSURV_LINE_LEN_OWE+1];
 #else
 	char site_line[SSURV_LINE_LEN+1];
 #endif
@@ -1788,6 +1789,7 @@ ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 	memset(data, 0, sizeof(data));
 	wrq.u.data.length = sizeof(data);
 	wrq.u.data.pointer = data;
+
 	wrq.u.data.flags = 0;
 	if (wl_ioctl(IFNAME_2G_MAIN, RTPRIV_IOCTL_GSITESURVEY, &wrq) < 0)
 	{
@@ -1796,7 +1798,7 @@ ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 	}
 
 #if (defined (USE_WSC_WPS) || defined(USE_RT3352_MII))
-	line_len = SSURV_LINE_LEN;
+	line_len = SSURV_LINE_LEN_OWE;
 #else
 	line_len = SSURV_LINE_LEN;
 #endif
@@ -1805,7 +1807,7 @@ ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 	{
 		op = sp = wrq.u.data.pointer+line_len+2; // skip \n+\n
 		len = strlen(op);
-		
+
 		while (*sp && ((len - (sp-op)) >= 0))
 		{
 			memcpy(site_line, sp, line_len);
@@ -1815,26 +1817,26 @@ ej_wl_scan_2g(int eid, webs_t wp, int argc, char **argv)
 			memcpy(site_bssid, sp+37, 20);
 			memcpy(site_signal, sp+80, 9);
 
-			site_line[line_len] = '\0';
+			site_line[line_len + 1] = '\0';
 			site_chnl[3] = '\0';
 			site_ssid[33] = '\0';
 			site_bssid[20] = '\0';
 			site_signal[9] = '\0';
-			
+
 			memset(ssid_str, 0, sizeof(ssid_str));
 			char_to_ascii(ssid_str, trim_r(site_ssid));
-			
+
 			if (!strlen(ssid_str))
 				strcpy(ssid_str, "???");
-			
+
 			if (apCount)
 				retval += websWrite(wp, "%s ", ",");
-			
+
 			retval += websWrite(wp, "[\"%s\", \"%s\", \"%s\", \"%s\"]", ssid_str, trim_r(site_bssid), trim_r(site_chnl), trim_r(site_signal));
-			
+
 //			dbg("%s\n", site_line);
-			
-			sp+=line_len+1; // skip \n
+
+			sp+=line_len + 2; // skip \n
 			apCount++;
 		}
 	}
