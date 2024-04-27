@@ -164,6 +164,13 @@ function wl_auth_mode_change(isload){
 	else
 		$("wl_wpa_psk").style.display = "none";
 
+	if(opts[opts.selectedIndex].text == "WPA2-Personal" || opts[opts.selectedIndex].text == "WPA2-Enterprise (Radius)")
+		$("wl_pmf").style.display = "";
+	else {
+		document.form.wl_pmf.value = 0;
+		$("wl_pmf").style.display = "none";
+	}
+
 	for(var i = 0; i < document.form.wl_crypto.length; ++i)
 		if(document.form.wl_crypto[i].selected){
 			cur_crypto = document.form.wl_crypto[i].value;
@@ -703,6 +710,16 @@ window.onunload  = function(){
             <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('sta_wpa_psk')"><i class="icon-eye-close"></i></button>
         </div>
     </td>
+  </tr>
+  <tr id='wl_pmf' style='display:none;'>
+	<th width="110"><#WLANConfig11b_PMFType_itemname#></th>
+	<td>
+		<select name="wl_pmf" class="input" onchange="wl_auth_mode_change(0);">
+		<option value="0" <% nvram_match_x("", "wl_pmf", "0", "selected"); %>><#PMF_Disabled#></option>
+		<option value="1" <% nvram_match_x("", "wl_pmf", "1", "selected"); %>><#PMF_Capable#></option>
+		<option value="2" <% nvram_match_x("", "wl_pmf", "2", "selected"); %>><#PMF_Mandatory#></option>
+		</select>
+	</td>
   </tr>
   <tr>
     <th>&nbsp;</th>

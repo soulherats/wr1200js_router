@@ -142,6 +142,7 @@ function change_wireless_bridge(){
 	showhide_div("row_apc_1", is_apc);
 	showhide_div("row_apc_2", is_apc);
 	showhide_div("row_apc_3", is_apc);
+	showhide_div("row_apc_4", is_apc);
 }
 
 function change_wdsapply(){
@@ -165,16 +166,21 @@ function change_sta_auth_mode(mflag){
 				document.form.wl_sta_crypto.options[1].selected = 1;
 				document.form.wl_sta_wpa_mode.value = "2";
 			}
+			document.form.wl_sta_pmf.style.display = "";
 		}else{
 			if (mflag == 1){
 				document.form.wl_sta_crypto.options[1].selected = 0;
 				document.form.wl_sta_crypto.options[0].selected = 1;
 				document.form.wl_sta_wpa_mode.value = "1";
 			}
+			document.form.wl_sta_pmf.style.display = "none";
+			document.form.wl_sta_pmf.value = "0";
 		}
 	}else{
 		inputCtrl(document.form.wl_sta_crypto, 0);
 		inputCtrl(document.form.wl_sta_wpa_psk, 0);
+		document.form.wl_sta_pmf.style.display = "none";
+		document.form.wl_sta_pmf.value = "0";
 	}
 }
 
@@ -419,6 +425,16 @@ function hideClients_Block(){
                                                     <input type="password" name="wl_sta_wpa_psk" id="wl_sta_wpa_psk" maxlength="64" size="32" value="" style="width: 175px;">
                                                     <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('wl_sta_wpa_psk')"><i class="icon-eye-close"></i></button>
                                                 </div>
+                                            </td>
+                                        </tr>
+                                        <tr id="row_apc_4" style="display:none;">
+                                            <th><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 27);"><#WLANConfig11b_PMFType_itemname#></a></th>
+                                            <td>
+						<select name="wl_sta_pmf" class="input" onchange="change_sta_auth_mode(0);">
+                                                <option value="0" <% nvram_match_x("", "wl_sta_pmf", "0", "selected"); %>><#PMF_Disabled#></option>
+                                                <option value="1" <% nvram_match_x("", "wl_sta_pmf", "1", "selected"); %>><#PMF_Capable#></option>
+                                                <option value="2" <% nvram_match_x("", "wl_sta_pmf", "2", "selected"); %>><#PMF_Mandatory#></option>
+                                                </select>
                                             </td>
                                         </tr>
                                     </table>
