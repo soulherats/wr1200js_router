@@ -117,8 +117,8 @@ EOF
 
 func_stop_ss_dns(){
 	sed -i '/Chinadns/,+4d' /etc/storage/dnsmasq/dnsmasq.conf
-	restart_dns
 	killall -q chinadns-ng
+	restart_dhcpd
 }
 
 func_stop(){
