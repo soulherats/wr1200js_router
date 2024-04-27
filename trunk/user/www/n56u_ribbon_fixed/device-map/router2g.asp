@@ -125,6 +125,8 @@ function show_middle_status_router(){
 		security_mode = "WPA2-Enterprise";
 	else if(auth_mode == "radius")
 		security_mode = "Radius with 802.1x";
+	else if(auth_mode == "owe")
+		security_mode = "Enhanced Open";
 
 	//parent.$("wl_securitylevel_span").innerHTML = security_mode;
 
@@ -151,6 +153,7 @@ function rt_auth_mode_change(isload){
 	var mode = document.form.rt_auth_mode.value;
 	var opts = document.form.rt_auth_mode.options;
 	var new_array;
+	var cur_pmf;
 	var cur_crypto;
 	var cur_key_index, cur_key_obj;
 
@@ -166,7 +169,7 @@ function rt_auth_mode_change(isload){
 		$("asus_wep_key").style.display = "none";
 	}
 
-	if(mode == "wpa" || mode == "wpa2" || mode == "psk")
+	if(mode == "wpa" || mode == "wpa2" || mode == "psk" || mode == "owe")
 		$("rt_crypto").style.display = "";
 	else
 		$("rt_crypto").style.display = "none";
@@ -176,11 +179,38 @@ function rt_auth_mode_change(isload){
 	else
 		$("rt_wpa_psk").style.display = "none";
 
-	if(opts[opts.selectedIndex].text == "Open System" || opts[opts.selectedIndex].text == "Shared Key" ||
-		opts[opts.selectedIndex].text == "WPA-Personal" || opts[opts.selectedIndex].text == "WPA-Enterprise (Radius)")
+	for(var i = 0; i < document.form.rt_pmf.length; ++i)
+		if(document.form.rt_pmf[i].selected){
+			cur_pmf = document.form.rt_pmf[i].value;
+			break;
+		}
+
+	free_options(document.form.rt_pmf);
+	$("rt_pmf").style.display = "";
+	if(opts[opts.selectedIndex].text == "WPA2-Personal" || opts[opts.selectedIndex].text == "WPA2-Enterprise (Radius)") {
+		new_array = new Array("<#PMF_Disabled#>","<#PMF_Capable#>","<#PMF_Mandatory#>");
+	} else if (opts[opts.selectedIndex].text == "WPA3-Personal" || opts[opts.selectedIndex].text == "Enhanced Open") {
+		new_array = new Array("<#PMF_Mandatory#>");
+	} else if (opts[opts.selectedIndex].text == "WPA2-WPA3-Mixed") {
+		new_array = new Array("<#PMF_Capable#>");
+	} else {
 		$("rt_pmf").style.display = "none";
-	else
-		$("rt_pmf").style.display = "";
+		new_array = new Array("<#PMF_Disabled#>");
+	}
+
+	for(var i in new_array){
+		var tmp;
+		if (new_array[i] == "<#PMF_Disabled#>")
+			tmp = 0;
+		else if (new_array[i] == "<#PMF_Capable#>")
+			tmp = 1;
+		else
+			tmp = 2;
+		document.form.rt_pmf[i] = new Option(new_array[i], tmp);
+		document.form.rt_pmf[i].value = tmp;
+		if(tmp == cur_pmf)
+			document.form.rt_pmf[i].selected = true;
+	}
 
 	for(var i = 0; i < document.form.rt_crypto.length; ++i)
 		if(document.form.rt_crypto[i].selected){
@@ -195,7 +225,7 @@ function rt_auth_mode_change(isload){
 			new_array = new Array("AES");
 		else
 			new_array = new Array("AES", "TKIP+AES");
-		
+
 		free_options(document.form.rt_crypto);
 		for(var i in new_array){
 			document.form.rt_crypto[i] = new Option(new_array[i], new_array[i].toLowerCase());
@@ -209,7 +239,7 @@ function rt_auth_mode_change(isload){
 			new_array = new Array("TKIP");
 		else
 			new_array = new Array("AES", "TKIP+AES");
-		
+
 		free_options(document.form.rt_crypto);
 		for(var i in new_array){
 			document.form.rt_crypto[i] = new Option(new_array[i], new_array[i].toLowerCase());
@@ -218,9 +248,9 @@ function rt_auth_mode_change(isload){
 				document.form.rt_crypto[i].selected = true;
 		}
 	}
-	else if(mode == "wpa2"){
+	else if(mode == "wpa2" || mode == "owe"){
 		new_array = new Array("AES");
-		
+
 		free_options(document.form.rt_crypto);
 		for(var i in new_array){
 			document.form.rt_crypto[i] = new Option(new_array[i], new_array[i].toLowerCase());
@@ -236,11 +266,11 @@ function rt_auth_mode_change(isload){
 			break;
 		}
 
-	if(mode == "psk" || mode == "wpa" || mode == "wpa2")
+	if(mode == "psk" || mode == "wpa" || mode == "wpa2" || mode == "owe")
 		new_array = new Array("2", "3");
 	else{
 		new_array = new Array("1", "2", "3", "4");
-		
+
 		if(!isload)
 			cur_key_index = "1";
 	}
@@ -281,7 +311,7 @@ function change_wep_type(mode){
 		}
 	}
 
-	if(mode == "psk" || mode == "wpa" || mode == "wpa2")
+	if(mode == "psk" || mode == "wpa" || mode == "wpa2" || mode == "owe")
 		document.form.rt_wep_x.value = "0";
 
 	change_wlweptype(document.form.rt_wep_x);
@@ -309,19 +339,20 @@ function rt_wep_change(){
 	var mode = document.form.rt_auth_mode.value;
 	var wep = document.form.rt_wep_x.value;
 
-	if(mode == "psk" || mode == "wpa" || mode == "wpa2"){
-		if(mode == "psk"){
+	if(mode == "psk" || mode == "wpa" || mode == "wpa2" || mode == "owe"){
+		if(mode == "psk" || mode == "owe")
 			$("rt_crypto").style.display = "";
+
+		if(mode == "psk")
 			$("rt_wpa_psk").style.display = "";
-		}
-		
+
 		$("all_wep_key").style.display = "none";
 		$("asus_wep_key").style.display = "none";
 	}
 	else{
 		$("rt_crypto").style.display = "none";
 		$("rt_wpa_psk").style.display = "none";
-		
+
 		if(wep == "0" || mode == "radius"){
 			$("all_wep_key").style.display = "none";
 			$("asus_wep_key").style.display = "none";
@@ -355,7 +386,7 @@ function change_auth_mode(auth_mode_obj){
 	rt_auth_mode_change(0);
 	if(auth_mode_obj.value == "psk" || auth_mode_obj.value == "wpa"){
 		var opts = document.form.rt_auth_mode.options;
-		
+
 		if(opts[opts.selectedIndex].text == "WPA-Personal")
 			document.form.rt_wpa_mode.value = "1";
 		else if(opts[opts.selectedIndex].text == "WPA2-Personal")
@@ -370,7 +401,9 @@ function change_auth_mode(auth_mode_obj){
 			document.form.rt_wpa_mode.value="3";
 		else if(opts[opts.selectedIndex].text == "WPA-Auto-Enterprise (Radius)")
 			document.form.rt_wpa_mode.value = "4";
-		
+		else if(opts[opts.selectedIndex].text == "Enhanced Open")
+			document.form.rt_wpa_mode.value="7";
+
 		if(auth_mode_obj.value == "psk"){
 			document.form.rt_wpa_psk.focus();
 			document.form.rt_wpa_psk.select();
@@ -466,10 +499,10 @@ function StopTheClock()
 function StartTheTimer(){
 	if(msecs == 0){
 		StopTheClock();
-		
+
 		if(stopFlag == 1)
 			return;
-		
+
 		msecs = timeout;
 		StartTheTimer();
 	}
@@ -668,6 +701,7 @@ window.onunload  = function(){
 		<option value="wpa" <% nvram_double_match_x("", "rt_auth_mode", "wpa", "", "rt_wpa_mode", "3", "selected"); %>>WPA-Enterprise (Radius)</option>
 		<option value="wpa2" <% nvram_match_x("", "rt_auth_mode", "wpa2", "selected"); %>>WPA2-Enterprise (Radius)</option>
 		<option value="wpa" <% nvram_double_match_x("", "rt_auth_mode", "wpa", "", "rt_wpa_mode", "4", "selected"); %>>WPA-Auto-Enterprise (Radius)</option>
+		<option value="owe" <% nvram_match_x("", "rt_auth_mode", "owe", "selected"); %>>Enhanced Open</option>
 		<option value="radius" <% nvram_match_x("","rt_auth_mode", "radius","selected"); %>>Radius with 802.1x</option>
 	  </select>
     </td>

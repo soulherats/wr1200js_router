@@ -152,6 +152,7 @@ function change_wireless_bridge(){
 	showhide_div("row_apc_1", is_apc);
 	showhide_div("row_apc_2", is_apc);
 	showhide_div("row_apc_3", is_apc);
+	showhide_div("row_apc_4", is_apc);
 }
 
 function change_wdsapply(){
@@ -169,11 +170,24 @@ function change_sta_auth_mode(mflag){
 	if(mode == "psk"){
 		inputCtrl(document.form.rt_sta_crypto, 1);
 		inputCtrl(document.form.rt_sta_wpa_psk, 1);
-		if(opts[opts.selectedIndex].text == "WPA2-Personal"){
+		if(opts[opts.selectedIndex].text == "WPA2-Personal" || opts[opts.selectedIndex].text == "WPA3-Personal"){
 			if (mflag == 1){
 				document.form.rt_sta_crypto.options[0].selected = 0;
 				document.form.rt_sta_crypto.options[1].selected = 1;
-				document.form.rt_sta_wpa_mode.value = "2";
+				document.form.rt_sta_wpa_mode.value = opts[opts.selectedIndex].text == "WPA2-Personal" ? "2" : "3";
+			}
+			document.form.rt_sta_crypto.options[1].style.display = "";
+			document.form.rt_sta_crypto.options[0].style.display = "none";
+			document.form.rt_sta_pmf.style.display = "";
+
+			// PMF display
+			if (opts[opts.selectedIndex].text == "WPA2-Personal") {
+				document.form.rt_sta_pmf.options[0].style.display = "";
+				document.form.rt_sta_pmf.options[1].style.display = "";
+			} else {
+				document.form.rt_sta_pmf.options[0].style.display = "none";
+				document.form.rt_sta_pmf.options[1].style.display = "none";
+				document.form.rt_sta_pmf.value = "2";
 			}
 		}else{
 			if (mflag == 1){
@@ -181,10 +195,16 @@ function change_sta_auth_mode(mflag){
 				document.form.rt_sta_crypto.options[0].selected = 1;
 				document.form.rt_sta_wpa_mode.value = "1";
 			}
+			document.form.rt_sta_crypto.options[0].style.display = "";
+			document.form.rt_sta_crypto.options[1].style.display = "none";
+			document.form.rt_sta_pmf.style.display = "none";
+			document.form.rt_sta_pmf.value = "0";
 		}
 	}else{
 		inputCtrl(document.form.rt_sta_crypto, 0);
 		inputCtrl(document.form.rt_sta_wpa_psk, 0);
+		document.form.rt_sta_pmf.style.display = "none";
+		document.form.rt_sta_pmf.value = "1";
 	}
 }
 
@@ -410,6 +430,7 @@ function hideClients_Block(){
                                                     <option value="open" <% nvram_match_x("", "rt_sta_auth_mode", "open", "selected"); %>>Open System</option>
                                                     <option value="psk" <% nvram_double_match_x("", "rt_sta_auth_mode", "psk", "", "rt_sta_wpa_mode", "1", "selected"); %>>WPA-Personal</option>
                                                     <option value="psk" <% nvram_double_match_x("", "rt_sta_auth_mode", "psk", "", "rt_sta_wpa_mode", "2", "selected"); %>>WPA2-Personal</option>
+                                                    <option value="psk" <% nvram_double_match_x("", "rt_sta_auth_mode", "psk", "", "rt_sta_wpa_mode", "3", "selected"); %>>WPA3-Personal</option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -429,6 +450,16 @@ function hideClients_Block(){
                                                     <input type="password" name="rt_sta_wpa_psk" id="rt_sta_wpa_psk" maxlength="64" size="32" value="" style="width: 175px;">
                                                     <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('rt_sta_wpa_psk')"><i class="icon-eye-close"></i></button>
                                                 </div>
+                                            </td>
+                                        </tr>
+                                        <tr id="row_apc_4" style="display:none;">
+                                            <th><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 27);"><#WLANConfig11b_PMFType_itemname#></a></th>
+                                            <td>
+						<select name="rt_sta_pmf" class="input" onchange="change_sta_auth_mode(0);">
+							<option value="0" <% nvram_match_x("", "rt_sta_pmf", "0", "selected"); %>><#PMF_Disabled#></option>
+							<option value="1" <% nvram_match_x("", "rt_sta_pmf", "1", "selected"); %>><#PMF_Capable#></option>
+							<option value="2" <% nvram_match_x("", "rt_sta_pmf", "2", "selected"); %>><#PMF_Mandatory#></option>
+						</select>
                                             </td>
                                         </tr>
                                     </table>
