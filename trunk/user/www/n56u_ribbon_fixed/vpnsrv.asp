@@ -78,6 +78,8 @@ function initial(){
 
 	change_vpns_enabled();
 
+	change_ipsec();
+
 	showTab(getHash());
 
 	load_body();
@@ -258,14 +260,31 @@ function change_vpns_enabled(){
 	}
 }
 
+function fix_option(obj, op){
+	for (var i = 0; i < obj.options.length; i++) {
+		if (i == obj.value) {
+			obj.options[i].style.display = "";
+		} else {
+			obj.options[i].style.display = (op == 1) ? "none" : "";
+		}
+	}
+}
+
 function change_ipsec(){
 	var mode = document.form.vpns_type.value;
 	var ipsec = document.form.vpns_ipsec.value;
-	if (mode == "1" && ipsec == "1") {
-		document.form.vpns_mppe.value=3;
+	var opts = document.form.vpns_ipsec.options;
+	if (opts[opts.selectedIndex].text == "L2TP/IPSEC") {
+		document.form.vpns_mppe.value = 3;
+		document.form.vpns_auth.value = 0;
+		fix_option(document.form.vpns_mppe, 1);
+		fix_option(document.form.vpns_auth, 1);
 	} else {
-		document.form.vpns_mppe.value=1;
+		document.form.vpns_mppe.value = 1;
+		fix_option(document.form.vpns_mppe, 0);
+		fix_option(document.form.vpns_auth, 0);
 	}
+
         showhide_div('row_IPSEC', (mode == "1" && ipsec == "1") ? 1 : 0);
         showhide_div('row_ipsec_psk', (mode == "1" && ipsec == "1") ? 1 : 0);
         showhide_div('row_vpns_ipsec_script', (mode == "1" && ipsec == "1") ? 1 : 0);

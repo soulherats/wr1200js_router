@@ -112,7 +112,7 @@ server=127.0.0.1#65353
 EOF
 		restart_dhcpd
 	fi
-	sh -c "chinadns-ng -g $gfwlist -d chn -t tcp://8.8.8.8,8.8.4.4 -c $dns --no-ipv6=gt &"
+	sh -c "chinadns-ng -g $gfwlist -d chn -t tcp://8.8.8.8 -c $dns --no-ipv6=tag:gfw &"
 }
 
 func_stop_ss_dns(){
