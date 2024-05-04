@@ -199,6 +199,7 @@ ifneq (,$(filter y,$(CONFIG_FIRMWARE_INCLUDE_NFSD) $(CONFIG_FIRMWARE_INCLUDE_NFS
 dir_y						+= rpcbind
 endif
 dir_y						+= optware
+dir_y						+= 6relayd
 dir_y						+= util-linux
 dir_$(FS_EXT_ENABLED)				+= e2fsprogs
 dir_$(FS_FAT_ENABLED)				+= dosfstools

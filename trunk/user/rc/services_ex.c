@@ -840,6 +840,31 @@ restart_upnp(void)
 	restart_firewall();
 }
 
+void stop_6relayd(void)
+{
+	char *svcs[] = { "6relayd", NULL };
+	kill_services(svcs, 3, 1);
+}
+
+int start_6relayd(void)
+{
+	char wan_ifname[16];
+
+	if (!nvram_get_int("ip6_lan_relay") || get_ap_mode())
+		return 1;
+
+	wan_ifname[0] = 0;
+	get_wan_ifname(wan_ifname);
+	return eval("/usr/sbin/6relayd", "-d", "-A", wan_ifname, "br0");
+}
+
+int
+restart_6relayd(void)
+{
+	stop_6relayd();
+	return start_6relayd();
+}
+
 ///////////////////////////////////////////////////////////////////////
 // inadyn
 ///////////////////////////////////////////////////////////////////////
