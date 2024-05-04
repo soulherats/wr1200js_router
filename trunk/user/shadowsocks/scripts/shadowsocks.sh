@@ -2,6 +2,7 @@
 
 ss_bin="ss-redir"
 ss_json_file="/tmp/ss-redir.json"
+dns_conf="/etc/china_dns.conf"
 ss_proc="/var/ss-redir"
 gfwlist="/etc/storage/gfwlist/gfwlist_domain.txt"
 
@@ -112,7 +113,17 @@ server=127.0.0.1#65353
 EOF
 		restart_dhcpd
 	fi
-	sh -c "chinadns-ng -g $gfwlist -d chn -t tcp://8.8.8.8 -c $dns --no-ipv6=tag:gfw &"
+cat > "$dns_conf" <<EOF
+gfwlist-file $gfwlist
+default-tag chn
+ipset-name4 ss_spec_dst_bp
+trust-dns 8.8.8.8,8.8.4.4
+china-dns $dns
+no-ipv6 tag:gfw
+hosts /etc/hosts
+
+EOF
+	sh -c "chinadns-ng -C $dns_conf &"
 }
 
 func_stop_ss_dns(){
