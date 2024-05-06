@@ -25,7 +25,6 @@ configure:
 clean:
 	rm -f config_done
 	rm -rf $(THISDIR)/install
-	rm -rf $(THISDIR)/$(SRC_NAME)
 
 romfs:
 	$(STRIP) $(THISDIR)/$(SRC_NAME)/bin/6relayd
