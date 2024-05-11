@@ -4,7 +4,7 @@ install:  install-shared-app
 MROOT		= /opt/rt-n56u/trunk/user/6relayd/6relayd/
 prefix		= /usr
 
-CROSS_TARGET	= 
+CROSS_TARGET	= mipsel-linux-
 CC		= /opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -mips32r2 -march=mips32r2 -mtune=1004kc
 CXX		= /opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-g++ -mips32r2 -march=mips32r2 -mtune=1004kc
 LD		= $(CROSS_TARGET)ld

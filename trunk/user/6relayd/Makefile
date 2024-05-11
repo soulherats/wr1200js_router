@@ -20,6 +20,8 @@ configure:
 	( cd $(SRC_NAME) ; \
 	PKG_CONFIG_PATH=$(STAGEDIR)/lib/pkgconfig \
 	./configure \
+		--host=$(HOST_TARGET) \
+                --build=$(HOST_BUILD) ; \
 	)
 
 clean:
