@@ -360,7 +360,6 @@
 			{"ip6_dns2", "", NULL, EVM_RESTART_IPV6},
 			{"ip6_dns3", "", NULL, EVM_RESTART_IPV6},
 			{"ip6_lan_auto", "", NULL, EVM_RESTART_IPV6},
-			{"ip6_lan_relay", "", NULL, EVM_RESTART_IPV6},
 			{"ip6_lan_addr", "", NULL, EVM_RESTART_IPV6},
 			{"ip6_lan_size", "", NULL, EVM_RESTART_IPV6},
 			{"ip6_lan_radv", "", NULL, EVM_RESTART_RADV},

@@ -350,7 +350,7 @@ void wan6_up(char *wan_ifname, int unit)
 
 	if (ipv6_type == IPV6_6IN4 || ipv6_type == IPV6_6TO4 || ipv6_type == IPV6_6RD) {
 		set_wan_unit_value(unit, "ifname6", IFNAME_SIT);
-
+		
 		wan_addr4 = get_wan_unit_value(unit, "ipaddr");
 		wan_gate4 = get_wan_unit_value(unit, "gateway");
 		wan_addr6 = get_wan_unit_value(unit, "addr6");
@@ -382,8 +382,7 @@ void wan6_up(char *wan_ifname, int unit)
 			control_if_ipv6_radv(wan_ifname, 1);
 			/* wait for interface ready */
 			sleep(2);
-			if (restart_6relayd())
-				start_dhcp6c(wan_ifname);
+			start_dhcp6c(wan_ifname);
 		}
 	}
 }
@@ -398,8 +397,6 @@ void wan6_down(char *wan_ifname, int unit)
 		return;
 
 	stop_dhcp6c();
-	stop_6relayd();
-
 	control_if_ipv6_radv(wan_ifname, 0);
 	control_if_ipv6_autoconf(wan_ifname, 0);
 
