@@ -9,7 +9,7 @@ all: download_test extract_test config_test
 	$(MAKE) -j$(HOST_NCPU) -C $(SRC_NAME)
 
 download_test:
-	( if [ ! -f $(SRC_NAME).tar.bz2 ]; then \
+	( if [ ! -f $(SRC_NAME).tar.gz ]; then \
 		wget -t5 --timeout=20 --no-check-certificate -O $(SRC_NAME).tar.gz $(SRC_URL); \
 	fi )
 
@@ -41,5 +41,5 @@ clean:
 	rm -f config_done
 
 romfs:
-	$(STRIP) $(THISDIR)/$(SRC_NAME)/bin/radvd
+	$(STRIP) $(THISDIR)/$(SRC_NAME)/radvd
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_NAME)/radvd /usr/bin/radvd

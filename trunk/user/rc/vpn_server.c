@@ -434,15 +434,21 @@ int
 ipup_vpns_main(int argc, char **argv)
 {
 	FILE *fp;
-	int i_cast, i_vuse;
+	int i_cast, i_vuse, prefix_len;
 	char *peer_name;
 	char *svcs[] = { "bcrelay", NULL };
 	const char *script_name = VPN_SERVER_UPDOWN_SCRIPT;
+#if defined (USE_IPV6)
+	char prefix[INET6_ADDRSTRLEN]= {0}, *remote=NULL;
+	char addr6s[INET6_ADDRSTRLEN] = {0};
+	struct in6_addr addr6;
+#endif
 
 	if (argc < 7)
 		return -1;
 
 	peer_name = safe_getenv("PEERNAME");
+	remote = safe_getenv("LLREMOTE");
 
 	logmessage(VPNS_LOG_NAME, "peer %s (%s) connected - ifname: %s, local IP: %s",
 			argv[6], peer_name, argv[1], argv[5]);
@@ -480,8 +486,20 @@ ipup_vpns_main(int argc, char **argv)
 			eval("/usr/sbin/bcrelay", "-d", "-i", "ppp[1-5][0-9]", "-o", IFNAME_BR, "-n");
 	}
 
+#if defined (USE_IPV6)
+	if (get_ipv6_type() != IPV6_DISABLED) {
+		if (get_ifaddr6(IFNAME_BR, 0, addr6s) || get_ifaddr6(nvram_safe_get("wan0_ifname_t"), 0, addr6s)
+				|| get_ifaddr6(IFNAME_SIT, 0, addr6s)) {
+			prefix_len = ipv6_from_string(addr6s, &addr6);
+			ipv6_to_net(&addr6, prefix_len);
+			if (prefix_len < 64) addr6.s6_addr16[3] |= htons(0x0001);
+			inet_ntop(AF_INET6, &addr6, prefix, INET6_ADDRSTRLEN);
+		}
+	}
+#endif
+
 	if (check_if_file_exist(script_name))
-		doSystem("%s %s %s %s %s %s", script_name, "up", argv[1], argv[5], argv[6], peer_name);
+		doSystem("%s %s %s %s %s %s %s %s", script_name, "up", argv[1], argv[5], argv[6], peer_name, remote, prefix);
 
 	return 0;
 }

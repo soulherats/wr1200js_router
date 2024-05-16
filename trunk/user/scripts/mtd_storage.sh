@@ -355,10 +355,16 @@ EOF
 ### \$3 - peer local IP address
 ### \$4 - peer remote IP address
 ### \$5 - peer name
+### \$6 - peer remote local ipv6 address
+### \$7 - ipv6 prefix
 
 peer_if="\$2"
 peer_ip="\$4"
 peer_name="\$5"
+peer_ip6="\$6"
+prefix="\$7"
+template=/etc/storage/dnsmasq/radvd.conf
+CONFDIR=/tmp/ppp/radvd
 
 ### example: add static route to private LAN subnet behind a remote peer
 
@@ -369,6 +375,27 @@ func_ipup()
 #  elif [ "\$peer_name" == "victoria" ] ; then
 #    route add -net 192.168.8.0 netmask 255.255.255.0 dev \$peer_if
 #  fi
+
+# ipv6up
+   ADDR=\$(echo \$peer_ip6 | cut -d : -f 3,4,5,6)
+   if test x\$ADDR == x ; then
+      logger -t "log" "Unable to generate IPv6 Address"
+      return 0
+   fi
+   ADDR=\${prefix%?}\$ADDR
+   if [ \$(nvram get wan0_proto) == "dhcp" ]; then
+       sysctl -w net.ipv6.conf.\$(nvram get wan0_ifname_t).proxy_ndp=1
+       ip -6 neigh add proxy \$ADDR dev \$(nvram get wan0_ifname_t)
+   fi
+   ip -6 route add \$ADDR/128 dev \$peer_if
+   ip6tables -A FORWARD -i \$peer_if -j ACCEPT
+
+   [ ! -d "\$CONFDIR" ] && mkdir \$CONFDIR
+   sed "s/peer_if/\$peer_if/g; s/peer_prefix/\$prefix/g; s/peer_ip6/\$peer_ip6/g" \$template > \$CONFDIR/\$peer_if
+   cat \$CONFDIR/ppp* > \$CONFDIR/radvd.conf
+   chmod 755 \$CONFDIR/radvd.conf
+   killall radvd
+   /usr/bin/radvd -C \$CONFDIR/radvd.conf -u nobody
    return 0
 }
 
@@ -379,6 +406,13 @@ func_ipdown()
 #  elif [ "\$peer_name" == "victoria" ] ; then
 #    route del -net 192.168.8.0 netmask 255.255.255.0 dev \$peer_if
 #  fi
+
+# ipv6 down
+if [ \$(nvram get wan0_proto) == "dhcp"; then
+    ip -6 neigh del proxy \$ADDR dev \$(nvram get wan0_ifname_t)
+fi
+   ip6tables -D FORWARD -i \$peer_if -j ACCEPT
+   rm /tmp/ppp/radvd/\$peer_if.conf
    return 0
 }
 
@@ -394,6 +428,7 @@ esac
 EOF
 		chmod 755 "$script_vpnsc"
 	fi
+
 
 	# create vpn client action script
 	if [ ! -f "$script_vpncs" ] ; then
@@ -457,7 +492,7 @@ EOF
 		chmod 755 "$script_ezbtn"
 	fi
 
-	# create user dnsmasq.conf
+	# cr/etc/storage/dnsmasq/radvd.conf dnsmasq.conf
 	[ ! -d "$dir_dnsmasq" ] && mkdir -p -m 755 "$dir_dnsmasq"
 	for i in dnsmasq.conf hosts ; do
 		[ -f "$dir_storage/$i" ] && mv -n "$dir_storage/$i" "$dir_dnsmasq"
@@ -525,6 +560,24 @@ EOF
 
 EOF
 		chmod 644 "$user_dhcp_conf"
+	fi
+
+	#create radvd
+	if [ ! -f "$dir_dnsmasq/radvd.conf" ]; then
+		cat > "$dir_dnsmasq/radvd.conf" <<EOF
+interface peer_if {
+AdvManagedFlag off;
+AdvOtherConfigFlag on;
+AdvSendAdvert on;
+MinRtrAdvInterval 5;
+MaxRtrAdvInterval 100;
+UnicastOnly on;
+AdvSourceLLAddress on;
+prefix peer_prefix/64 {};
+clients {peer_ip6;};
+};
+
+EOF
 	fi
 
 	# create user inadyn.conf"
@@ -649,6 +702,26 @@ EOF
 		if [ ! -f "$user_sswan_conf" ] ; then
 			cat > "$user_sswan_conf" <<EOF
 ### strongswan.conf - user strongswan configuration file
+config setup
+
+conn L2TP-PSK-NAT
+    rightsubnet=vhost:%priv
+    also=L2TP-PSK-noNAT
+
+conn L2TP-PSK-noNAT
+    authby=secret
+    auto=add
+    keyingtries=3
+    rekey=no
+    ikelifetime=8h
+    keylife=1h
+    type=transport
+    left=%any
+    leftprotoport=17/1701
+    right=%any
+    rightprotoport=17/%any
+    ike=3des-aes256-sha1-modp2048!
+    esp=3des-sha1,aes256-sha1!
 
 EOF
 			chmod 644 "$user_sswan_conf"
