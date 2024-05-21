@@ -492,7 +492,7 @@ EOF
 		chmod 755 "$script_ezbtn"
 	fi
 
-	# cr/etc/storage/dnsmasq/radvd.conf dnsmasq.conf
+	# create /etc/storage/dnsmasq/radvd.conf dnsmasq.conf
 	[ ! -d "$dir_dnsmasq" ] && mkdir -p -m 755 "$dir_dnsmasq"
 	for i in dnsmasq.conf hosts ; do
 		[ -f "$dir_storage/$i" ] && mv -n "$dir_storage/$i" "$dir_dnsmasq"
@@ -702,6 +702,13 @@ EOF
 		if [ ! -f "$user_sswan_conf" ] ; then
 			cat > "$user_sswan_conf" <<EOF
 ### strongswan.conf - user strongswan configuration file
+
+EOF
+			chmod 644 "$user_sswan_conf"
+		fi
+		if [ ! -f "$user_sswan_ipsec_conf" ] ; then
+			cat > "$user_sswan_ipsec_conf" <<EOF
+### ipsec.conf - user strongswan IPsec configuration file
 config setup
 
 conn L2TP-PSK-NAT
@@ -722,13 +729,6 @@ conn L2TP-PSK-noNAT
     rightprotoport=17/%any
     ike=3des-aes256-sha1-modp2048!
     esp=3des-sha1,aes256-sha1!
-
-EOF
-			chmod 644 "$user_sswan_conf"
-		fi
-		if [ ! -f "$user_sswan_ipsec_conf" ] ; then
-			cat > "$user_sswan_ipsec_conf" <<EOF
-### ipsec.conf - user strongswan IPsec configuration file
 
 EOF
 			chmod 644 "$user_sswan_ipsec_conf"
