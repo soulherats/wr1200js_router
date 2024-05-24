@@ -125,11 +125,9 @@ hosts /etc/hosts
 
 EOF
 	sh -c "chinadns-ng -C $dns_conf &"
-	iptables -t mangle -A OUTPUT -d $ss_dns -j MARK --set-mark 0x64
 }
 
 func_stop_ss_dns(){
-	iptables -t mangle -D OUTPUT -d $ss_dns -j MARK --set-mark 0x64
 	sed -i '/Chinadns/,+4d' /etc/storage/dnsmasq/dnsmasq.conf
 	killall -q chinadns-ng
 	restart_dhcpd
@@ -146,8 +144,8 @@ func_start(){
 	func_gen_ss_json && \
 	func_start_ss_redir && \
 	func_start_ss_rules && \
-	restart_firewall && \
 	func_start_ss_dns && \
+	restart_firewall && \
 	loger $ss_bin "start done" || { ss-rules -f && func_stop && loger $ss_bin "start fail!";}
 }
 
