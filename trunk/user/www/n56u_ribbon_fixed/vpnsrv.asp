@@ -1241,7 +1241,7 @@ function getHash(){
                                     <td>
                                         <input type="text" size="14" class="span12" autocomplete="off" maxlength="32" name="vpns_pass_x_0" onkeypress="return is_string(this,event);" />
                                     </td>
-                                    <td>
+                                    <td style="padding-right:inherit;">
                                         <span id="vpnip3"></span>
                                         <input type="text" size="2" maxlength="3" style="width: 25px;" name="vpns_addr_x_0" value="<% nvram_get_x("", "vpns_addr_x_0"); %>" onkeypress="return is_number(this,event);" />
                                     </td>

@@ -1,9 +1,5 @@
 body{
-    background: url("../img/bg/wood.jpg") scroll center top transparent;
-    background-color: #282828;
-    overflow-y: scroll;
-    z-index:-1;
-    background-size: cover;
+    background-image: radial-gradient(#667eeaa8, #764ba2);
 }
 body.body_iframe{
     background-color: rgba(34, 34, 34, 0);
@@ -25,16 +21,17 @@ body.body_iframe{
     color:#ffffff;
     margin-bottom: 1px;
 }
+
 .wrapper {
-    width: 1020px;
+    width: 960px;
     margin: 0 auto;
 }
 
-#logo {  
+#logo {
     background-image: url("../img/asus_logo.png");
     width: 150px;
     height: 71px;
-    margin-top: 30px;
+    margin-top: 40px;
     z-index:1;/* 置于上层 */
 }
 #logo:hover {
