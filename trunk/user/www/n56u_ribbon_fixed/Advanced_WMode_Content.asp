@@ -44,7 +44,7 @@ function initial(){
 	showLANIPList();
 
 	change_wireless_bridge();
-	change_sta_auth_mode(0);
+	change_sta_auth_mode(1);
 
 	document.form.wl_channel.value = document.form.wl_channel_org.value;
 	document.form.wl_sta_ssid.value = decodeURIComponent(document.form.wl_sta_ssid_org.value);
@@ -157,6 +157,15 @@ function change_wdsapply(){
 function change_sta_auth_mode(mflag){
 	var mode = document.form.wl_sta_auth_mode.value;
 	var opts = document.form.wl_sta_auth_mode.options;
+	var copts = document.form.wl_sta_crypto.options;
+	var m = document.form.wl_mode_x.value;
+
+        for(var i = 0; i < document.form.wl_sta_pmf.length; ++i)
+                if(document.form.wl_sta_pmf[i].selected){
+                        cur_pmf = document.form.wl_sta_pmf[i].value;
+                        break;
+                }
+
 	if(mode == "psk"){
 		inputCtrl(document.form.wl_sta_crypto, 1);
 		inputCtrl(document.form.wl_sta_wpa_psk, 1);
@@ -166,22 +175,42 @@ function change_sta_auth_mode(mflag){
 				document.form.wl_sta_crypto.options[1].selected = 1;
 				document.form.wl_sta_wpa_mode.value = "2";
 			}
-			document.form.wl_sta_pmf.style.display = "";
 		}else{
 			if (mflag == 1){
 				document.form.wl_sta_crypto.options[1].selected = 0;
 				document.form.wl_sta_crypto.options[0].selected = 1;
 				document.form.wl_sta_wpa_mode.value = "1";
 			}
-			document.form.wl_sta_pmf.style.display = "none";
-			document.form.wl_sta_pmf.value = "0";
 		}
 	}else{
 		inputCtrl(document.form.wl_sta_crypto, 0);
 		inputCtrl(document.form.wl_sta_wpa_psk, 0);
-		document.form.wl_sta_pmf.style.display = "none";
-		document.form.wl_sta_pmf.value = "0";
 	}
+
+	if (m == "3" || m == "4")
+		showhide_div("row_apc_4", 1);
+
+	free_options(document.form.wl_sta_pmf);
+        if (opts[opts.selectedIndex].text == "WPA2-Personal" && copts[copts.selectedIndex].text == "AES")
+                new_array = new Array("<#PMF_Disabled#>","<#PMF_Capable#>","<#PMF_Mandatory#>");
+        else {
+                new_array = new Array("<#PMF_Disabled#>");
+		showhide_div("row_apc_4", 0);
+        }
+
+        for(var i in new_array){
+                var tmp;
+                if (new_array[i] == "<#PMF_Disabled#>")
+                        tmp = 0;
+                else if (new_array[i] == "<#PMF_Capable#>")
+                        tmp = 1;
+                else
+                        tmp = 2;
+                document.form.wl_sta_pmf[i] = new Option(new_array[i], tmp);
+                document.form.wl_sta_pmf[i].value = tmp;
+                if(tmp == cur_pmf)
+                        document.form.wl_sta_pmf[i].selected = true;
+        }
 }
 
 function click_auto_seek(o) {
@@ -402,7 +431,7 @@ function hideClients_Block(){
                                         <tr id="row_apc_1" style="display:none;">
                                             <th><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this, 0, 5);"><#WLANConfig11b_AuthenticationMethod_itemname#></a></th>
                                             <td>
-                                                <select name="wl_sta_auth_mode" class="input" onChange="change_sta_auth_mode(1);">
+                                                <select name="wl_sta_auth_mode" class="input" onChange="change_sta_auth_mode(0);">
                                                     <option value="open" <% nvram_match_x("", "wl_sta_auth_mode", "open", "selected"); %>>Open System</option>
                                                     <option value="psk" <% nvram_double_match_x("", "wl_sta_auth_mode", "psk", "", "wl_sta_wpa_mode", "1", "selected"); %>>WPA-Personal</option>
                                                     <option value="psk" <% nvram_double_match_x("", "wl_sta_auth_mode", "psk", "", "wl_sta_wpa_mode", "2", "selected"); %>>WPA2-Personal</option>

@@ -28,7 +28,7 @@ function initial(){
 }
 </script>
 </head>
-<body onload="initial()">
+<body onload="initial()" style="background-image: none;background-color: #625ba8;">
     <div style="margin-top: 50px;">
         <center>
             <div class="well" style="max-width: 600px;">
