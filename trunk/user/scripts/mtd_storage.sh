@@ -323,6 +323,10 @@ EOF
 ### \$2 - WAN interface name (e.g. eth3 or ppp0)
 ### \$3 - WAN IPv4 address
 
+if [ \$1 = "up" ]; then
+
+fi
+
 EOF
 		chmod 755 "$script_postw"
 	fi
@@ -710,6 +714,7 @@ EOF
 			cat > "$user_sswan_ipsec_conf" <<EOF
 ### ipsec.conf - user strongswan IPsec configuration file
 config setup
+    charondebug=dmn 0, mgr 0, ike -1, chd 0, job 0, cfg 0, knl 0, net 0, asn 0, enc 0, lib 0, esp 0, tls 0, tnc 0, imc 0, imv 0, pts 0
 
 conn L2TP-PSK-NAT
     rightsubnet=vhost:%priv

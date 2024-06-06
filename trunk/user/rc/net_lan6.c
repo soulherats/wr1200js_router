@@ -123,7 +123,7 @@ int get_lan_dhcp6s_prefix_size(void)
 
 int store_lan_addr6(char *lan_addr6_new)
 {
-	char *lan_addr6_old;
+	char *lan_addr6_old, *ipaddr;
 
 	if (!lan_addr6_new)
 		return 0;
@@ -134,6 +134,8 @@ int store_lan_addr6(char *lan_addr6_new)
 	lan_addr6_old = nvram_safe_get("lan_addr6");
 	if (strcmp(lan_addr6_new, lan_addr6_old) != 0) {
 		nvram_set_temp("lan_addr6", lan_addr6_new);
+		ipaddr  = nvram_safe_get("lan_ipaddr");
+		update_hosts_router(ipaddr);
 		return 1;
 	}
 
