@@ -12,7 +12,6 @@
 <link rel="stylesheet" type="text/css" href="/bootstrap/css/main.css">
 
 <script type="text/javascript" src="/jquery.js"></script>
-<script type="text/javascript" src="/bootstrap/js/jquery.xdomainajax.js"></script>
 <script type="text/javascript" src="/bootstrap/js/jquery.maskedinput-1.3.min.js"></script>
 <script type="text/javascript" src="/state.js"></script>
 <script type="text/javascript" src="/general.js"></script>
@@ -78,17 +77,16 @@ function getVendors()
 
         if(company == null)
         {
-            // this ajax request with hack from xdomainajax.js
             $j.ajax({
-                url: 'http://www.macvendorlookup.com/api/v2/'+hw_addr+'/json',
+                url: 'https://api.maclookup.app/v2/macs/'+hw_addr+'?format=jsonp',
                 type: 'GET',
+		dataType: "jsonp",
                 success: function(response){
                     try{
-                        var vendorObj = JSON.parse($j(response.responseText).text())[0];
-                        $j(value).parents('tr').find('td.vendor').html(vendorObj.company);
+                        $j(value).parents('tr').find('td.vendor').html(response.company);
 
                         // add new vendor for saving to localStorage
-                        allMacs[hw_addr] = vendorObj.company;
+                        allMacs[hw_addr] = response.company;
 
                         // save vendor to localStorage
                         setToLocalStorage('hw_addr', JSON.stringify(allMacs));
