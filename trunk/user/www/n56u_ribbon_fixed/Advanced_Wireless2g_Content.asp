@@ -279,6 +279,7 @@ function validate_wlphrase(s, v, obj){
     <input type="hidden" name="rt_radio_time2_x" value="<% nvram_get_x("","rt_radio_time2_x"); %>">
     <input type="hidden" name="rt_ssid2" value="<% nvram_char_to_ascii("",  "rt_ssid"); %>">
     <input type="hidden" name="rt_wpa_mode" value="<% nvram_get_x("","rt_wpa_mode"); %>">
+    <input type="hidden" name="rt_pmf" value="<% nvram_get_x("","rt_pmf"); %>">
     <input type="hidden" name="rt_wpa_psk_org" value="<% nvram_char_to_ascii("", "rt_wpa_psk"); %>">
     <input type="hidden" name="rt_key1_org" value="<% nvram_char_to_ascii("", "rt_key1"); %>">
     <input type="hidden" name="rt_key2_org" value="<% nvram_char_to_ascii("", "rt_key2"); %>">

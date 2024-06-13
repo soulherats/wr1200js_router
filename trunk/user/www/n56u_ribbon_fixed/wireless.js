@@ -32,9 +32,9 @@ function nmode_limitation() {
             alert("<#WLANConfig11n_nmode_limition_hint#>");
             document.form.wl_auth_mode.selectedIndex = 6;
         }
-        else if (document.form.wl_auth_mode.selectedIndex == 7 && (document.form.wl_crypto.selectedIndex == 0 || document.form.wl_crypto.selectedIndex == 2)) {
+        else if ((document.form.wl_auth_mode.selectedIndex == 7 || document.form.wl_auth_mode.selectedIndex == 4)  && document.form.wl_crypto.selectedIndex == 1) {
             alert("<#WLANConfig11n_nmode_limition_hint#>");
-            document.form.wl_crypto.selectedIndex = 1;
+            document.form.wl_crypto.selectedIndex = 0;
         }
         wl_auth_mode_change(0);
     }
@@ -676,6 +676,11 @@ function wl_auth_mode_change(isload) {
             if (algos[i].toLowerCase() == cur)
                 document.form.wl_crypto[i].selected = true;
         }
+
+	if (opts[opts.selectedIndex].text == "WPA2-Personal" && document.form.wl_crypto[0].selected == true)
+		document.form.wl_pmf.value = 1;
+	else
+		document.form.wl_pmf.value = 0;
     }
     else if (mode == "wpa") {
         for (var i = 0; i < document.form.wl_crypto.length; i++) {
@@ -699,6 +704,7 @@ function wl_auth_mode_change(isload) {
             if (algos[i].toLowerCase() == cur)
                 document.form.wl_crypto[i].selected = true;
         }
+	document.form.wl_pmf.value = 0;
     }
     else if (mode == "wpa2") {
         for (var i = 0; i < document.form.wl_crypto.length; i++) {
@@ -718,7 +724,9 @@ function wl_auth_mode_change(isload) {
             if (algos[i].toLowerCase() == cur)
                 document.form.wl_crypto[i].selected = true;
         }
-    }
+	document.form.wl_pmf.value = 1;
+    } else
+	document.form.wl_pmf.value = 0;
 
     change_wep_type(mode, isload);
 

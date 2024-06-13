@@ -384,7 +384,7 @@ function change_key_des(){
 
 function change_auth_mode(auth_mode_obj){
 	rt_auth_mode_change(0);
-	if(auth_mode_obj.value == "psk" || auth_mode_obj.value == "wpa"){
+	if(auth_mode_obj.value == "psk" || auth_mode_obj.value == "wpa" || auth_mode_obj.value == "owe"){
 		var opts = document.form.rt_auth_mode.options;
 
 		if(opts[opts.selectedIndex].text == "WPA-Personal")

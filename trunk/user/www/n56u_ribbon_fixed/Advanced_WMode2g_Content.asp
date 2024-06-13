@@ -184,6 +184,7 @@ function change_sta_auth_mode(){
 	if(mode == "psk"){
 		inputCtrl(document.form.rt_sta_crypto, 1);
 		inputCtrl(document.form.rt_sta_wpa_psk, 1);
+		document.form.rt_sta_wpa_mode.value = opts.selectedIndex;
 		if(opts[opts.selectedIndex].text == "WPA-Personal" || opts[opts.selectedIndex].text == "WPA2-Personal")
 			new_array = new Array("AES", "TKIP");
 		else {
