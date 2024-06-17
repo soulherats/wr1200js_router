@@ -1331,6 +1331,10 @@ handle_notifications(void)
 			reapply_vpn_server();
 		}
 #endif
+		else if (strcmp(entry->d_name, RCN_RESTART_DDNSTO) == 0)
+		{
+			restart_ddnsto();
+		}
 		else if (strcmp(entry->d_name, RCN_RESTART_LLTD) == 0)
 		{
 			restart_lltd();

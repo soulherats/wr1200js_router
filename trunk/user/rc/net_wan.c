@@ -1390,6 +1390,9 @@ wan_down(char *wan_ifname, int unit, int is_static)
 
 	notify_pause_detect_internet();
 
+	/* stop ddnsto */
+	stop_ddnsto();
+
 	/* deferred stop static VPN client (prevent rebuild resolv.conf) */
 	nvram_set_temp("vpnc_dns_t", "");
 	if (!is_static)

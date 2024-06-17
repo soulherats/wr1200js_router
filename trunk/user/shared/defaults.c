@@ -589,6 +589,10 @@ struct nvram_pair router_defaults[] = {
 	{ "ss_update_gfwlist", "0" },
 #endif
 
+	/* DDNSTO */
+	{ "ddnsto_enable", "0" },
+	{ "ddnsto_token", "" },
+
 	/* DHCP server parameters */
 	{ "dhcp_start", DEF_LAN_DHCP_BEG },	/* First assignable DHCP address */
 	{ "dhcp_end", DEF_LAN_DHCP_END },	/* Last assignable DHCP address */

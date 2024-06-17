@@ -871,6 +871,12 @@
 	};
 #endif
 
+	struct variable variables_ddnsto[] = {
+			{"ddnsto_enable","",NULL, EVM_RESTART_DDNSTO},
+			{"ddnsto_token","",NULL, EVM_RESTART_DDNSTO},
+			{0,0,0,0}
+	};
+
 	struct variable variables_WLANConfig11b[] = {
 			{"rt_ssid", "", NULL, EVM_RESTART_WIFI2},
 			{"rt_ssid2", "", NULL, EVM_RESTART_WIFI2},
@@ -993,6 +999,7 @@
 #if defined(APP_SHADOWSOCKS)
 		{"ShadowsocksConf",		variables_ShadowsocksConf},
 #endif
+		{"DDNSTO",			variables_ddnsto},
 		{"LANGUAGE",			variables_Language},
 		{0,0}
 	};
@@ -1079,6 +1086,7 @@
 #if defined(APP_SMBD) || defined(APP_NMBD)
 		{EVM_RESTART_NMBD,		EVT_RESTART_NMBD,		RCN_RESTART_NMBD,	0},
 #endif
+		{EVM_RESTART_DDNSTO,		EVT_RESTART_DDNSTO,		RCN_RESTART_DDNSTO,  0},
 		{EVM_RESTART_FIREWALL,		EVT_RESTART_FIREWALL,		RCN_RESTART_FIREWALL,	0},
 		{0,0,0,0}
 	};

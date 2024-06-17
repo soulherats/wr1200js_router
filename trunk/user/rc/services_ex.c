@@ -1127,6 +1127,7 @@ notify_ddns_update(void)
 		return doSystem("killall %s %s", "-SIGHUP", "inadyn");
 	}
 
+	restart_ddnsto();
 	return start_ddns(0);
 }
 

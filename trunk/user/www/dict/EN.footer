@@ -886,6 +886,7 @@ menu5_3_3=IPv6 Protocol
 menu5_3_4=Port Forwarding
 menu5_3_5=DMZ
 menu5_3_6=DDNS
+menu5_3_6=DDNSTO
 menu5_4_1=Network Neighborhood Share
 menu5_4_2=FTP Share
 menu5_4_3=Common Setting

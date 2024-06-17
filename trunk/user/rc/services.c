@@ -399,6 +399,28 @@ void start_napt66(void){
 #endif
 
 void
+start_ddnsto(void)
+{
+	int ddnsto_mode = nvram_get_int("ddnsto_enable");
+	char *token = nvram_get("ddnsto_token");
+	if (ddnsto_mode == 1) {
+		eval("/usr/bin/ddnsto", "-u", token, "-d");
+	}
+}
+
+void
+stop_ddnsto(void)
+{
+	char* svcs[] = { "ddnsto", NULL };
+	kill_services(svcs, 3, 1);
+}
+
+void restart_ddnsto(void){
+	stop_ddnsto();
+	start_ddnsto();
+}
+
+void
 start_httpd(int restart_fw)
 {
 	int http_proto, argv_index, http_port, restart_fw_need;
