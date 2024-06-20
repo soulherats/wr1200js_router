@@ -1395,7 +1395,7 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 #endif
 
 	//Wsc
-	fprintf(fp, "WscConfMode=%d\n", 0);
+	fprintf(fp, "WscConfMode=%d\n", nvram_wlan_get_int(is_aband, "WPS"));
 	fprintf(fp, "WscConfStatus=%d\n", 2);
 	fprintf(fp, "WscVendorPinCode=%s\n", nvram_safe_get("secret_code"));
 	fprintf(fp, "WscManufacturer=%s\n", BOARD_VENDOR_NAME);

@@ -204,6 +204,7 @@ struct nvram_pair router_defaults[] = {
 #else
 	{ "wl_HT_BW", "1" },
 #endif
+	{ "wl_WPS", "0" },
 	{ "wl_txbf", "1" },
 	{ "wl_ssid2",  DEF_WLAN_5G_SSID },
 	{ "wl_mode_x", "0" },
@@ -287,6 +288,7 @@ struct nvram_pair router_defaults[] = {
 	{ "rt_mrate", "2" },
 	{ "rt_mode", "ap" },
 	{ "rt_HT_BW", "1" },
+	{ "rt_WPS", "0" },
 	{ "rt_HT_EXTCHA", "1" },
 	{ "rt_HT_OpMode", "0" },
 	{ "rt_wme", "1" },

@@ -2075,6 +2075,20 @@ ej_detect_internet_hook(int eid, webs_t wp, int argc, char **argv)
 }
 
 static int
+wps_action_hook(int eid, webs_t wp, int argc, char **argv)
+{
+	int sys_result;
+	sys_result = doSystem("/bin/iwpriv %s set WscMode=2", IFNAME_5G_MAIN);
+	if (sys_result != 0)
+		goto exit;
+	sys_result = doSystem("/bin/iwpriv %s set WscGetConf=1", IFNAME_5G_MAIN);
+
+exit:
+	websWrite(wp, "{\"status\": \"%d\"}", sys_result);
+	return 0;
+}
+
+static int
 wol_action_hook(int eid, webs_t wp, int argc, char **argv) 
 {
 	int i, sys_result;
@@ -4101,6 +4115,7 @@ struct ej_handler ej_handlers[] =
 	{ "lanlink", lanlink_hook},
 	{ "wan_action", wan_action_hook},
 	{ "wol_action", wol_action_hook},
+	{ "wps_action", wps_action_hook},
 	{ "nf_values", nf_values_hook},
 	{ "get_parameter", ej_get_parameter},
 	{ "get_nvram_list", ej_get_nvram_list},

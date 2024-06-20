@@ -24,8 +24,9 @@
 var $j = jQuery.noConflict();
 
 $j(document).ready(function() {
-	init_itoggle('wl_radio_x');
-	init_itoggle('wl_closed');
+	init_itoggle('wl_radio_x', wl_wps_change);
+	init_itoggle('wl_closed', wl_wps_change);
+	init_itoggle('wl_WPS', wl_wps_change);
 });
 
 </script>
@@ -132,6 +133,46 @@ function domore_create(){
 		$("Router_domore").remove(6);
 		$("Router_domore").remove(5);
 		$("Router_domore").options[4].value="../Advanced_APLAN_Content.asp";
+	}
+}
+
+function wps_pbc(){
+	var $button = $j('#btn_connect');
+	$button.button('loading');
+	$j.getJSON('/wps_action.asp',function(response){
+		if(response.status == 0) {
+			$button.data('complete-text','Success')
+			       .removeClass('btn-info')
+			       .addClass('btn-success');
+		} else {
+			$button.data('complete-text','Error')
+			       .removeClass('btn-success')
+			       .addClass('btn-info');
+		}
+		$button.button('complete');
+
+                var idTimeOut = setTimeout(function(){
+                    clearTimeout(idTimeOut);
+                    $button.button('reset');
+		    $button.removeClass('btn-success')
+			   .removeClass('btn-info')
+			   .addClass('btn-success');
+                }, 1500);
+	})
+}
+
+function wl_wps_change(){
+	var mode = document.form.wl_auth_mode.value;
+	var wl_close = document.form.wl_closed.value;
+	var wl_radio = document.form.wl_radio_x.value;
+
+	if( wl_radio == 1 && (mode == "open" || mode == "psk") && wl_close == 0) {
+		$("wl_WPS").style.display = "";
+		$("wps_button").style.display = (document.form.wl_WPS.value == 0) ? "none" : "";
+	} else {
+		$j("label.itoggle")[2].click();
+		$("wl_WPS").style.display = "none";
+		$("wps_button").style.display = "none";
 	}
 }
 
@@ -242,6 +283,7 @@ function wl_auth_mode_change(isload){
 			document.form.wl_key[i].selected = true;
 	}
 
+	wl_wps_change();
 	wl_wep_change();
 }
 
@@ -346,7 +388,7 @@ function change_auth_mode(auth_mode_obj){
 	wl_auth_mode_change(0);
 	if(auth_mode_obj.value == "psk" || auth_mode_obj.value == "wpa"){
 		var opts = document.form.wl_auth_mode.options;
-		
+
 		if(opts[opts.selectedIndex].text == "WPA-Personal")
 			document.form.wl_wpa_mode.value = "1";
 		else if(opts[opts.selectedIndex].text == "WPA2-Personal")
@@ -357,11 +399,12 @@ function change_auth_mode(auth_mode_obj){
 			document.form.wl_wpa_mode.value="3";
 		else if(opts[opts.selectedIndex].text == "WPA-Auto-Enterprise (Radius)")
 			document.form.wl_wpa_mode.value = "4";
-		
+
 		if(auth_mode_obj.value == "psk"){
 			document.form.wl_wpa_psk.focus();
 			document.form.wl_wpa_psk.select();
 		}
+
 	}
 	else if(auth_mode_obj.value == "shared"){
 		show_key();
@@ -644,6 +687,20 @@ window.onunload  = function(){
         </div>
     </td>
     </tr>
+   <tr id='wl_WPS'>
+      <th width="110"><#WLANConfig11b_x_WPS_itemname#></th>
+      <td>
+        <div class="main_itoggle">
+            <div id="wl_WPS_on_of">
+                <input type="checkbox" id="wl_WPS_fake" <% nvram_match_x("", "wl_WPS", "7", "value=7 checked"); %><% nvram_match_x("", "wl_WPS", "0", "value=0"); %>>
+            </div>
+        </div>
+        <div style="position: absolute; margin-left: -10000px;">
+            <input type="radio" name="wl_WPS" id="wl_WPS_1" value="7" <% nvram_match_x("", "wl_WPS", "7", "checked"); %>/><#checkbox_Yes#>
+            <input type="radio" name="wl_WPS" id="wl_WPS_0" value="0" <% nvram_match_x("", "wl_WPS", "0", "checked"); %>/><#checkbox_No#>
+        </div>
+      </td>
+  </tr>
     <tr>
     <th width="110"><#WLANConfig11b_AuthenticationMethod_itemname#></th>
     <td>
@@ -729,6 +786,13 @@ window.onunload  = function(){
   </tr>
  </table>
  <table class="table">
+  <tr id="wps_button">
+    <th width="50%"><#WPSControl#></th>
+    <td>
+      <input type="button" id="btn_connect" class="btn btn-success" data-loading-text="WPS" value="<#WPS_Trigger#>" onclick="wps_pbc()" />
+    </td>
+  </tr>
+  <tr>
     <th width="50%"><#LAN_IP#></th>
     <td id="LANIP"></td>
   </tr>
@@ -736,7 +800,7 @@ window.onunload  = function(){
     <th><#MAC_Address#></th>
     <td id="MAC"></td>
   </tr>
-  <tr>
+ <tr>
     <th>&nbsp;</th>
     <td>
         <select id="Router_domore" class="domore" onchange="domore_link(this);">
