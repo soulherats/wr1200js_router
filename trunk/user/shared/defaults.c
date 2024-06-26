@@ -589,6 +589,8 @@ struct nvram_pair router_defaults[] = {
 	{ "ss_watchcat", "1" },
 	{ "ss_update_chnroute", "0" },
 	{ "ss_update_gfwlist", "0" },
+
+	{ "ss_link", ""},
 #endif
 
 	/* DDNSTO */

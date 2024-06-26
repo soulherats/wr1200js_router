@@ -111,7 +111,8 @@ struct ej_handler {
 };
 
 extern struct ej_handler ej_handlers[];
-
+//ss.c
+extern int ej_decode_link(int eid, webs_t wp, int argc, char **argv);
 // aidisk.c
 #if defined (USE_USB_SUPPORT)
 extern int ej_get_usb_ports_info(int eid, webs_t wp, int argc, char **argv);

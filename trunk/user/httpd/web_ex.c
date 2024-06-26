@@ -2088,6 +2088,23 @@ exit:
 	return 0;
 }
 
+int
+ej_decode_link(int eid, webs_t wp, int argc, char **argv)
+{
+	int sys_result;
+	char ch;
+	sys_result = doSystem("/usr/bin/decode %s", nvram_safe_get("ss_link"));
+	websWrite(wp, "link_list=");
+	if (!sys_result) {
+		FILE* file = fopen("/tmp/ss_link", "r");
+		if (file == NULL) return -1;
+		 while((ch = fgetc(file)) != EOF) {
+			websWrite(wp, "%c", ch);
+		}
+	}
+	return 0;
+}
+
 static int
 wol_action_hook(int eid, webs_t wp, int argc, char **argv) 
 {
@@ -4116,6 +4133,7 @@ struct ej_handler ej_handlers[] =
 	{ "wan_action", wan_action_hook},
 	{ "wol_action", wol_action_hook},
 	{ "wps_action", wps_action_hook},
+	{ "ss_link_list", ej_decode_link},
 	{ "nf_values", nf_values_hook},
 	{ "get_parameter", ej_get_parameter},
 	{ "get_nvram_list", ej_get_nvram_list},
