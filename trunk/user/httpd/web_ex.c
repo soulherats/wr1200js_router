@@ -2093,7 +2093,7 @@ ej_decode_link(int eid, webs_t wp, int argc, char **argv)
 {
 	int sys_result;
 	char ch;
-	sys_result = doSystem("/usr/bin/decode %s", nvram_safe_get("ss_link"));
+	sys_result = doSystem("/usr/bin/decode \"%s\"", nvram_safe_get("ss_link"));
 	websWrite(wp, "link_list=");
 	if (!sys_result) {
 		FILE* file = fopen("/tmp/ss_link", "r");
@@ -2101,6 +2101,7 @@ ej_decode_link(int eid, webs_t wp, int argc, char **argv)
 		 while((ch = fgetc(file)) != EOF) {
 			websWrite(wp, "%c", ch);
 		}
+		fclose(file);
 	}
 	return 0;
 }

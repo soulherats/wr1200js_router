@@ -141,7 +141,7 @@ int base64_decode(const char *in, uint8_t *out, uint16_t *out_len)
 {
     uint16_t i = 0, cnt = 0;
     uint8_t c, in_data_cnt;
-    int error_msg = 1;
+    int error_msg = 0;
     uint32_t tmp = 0;
 
     if ((!in) || (!out) || (!out_len)) {
@@ -153,6 +153,7 @@ int base64_decode(const char *in, uint8_t *out, uint16_t *out_len)
     while (in[i] != '\0') {
         c = get_index_from_char(in[i++]);
         if (c == 255) {
+	    *out_len = i - 1;
             return BASE64_ERR_BASE64_BAD_MSG;
         } else if (c == 254) {
             continue;           // Carriage return or newline feed, skip
@@ -190,7 +191,6 @@ int base64_decode(const char *in, uint8_t *out, uint16_t *out_len)
 
 size_t print_ss(char *str, char *name, char *proto, char* decode_data) {
 	uint16_t j = 0, len, total = 0; //计数器
-	char tmp[50] = {0};
 	char seps[] = ":@/?&", *token = NULL, *context = NULL, *data = decode_data;
 
 	data += sprintf(data,"[\"%s\",", proto);
@@ -201,13 +201,19 @@ size_t print_ss(char *str, char *name, char *proto, char* decode_data) {
 			if (token[strlen(token) - 1] == '=') flag = 1;
 			for(ptr = strtok(token, &sep); ptr != NULL; ptr = strtok( NULL, &sep)) {
 				if (j % 2) {
-					base64_decode(ptr, tmp, &len);
-					tmp[len] = '\0';
+					base64_decode(ptr, ptr, &len);
+					ptr[len] = '\0';
 					//if (j == 5) data += sprintf(data, "password:");
-					data += sprintf(data,"\"%s\"", tmp);
+					data += sprintf(data,"\"%s\"", ptr);
 					if (j != 13) data += sprintf(data,",");
 				} else {
 					j++;
+					//没有混淆参数 plain
+					if (j == 7 && strcmp(ptr, "obfsparam")) {
+						//data += sprintf(data, "\"obfsparam\":");
+						data += sprintf(data,"\"\",");
+						j = 9;
+					}
 					//data += sprintf(data,"\"%s\":", ptr);
 				}
 			}
@@ -222,24 +228,36 @@ size_t print_ss(char *str, char *name, char *proto, char* decode_data) {
 }
 
 size_t ParseProtocol(char *str, char* out_buff) {
-	char proto[6] = {0}, data[400] = {0}, name[20] = {0};
+	char proto[6] = {0}, name[64] = {0}, *ptr = str, ch;
+	char tmp[512];
 	uint16_t len = 0;
-	sscanf(str, "%[^:]://%[^#]#%s", proto, data, name);
-	if (data[0] == '\0') return 1; //丢弃非链接
+	sscanf(str, "%[^:]://%[^#]#%s", proto, str, name);
+	if (strcmp(proto,"ssr") && strcmp(proto,"ss"))  return 0; //丢弃非链接
 
-	base64_decode(data, str, &len);
-	str[len] = '\0';
+	if (base64_decode(str, tmp, &len)) {
+		ptr += len;
+		ch = str[len];
+		str[len] = '\0';
+		base64_decode(str, str, &len);
+		*ptr = ch;
+		memcpy(str + len, ptr, strlen(ptr) + 1);
+	} else {
+		base64_decode(str, str, &len);
+		str[len] = '\0';
+	}
 
 	return print_ss(str, name, proto, out_buff);
 }
 
-void ParseData(char* data) {
-	char line[512], *ptr = data, *ptw = data; /*ptw for write*/
-	while (sscanf(ptr, "%s", line) == 1) {
-		for (ptr += strlen(line); *ptr && *ptr != '\n' && *ptr != '\r'; ptr++) {};
-		if (ptw == data) sprintf(ptw++,"[");
-		ptw += ParseProtocol(line, ptw);
-		if (*(ptr+1)) sprintf(ptw++,",");
+void ParseData(char* data, char* decode) {
+	char buffer[512], *ptr = data, *ptw = decode; /*ptw for write*/
+	size_t len = 0;
+	sprintf(ptw++,"[");
+	while (sscanf(ptr, "%s", buffer) == 1) {
+		if (ptr != data) sprintf(ptw++,",");
+		for (ptr += strlen(buffer); *ptr && *ptr != '\n' && *ptr != '\r'; ptr++) {};
+		ptw += ParseProtocol(buffer, ptw);
+		if (ptw - 2 == decode) *(--ptw) = '\0';
 	}
 	sprintf(ptw,"]\n");
 }
@@ -259,9 +277,9 @@ int main(int argc, char *argv[])
 
 	if (!http_get_upgrade_file(&data, argv[1])) {
 		decoded_data = (char*)malloc(strlen(data));
-		base64_decode(data, decoded_data, &decoded_length);
-		decoded_data[decoded_length] = '\0';
-		ParseData(decoded_data);
+		base64_decode(data, data, &decoded_length);
+		data[decoded_length] = '\0';
+		ParseData(data, decoded_data);
 	}
 
 	fp = fopen("/tmp/ss_link", "wb");

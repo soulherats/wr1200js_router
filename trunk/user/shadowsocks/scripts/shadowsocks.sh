@@ -5,7 +5,7 @@ ss_json_file="/tmp/ss-redir.json"
 dns_conf="/etc/china_dns.conf"
 ss_proc="/var/ss-redir"
 gfwlist="/etc/storage/gfwlist/gfwlist_domain.txt"
-ss_dns="8.8.8.8,8.8.4.4"
+ss_dns="tcp://8.8.8.8,tcp://8.8.4.4"
 
 #/usr/bin/ss-redir -> /var/ss-redir -> /usr/bin/ss-orig-redir or /usr/bin/ssr-redir
 

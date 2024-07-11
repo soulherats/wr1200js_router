@@ -389,7 +389,6 @@ func_ipup()
        ip -6 neigh add proxy \$ADDR dev \$(nvram get wan0_ifname_t)
    fi
    ip -6 route add \$ADDR/128 dev \$peer_if
-   ip6tables -A FORWARD -i \$peer_if -j ACCEPT
 
    [ ! -d "\$CONFDIR" ] && mkdir \$CONFDIR
    sed "s/peer_if/\$peer_if/g; s/peer_prefix/\$prefix/g; s/peer_ip6/\$peer_ip6/g" \$template > \$CONFDIR/\$peer_if
@@ -412,7 +411,6 @@ func_ipdown()
 if [ \$(nvram get wan0_proto) == "dhcp"; then
     ip -6 neigh del proxy \$ADDR dev \$(nvram get wan0_ifname_t)
 fi
-   ip6tables -D FORWARD -i \$peer_if -j ACCEPT
    rm /tmp/ppp/radvd/\$peer_if.conf
    return 0
 }

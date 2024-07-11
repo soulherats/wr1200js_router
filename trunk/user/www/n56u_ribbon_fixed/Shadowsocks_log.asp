@@ -20,13 +20,78 @@
 <script type="text/javascript" src="/itoggle.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
 <script type="text/javascript" src="/help.js"></script>
+<style>
+.load {
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    height: 432px; /* 设置容器高度 */
+}
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  color: #6d51a4;
+  background: radial-gradient(farthest-side, currentColor calc(100% - 6px),#0000 calc(100% - 5px) 0);
+  -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 13px),#000 calc(100% - 12px));
+  border-radius: 50%;
+  animation: l19 2s infinite linear;
+}
+.loader::before,
+.loader::after {    
+  content: "";
+  grid-area: 1/1;
+  background:
+    linear-gradient(currentColor 0 0) center,
+    linear-gradient(currentColor 0 0) center;
+  background-size: 100% 10px,10px 100%;
+  background-repeat: no-repeat;
+}
+.loader::after {
+   transform: rotate(45deg);
+}
 
+@keyframes l19 { 
+  100%{transform: rotate(1turn)}
+}
+</style>
 <script>
 var $j = jQuery.noConflict();
+var url = "/ss_link.asp";
+
+function get_sslink(){
+	$j.ajax({
+		url: url,
+		dataType: 'script',
+		cache: true,
+		error: function(xhr){
+			;
+		},
+		success: function(response){
+			$j('.load').remove();
+			for(var i in link_list){
+				var t_body = '';
+				var proto, name, hostname, port;
+				proto = link_list[i][0];
+				if (proto == "ss") {
+					name = decodeURIComponent(link_list[i][5]);
+					hostname = link_list[i][3];
+					port = link_list[i][4];
+				}
+				t_body += '<tr>\n';
+				t_body += '  <td>'+proto+'</td>\n';
+				t_body += '  <td>'+name+'</td>\n';
+				t_body += '  <td>'+hostname+'</td>\n';
+				t_body += '  <td>'+port+'</td>\n';
+				t_body += '</tr>\n';
+				$j('#ss_table').append(t_body);
+			}
+		}
+	});
+}
 
 $j(document).ready(function(){
-	var textArea = E('textarea');
-	textArea.scrollTop = textArea.scrollHeight;
+	get_sslink();
 });
 
 function initial(){
@@ -84,18 +149,18 @@ function initial(){
                             <div class="round_bottom">
                                 <div class="row-fluid">
                                     <div id="tabMenu" class="submenuBlock"></div>
-                                    <table width="100%" cellpadding="4" cellspacing="0" class="table">
-                                        <tr>
-                                            <td colspan="3" style="border-top: 0 none; padding-bottom: 0px;">
-                                            <textarea rows="21" class="span12" style="height:377px; font-family:'Courier New', Courier, mono; font-size:13px;" readonly="readonly" wrap="off" id="textarea"><% nvram_dump("ss-watchcat.log",""); %></textarea>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td width="15%" style="text-align: left; padding-bottom: 0px;">
-                                            <input type="button" onClick="location.href=location.href" value="<#CTL_refresh#>" class="btn btn-primary" style="width: 219px">
-                                            </td>
-                                        </tr>
+                                    <table width="100%" cellpadding="4" cellspacing="0" class="table" id="ss_table">
+				    <tr> <th colspan="4" style="background-color: rgba(171, 168, 167,0.2);"><#menu5_16_32#></th> </tr>
+				    <tr>
+                                            <th width="10%"><#ss_proto#></th>
+					    <th width="30%"><#ss_name#></th>
+                                            <th width="50%"><#ss_server#></th>
+					    <th width="10%"><#ss_port#></th>
+				    </tr>
                                     </table>
+				    <div class="load">
+					<div class="loader"></div>
+				    </div>
                                 </div>
                             </div>
                         </div>

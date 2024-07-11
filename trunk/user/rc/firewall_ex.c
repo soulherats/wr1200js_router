@@ -1523,9 +1523,9 @@ ip6t_filter_rules(char *man_if, char *wan_if, char *lan_if,
 			if (i_vpns_type == 1) {
 				fprintf(fp, "-A %s -p udp --dport %d -j %s\n", dtype, 1701, logaccept);
 				if (nvram_get_int("vpns_ipsec")) {
-                                        fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 500, logaccept);
-                                        fprintf(fp, "-A %s -p %s --dport %d -j %s\n", dtype, "udp", 4500, logaccept);
+                                        fprintf(fp, "-A %s -p udp -m multiport --dport %d,%d -j %s\n", dtype, 500, 4500, logaccept);
                                         fprintf(fp, "-A %s -p %s -j %s\n", dtype, "esp", logaccept);
+					fprintf(fp, "-A %s -i ppp1+ -p tcp -m multiport --dport %d,%d -j %s\n", dtype, 22, 80, logaccept);
                                 }
 			} else {
 				fprintf(fp, "-A %s -p tcp --dport %d -j %s\n", dtype, 1723, logaccept);
@@ -1605,7 +1605,12 @@ ip6t_filter_rules(char *man_if, char *wan_if, char *lan_if,
 		/* Jump to IPv6 pinhole (IGDv2 IP6FC or PCP) */
 		if (nvram_invmatch("upnp_enable_x", "0"))
 			fprintf(fp, "-A %s -j %s\n", dtype, MINIUPNPD_CHAIN_IP6_FORWARD);
-		
+
+		/* IPV6 VPN FORWARD */
+		if (nvram_match("vpns_enable", "1") && nvram_match("vpns_type", "1") && nvram_match("vpns_ipsec", "1")) {
+			fprintf(fp, "-A %s -i ppp1+ -j %s\n", dtype, "ACCEPT");
+		}
+
 		/* Drop all (only for log) */
 		if (is_logdrop)
 			fprintf(fp, "-A %s -j %s\n", dtype, logdrop);
