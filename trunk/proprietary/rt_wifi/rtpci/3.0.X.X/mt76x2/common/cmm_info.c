@@ -3103,6 +3103,34 @@ VOID RTMPIoctlGetRadioStatsCount(
 }
 #endif
 
+VOID RTMPIoctlGetOUI(
+        IN      PRTMP_ADAPTER   pAdapter,
+        IN      RTMP_IOCTL_INPUT_STRUCT *wrq)
+{
+        INT i;
+        PSTRING msg;
+        UCHAR *ptr;
+        os_alloc_mem(NULL, (PUCHAR *)&msg, 1024);
+	NdisZeroMemory(msg, 1024);
+
+        for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++) {
+                PMAC_TABLE_ENTRY pEntry = &pAdapter->MacTab.Content[i];
+                if ((IS_ENTRY_CLIENT(pEntry) || (IS_ENTRY_APCLI(pEntry)
+#ifdef MAC_REPEATER_SUPPORT
+                        && (pEntry->bReptCli == FALSE)
+#endif /* MAC_REPEATER_SUPPORT */
+                        ))
+                        && (pEntry->Sst == SST_ASSOC))
+                {
+                        ptr = (UCHAR *)&pEntry->Oui;
+                        sprintf(msg + strlen(msg), "\n%02X:%02X:%02X:%02X:%02X:%02X %02X:%02X:%02X", PRINT_MAC(pEntry->Addr), ptr[0], ptr[1], ptr[2]);
+                }
+        }
+	wrq->u.data.length = strlen(msg);
+        copy_to_user(wrq->u.data.pointer, msg, wrq->u.data.length);
+        os_free_mem(NULL, (PUCHAR)msg);
+}
+
 #if defined (AP_SCAN_SUPPORT) || defined (CONFIG_STA_SUPPORT)
 VOID RTMPIoctlGetSiteSurvey(
 	IN	PRTMP_ADAPTER	pAdapter, 
@@ -3308,7 +3336,7 @@ VOID RTMPIoctlGetSiteSurvey(
 	copy_to_user(wrq->u.data.pointer, msg, wrq->u.data.length);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("RTMPIoctlGetSiteSurvey - wrq->u.data.length = %d\n", wrq->u.data.length));
-	os_free_mem(NULL, (PUCHAR)msg);	
+	os_free_mem(NULL, (PUCHAR)msg);
 }
 #endif
 

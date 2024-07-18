@@ -2049,6 +2049,9 @@ LabelOK:
 	if (StatusCode != MLME_SUCCESS)
 		CFG80211_ApStaDelSendEvent(pAd, pEntry->Addr);
 #endif /* RT_CFG80211_P2P_SUPPORT */
+
+	NdisCopyMemory(&pEntry->Oui, &ie_list->OUIIe, 3);
+
 	if (ie_list != NULL)
 		os_free_mem(NULL, ie_list);
 

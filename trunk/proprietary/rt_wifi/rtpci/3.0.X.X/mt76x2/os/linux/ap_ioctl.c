@@ -38,8 +38,11 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1536, 0,
   "set"},  
 { RTPRIV_IOCTL_SHOW,
-  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
+  IW_PRIV_TYPE_CHAR | 1024, 0,
   "show"},
+{ RTPRIV_IOCTL_OUI,
+  0, IW_PRIV_TYPE_CHAR | 1024,
+  "oui"},
 { RTPRIV_IOCTL_GSITESURVEY,
 #ifdef AIRPLAY_SUPPORT
   IW_PRIV_TYPE_CHAR | 1024 ,
@@ -416,6 +419,10 @@ INT rt28xx_ap_ioctl(struct net_device *net_dev, struct ifreq *rq, int cmd)
 			break;
 #endif /* RTMP_RF_RW_SUPPORT */
 #endif /* defined(DBG) ||(defined(BB_SOC)&&defined(RALINK_ATE)) */
+
+		case RTPRIV_IOCTL_OUI:
+			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_OUI, 0, NULL, 0);
+			break;
 
 		default:
 /*			DBGPRINT(RT_DEBUG_ERROR, ("IOCTL::unknown IOCTL's cmd = 0x%08x\n", cmd)); */

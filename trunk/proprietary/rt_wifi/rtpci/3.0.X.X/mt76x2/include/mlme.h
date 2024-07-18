@@ -1370,6 +1370,7 @@ typedef struct _IE_lists {
 #endif /* WSC_AP_SUPPORT */
 	ULONG RalinkIe;
 	ULONG MediatekIe;
+	ULONG OUIIe;
 	EXT_CAP_INFO_ELEMENT ExtCapInfo;
 #ifdef DOT11R_FT_SUPPORT
 	FT_INFO FtInfo;

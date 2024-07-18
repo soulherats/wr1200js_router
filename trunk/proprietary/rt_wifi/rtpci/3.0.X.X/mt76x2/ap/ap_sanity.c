@@ -391,7 +391,7 @@ BOOLEAN PeerAssocReqCmmSanity(
 		
 						DBGPRINT(RT_DEBUG_OFF, ("!!!!!!not found OSEN IE,%x:%x:%x:%x\n", *tmp, *(tmp+1), *(tmp+2), *(tmp+3)));
 						CLIENT_STATUS_CLEAR_FLAG(pEntry, fCLIENT_STATUS_OSEN_CAPABLE);
-                    break;                          
+                    break;
                 }
 					else
 					{
@@ -399,11 +399,13 @@ BOOLEAN PeerAssocReqCmmSanity(
 						DBGPRINT(RT_DEBUG_OFF, ("!!!!!!found OSEN IE\n"));
 					}
 #else
-					break;							
-#endif          
-                                             
+		if (!ie_lists->OUIIe) {
+			NdisCopyMemory(&ie_lists->OUIIe, eid_ptr->Octet, 3); 
+		}
+					break;
+#endif
                 }
-                
+
                 if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len >= MIN_LEN_OF_RSNIE))
                 {
 					hex_dump("Received RSNIE in Assoc-Req", (UCHAR *)eid_ptr, eid_ptr->Len + 2);

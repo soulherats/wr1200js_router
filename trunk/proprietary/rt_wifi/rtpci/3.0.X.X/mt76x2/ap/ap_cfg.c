@@ -15278,6 +15278,10 @@ INT RTMP_AP_IoctlHandle(
 			break;
 #endif /* AP_SCAN_SUPPORT */
 
+		case CMD_RTPRIV_IOCTL_OUI:
+			RTMPIoctlGetOUI(pAd,wrq);
+			break;
+
 		case CMD_RTPRIV_IOCTL_STATISTICS:
 			RTMPIoctlStatistics(pAd, wrq);
 			break;

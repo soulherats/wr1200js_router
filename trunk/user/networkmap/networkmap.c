@@ -641,7 +641,23 @@ nmap_receive_arp(void)
 					lookup_dhcp_list(&src_addr, item);
 					lookup_static_dhcp_list(&src_addr, item);
 				}
-				
+
+				if (!item->device_name[0]) {
+					FILE *fp;
+					char buff[30], mac[18], oui[9];
+					fp = popen("/bin/iwpriv rai0 oui", "r");
+					if (fp) {
+						while (fgets(buff, sizeof(buff), fp)) {
+							if (sscanf(buff, "%s %s", mac, oui) != 2)
+								continue;
+							if (!strcmp(oui, "00:17:F2")) {
+								strcpy(item->device_name, "iphone");
+								break;
+							}
+						}
+						pclose(fp);
+					}
+				}
 				need_update_file |= 1;
 			}
 			

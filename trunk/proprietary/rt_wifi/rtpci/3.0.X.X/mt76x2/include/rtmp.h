@@ -3378,6 +3378,7 @@ typedef struct _MAC_TABLE_ENTRY {
 	ULONG OneSecTxBytes;
     ULONG OneSecRxBytes;
     UINT32 RxDecryptErrCnt;
+	ULONG Oui;
 #endif /* CONFIG_AP_SUPPORT */
 
 #if defined(DOT11Z_TDLS_SUPPORT) || defined(CFG_TDLS_SUPPORT)
@@ -10283,6 +10284,10 @@ VOID RTMPIoctlGetSiteSurvey(
 	IN	RTMP_ADAPTER *pAd, 
 	IN	RTMP_IOCTL_INPUT_STRUCT *wrq);
 #endif
+
+VOID RTMPIoctlGetOUI(
+	IN	RTMP_ADAPTER *pAd, 
+	IN	RTMP_IOCTL_INPUT_STRUCT *wrq);
 
 #ifdef CUSTOMER_DCC_FEATURE
 VOID RTMPIoctlGetApTable(
