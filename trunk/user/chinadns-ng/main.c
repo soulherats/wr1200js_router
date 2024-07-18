@@ -196,10 +196,10 @@ size_t print_ss(char *str, char *name, char *proto, char* decode_data) {
 	data += sprintf(data,"[\"%s\",", proto);
 	for(token = strtok_r(str, seps, &context); token != NULL; token = strtok_r( NULL, seps, &context), j++) {
 		if (j >= 5) {
-			char *ptr = NULL, sep = '=' , *ret;
+			char *ptr = NULL, sep[] = "=" , *ret, *rd = NULL;
 			int flag = 0;
 			if (token[strlen(token) - 1] == '=') flag = 1;
-			for(ptr = strtok(token, &sep); ptr != NULL; ptr = strtok( NULL, &sep)) {
+			for(ptr = strtok_r(token, sep, &rd); ptr != NULL; ptr = strtok_r( NULL, sep, &rd)) {
 				if (j % 2) {
 					base64_decode(ptr, ptr, &len);
 					ptr[len] = '\0';
@@ -262,13 +262,12 @@ void ParseData(char* data, char* decode) {
 	sprintf(ptw,"]\n");
 }
 
-
 int main(int argc, char *argv[])
 {
 	FILE *fp = NULL;
 	char *data = NULL;
-	char *decoded_data = NULL;
-	uint16_t decoded_length = 0;
+	char *tmp_data = NULL;
+	uint16_t tmp_length = 0;
 
 	if (argc < 2) {
 		printf("Usage: %s [URL]\n", argv[0]);
@@ -276,19 +275,20 @@ int main(int argc, char *argv[])
 	}
 
 	if (!http_get_upgrade_file(&data, argv[1])) {
-		decoded_data = (char*)malloc(strlen(data));
-		base64_decode(data, data, &decoded_length);
-		data[decoded_length] = '\0';
-		ParseData(data, decoded_data);
+		tmp_data = (char*)malloc(strlen(data));
+		base64_decode(data, tmp_data, &tmp_length);
+		tmp_data[tmp_length] = '\0';
+		memset(data, 0, strlen(data));
+		ParseData(tmp_data, data);
 	}
 
 	fp = fopen("/tmp/ss_link", "wb");
 	if (fp) {
-		fprintf(fp, "%s", decoded_data);
+		fprintf(fp, "%s", data);
 		fclose(fp);
 	}
 
 	if (data) free(data);  // 释放动态分配的内存
-	if (decoded_data) free(decoded_data);
+	if (tmp_data) free(tmp_data);
 	return 0;
 }

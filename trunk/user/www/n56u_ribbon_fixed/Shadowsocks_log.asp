@@ -77,10 +77,14 @@ function get_sslink(){
 					name = decodeURIComponent(link_list[i][5]);
 					hostname = link_list[i][3];
 					port = link_list[i][4];
+				} else if (proto == "ssr") {
+					name = link_list[i][9];
+					hostname = link_list[i][1];
+					port = link_list[i][2];
 				}
 				t_body += '<tr>\n';
 				t_body += '  <td>'+proto+'</td>\n';
-				t_body += '  <td>'+name+'</td>\n';
+				t_body += '  <td>🔗'+name+'</td>\n';
 				t_body += '  <td>'+hostname+'</td>\n';
 				t_body += '  <td>'+port+'</td>\n';
 				t_body += '</tr>\n';
@@ -153,8 +157,8 @@ function initial(){
 				    <tr> <th colspan="4" style="background-color: rgba(171, 168, 167,0.2);"><#menu5_16_32#></th> </tr>
 				    <tr>
                                             <th width="10%"><#ss_proto#></th>
-					    <th width="30%"><#ss_name#></th>
-                                            <th width="50%"><#ss_server#></th>
+					    <th width="45%"><#ss_name#></th>
+                                            <th width="35%"><#ss_server#></th>
 					    <th width="10%"><#ss_port#></th>
 				    </tr>
                                     </table>

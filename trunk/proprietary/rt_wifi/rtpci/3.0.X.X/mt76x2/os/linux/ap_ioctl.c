@@ -38,7 +38,7 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1536, 0,
   "set"},  
 { RTPRIV_IOCTL_SHOW,
-  IW_PRIV_TYPE_CHAR | 1024, 0,
+  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "show"},
 { RTPRIV_IOCTL_GSITESURVEY,
 #ifdef AIRPLAY_SUPPORT
