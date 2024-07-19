@@ -196,7 +196,7 @@ is_sshd_run(void)
 		if (pids("sshd"))
 			return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -401,11 +401,24 @@ void start_napt66(void){
 void
 start_ddnsto(void)
 {
-	int ddnsto_mode = nvram_get_int("ddnsto_enable");
-	char *token = nvram_get("ddnsto_token");
-	if (ddnsto_mode == 1) {
-		eval("/usr/bin/ddnsto", "-u", token, "-d");
-	}
+	char *ddnsto_argv[] = {
+		"/usr/bin/ddnsto",
+		"-u", NULL,
+		NULL, NULL,
+		NULL, NULL
+	};
+        int ddnsto_mode = nvram_get_int("ddnsto_enable"), argv_index = 2, idx = 1;
+        char *token = nvram_get("ddnsto_token");
+        char key[40], idx_s[5];
+	char *ptr;
+        if (ddnsto_mode && sscanf(token, "%s -x %d", key, &idx)) {
+		ddnsto_argv[argv_index++] = key;
+		sprintf(idx_s, "%d", idx);
+		ddnsto_argv[argv_index++] = "-x";
+		ddnsto_argv[argv_index++] = idx_s;
+		ddnsto_argv[argv_index++] = "-d";
+		_eval(ddnsto_argv, NULL, 0, NULL);
+        }
 }
 
 void
