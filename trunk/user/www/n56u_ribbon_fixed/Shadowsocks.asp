@@ -202,7 +202,7 @@ function fill_ss_status(status_code){
 
                                         <tr> <th width="50%"><#menu5_16_5#></th>
                                             <td>
-                                                <input type="password" maxlength="32" class="input" size="32" name="ss_key" id="ss_key" value="<% nvram_get_x("","ss_key"); %>" />
+                                                <input type="password" maxlength="38" class="input" size="32" name="ss_key" id="ss_key" value="<% nvram_get_x("","ss_key"); %>" />
                                                 <button style="margin-left: -5px;" class="btn" type="button" onclick="passwordShowHide('ss_key')"><i class="icon-eye-close"></i></button>
                                             </td>
                                         </tr>	
