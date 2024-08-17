@@ -200,6 +200,7 @@ dir_y						+= rpcbind
 endif
 dir_y						+= optware
 dir_y						+= radvd
+dir_y						+= opengnb
 dir_y						+= util-linux
 dir_$(FS_EXT_ENABLED)				+= e2fsprogs
 dir_$(FS_FAT_ENABLED)				+= dosfstools
