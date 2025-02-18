@@ -401,22 +401,24 @@ void start_napt66(void){
 void
 start_ddnsto(void)
 {
+	if (!nvram_get_int("ddnsto_enable")) return;
 	char *ddnsto_argv[] = {
 		"/usr/bin/ddnsto",
 		"-u", NULL,
 		NULL, NULL,
 		NULL, NULL
 	};
-        int ddnsto_mode = nvram_get_int("ddnsto_enable"), argv_index = 2, idx = 1;
+        int argv_index = 2, idx = 1, convert;
         char *token = nvram_get("ddnsto_token");
         char key[40], idx_s[5];
 	char *ptr;
-        if (ddnsto_mode && sscanf(token, "%s -x %d", key, &idx)) {
+        if (convert = sscanf(token, "%s -x %d", key, &idx)) {
 		ddnsto_argv[argv_index++] = key;
-		sprintf(idx_s, "%d", idx);
-		ddnsto_argv[argv_index++] = "-x";
-		ddnsto_argv[argv_index++] = idx_s;
-		ddnsto_argv[argv_index++] = "-d";
+		if (convert == 2) {
+			sprintf(idx_s, "%d", idx);
+			ddnsto_argv[argv_index++] = "-x";
+			ddnsto_argv[argv_index++] = idx_s;
+		}
 		_eval(ddnsto_argv, NULL, 0, NULL);
         }
 }
@@ -426,6 +428,7 @@ stop_ddnsto(void)
 {
 	char* svcs[] = { "ddnsto", NULL };
 	kill_services(svcs, 3, 1);
+	doSystem("killall %s", svcs[0]);
 }
 
 void restart_ddnsto(void){
@@ -639,10 +642,6 @@ start_services_once(int is_ap_mode)
 #endif
 #if defined(APP_DNSFORWARDER)
 	start_dnsforwarder();
-#endif
-#if defined(APP_SHADOWSOCKS)
-	start_ss();
-	start_ss_tunnel();
 #endif
 #if defined(APP_TTYD)
 	start_ttyd();

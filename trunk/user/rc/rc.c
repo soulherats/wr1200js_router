@@ -221,6 +221,12 @@ load_ipset_modules(void)
 #endif
 
 static void
+load_cryptok_modules(void)
+{
+	module_smart_load("crypto_k", NULL);
+}
+
+static void
 set_timezone(void)
 {
 	time_zone_x_mapping();
@@ -883,6 +889,7 @@ init_router(void)
 #if defined (USE_MTK_AES)
 	load_crypto_modules();
 #endif
+	load_cryptok_modules();
 #if defined (USE_IPSET)
 	load_ipset_modules();
 #endif
@@ -1334,6 +1341,11 @@ handle_notifications(void)
 		else if (strcmp(entry->d_name, RCN_RESTART_DDNSTO) == 0)
 		{
 			restart_ddnsto();
+		}
+		else if (strcmp(entry->d_name, RCN_RESTART_NDPPD) == 0)
+		{
+			char *ifname = NULL;
+			restart_ndppd(ifname);
 		}
 		else if (strcmp(entry->d_name, RCN_RESTART_LLTD) == 0)
 		{

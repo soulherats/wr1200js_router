@@ -944,7 +944,7 @@ validate_asp_apply(webs_t wp, int sid)
 		
 		nvram_set(v->name, value);
 		nvram_modified = 1;
-		
+
 		if (!strcmp(v->name, "http_username"))
 			user_changed = 1;
 		
@@ -2092,22 +2092,24 @@ int
 ej_decode_link(int eid, webs_t wp, int argc, char **argv)
 {
 	int sys_result;
-	char ch;
+	char ss_file[] = "/tmp/ss_link";
+	if (!get_login_safe()) goto exit;
 	sys_result = doSystem("/usr/bin/decode \"%s\"", nvram_safe_get("ss_link"));
-	websWrite(wp, "link_list=");
-	if (!sys_result) {
-		FILE* file = fopen("/tmp/ss_link", "r");
-		if (file == NULL) return -1;
-		 while((ch = fgetc(file)) != EOF) {
-			websWrite(wp, "%c", ch);
+	if (!sys_result && f_exists(ss_file)) {
+		FILE* fp = fopen(ss_file, "r");
+		char buf[MAX_FILE_LINE_SIZE];
+		if (fp == NULL) return -1;
+		while (fgets(buf, sizeof(buf), fp)!=NULL){
+			fputs(buf, wp);
 		}
-		fclose(file);
+		fclose(fp);
 	}
+exit:
 	return 0;
 }
 
 static int
-wol_action_hook(int eid, webs_t wp, int argc, char **argv) 
+wol_action_hook(int eid, webs_t wp, int argc, char **argv)
 {
 	int i, sys_result;
 	char *dst_mac, *p1, *p2, *pd;

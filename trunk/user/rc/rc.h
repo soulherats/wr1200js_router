@@ -38,6 +38,7 @@
 
 #define DNS_RESOLV_CONF			"/etc/resolv.conf"
 #define DNS_SERVERS_FILE		"/tmp/dnsmasq.servers"
+#define EXTRA_DNSMASQCONF		"/etc/dnsmasq/dnsmasq_ex.conf"
 #define DNS_RELAY_QUERIES_MAX		512
 
 #define SCRIPT_UDHCPC_LAN		"/tmp/udhcpc_lan.script"
@@ -516,6 +517,9 @@ void stop_misc(void);
 void stop_ss(void);
 void start_ss(void);
 void restart_ss(void);
+void stop_ddnsto(void);
+void start_ddnsto(void);
+void restart_ddnsto(void);
 #if defined(APP_SCUT)
 int is_scutclient_run(void);
 void stop_scutclient(void);
@@ -584,6 +588,9 @@ char *get_ddns_fqdn(void);
 void manual_ddns_hostname_check(void);
 int restart_dhcpd(void);
 int restart_dns(void);
+int start_ndppd(char *ifname);
+int restart_ndppd(char *ifname);
+int stop_ndppd(void);
 
 #if defined (USE_STORAGE)
 /* services_stor.c */

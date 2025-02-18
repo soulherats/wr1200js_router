@@ -293,7 +293,7 @@ int
 start_dns_dhcpd(int is_ap_mode)
 {
 	FILE *fp;
-	int i_verbose, i_dhcp_enable, is_dhcp_used, is_dns_used;
+	int i_verbose, i_dhcp_enable, is_dhcp_used, i_ss_enable, is_dns_used;
 	char dhcp_start[32], dhcp_end[32], dns_all[64], dnsv6[40];
 	char *ipaddr, *netmask, *gw, *dns1, *dns2, *dns3, *wins, *domain, *dns6;
 	const char *storage_dir = "/etc/storage/dnsmasq";
@@ -305,6 +305,8 @@ start_dns_dhcpd(int is_ap_mode)
 	netmask = nvram_safe_get("lan_netmask");
 	domain  = nvram_safe_get("lan_domain");
 
+	i_ss_enable = nvram_get_int("ss_enable");
+
 	/* touch dnsmasq.leases if not exist */
 	create_file(DHCPD_LEASE_FILE);
 
@@ -314,9 +316,10 @@ start_dns_dhcpd(int is_ap_mode)
 	if (!is_ap_mode) {
 		/* create /etc/hosts (run after fill_static_ethers!) */
 		update_hosts_router(ipaddr);
-		
+
 		/* touch resolv.conf if not exist */
 		create_file(DNS_RESOLV_CONF);
+
 	}
 
 	/* create /etc/dnsmasq.conf */
@@ -343,7 +346,7 @@ start_dns_dhcpd(int is_ap_mode)
 	if (!is_ap_mode) {
 		is_dns_used = 1;
 		fprintf(fp, "min-port=%d\n", 4096);
-		fprintf(fp, "cache-size=%d\n", DNS_RELAY_CACHE_MAX);
+		fprintf(fp, "cache-size=%d\n", i_ss_enable ? 0 : DNS_RELAY_CACHE_MAX);
 		fprintf(fp, "dns-forward-max=%d\n", DNS_RELAY_QUERIES_MAX);
 		fprintf(fp, "addn-hosts=%s/hosts\n", storage_dir);
 		fprintf(fp, "servers-file=%s\n", DNS_SERVERS_FILE);
@@ -498,6 +501,10 @@ start_dns_dhcpd(int is_ap_mode)
 	fprintf(fp, "tftp-no-fail\n");
 #endif
 
+	if (i_ss_enable) {
+		if (!check_if_file_exist(EXTRA_DNSMASQCONF)) doSystem("touch %s", EXTRA_DNSMASQCONF);
+		fprintf(fp, "conf-file=%s\n", EXTRA_DNSMASQCONF);
+	}
 	fprintf(fp, "conf-file=%s/dnsmasq.conf\n", storage_dir);
 	fclose(fp);
 
@@ -1127,7 +1134,6 @@ notify_ddns_update(void)
 		return doSystem("killall %s %s", "-SIGHUP", "inadyn");
 	}
 
-	restart_ddnsto();
 	return start_ddns(0);
 }
 
@@ -1176,3 +1182,63 @@ manual_ddns_hostname_check(void)
 	nvram_set_temp("ddns_return_code", "inadyn_unsupport");
 }
 
+#if defined (USE_IPV6)
+int stop_ndppd(void)
+{
+	char *svcs[] = { "ndppd", NULL };
+	kill_services(svcs, 3, 1);
+	return 0;
+}
+
+int start_ndppd(char *wan6_ifname)
+{
+	int size6 = 0;
+	struct in6_addr addr6;
+	char *addr6_wan,prefix[INET6_ADDRSTRLEN];
+	FILE *fp = NULL;
+	int ndppd_mode = nvram_get_int("ip6_lan_relay");
+
+	stop_ndppd();
+	if (!ndppd_mode) return 0;
+	if (!wan6_ifname) {
+		if (get_wan_proto(0) == IPV4_WAN_PROTO_IPOE_DHCP || !is_wan_ipv6_if_ppp())
+			wan6_ifname = nvram_safe_get("wan_ifname");
+		else
+			wan6_ifname = IFNAME_PPP;
+	}
+	addr6_wan = nvram_safe_get("lan_addr6");
+	size6 = ipv6_from_string(addr6_wan, &addr6);
+	ipv6_to_net(&addr6, size6);
+	inet_ntop(AF_INET6, &addr6, prefix, INET6_ADDRSTRLEN);
+
+	fp = fopen("/etc/ndppd.conf", "wb");
+	if (fp) {
+		fprintf(fp, "route-ttl 30000\n"
+			"address-ttl 30000\n\n"
+			"proxy %s {\n"
+			"  router yes\n"
+			"  timeout 500\n"
+			"  autowire no\n"
+			"  keepalive yes\n"
+			"  retries 3\n"
+			"  promiscuous no\n"
+			"  ttl 30000\n"
+			"  rule %s/64 {\n"
+			"    iface %s\n"
+			"    autovia no\n"
+			"  }\n"
+			"}\n",
+			wan6_ifname,
+			prefix,
+			IFNAME_BR);
+		fclose(fp);
+	}
+	return eval("/usr/bin/ndppd", "-d");
+}
+
+int restart_ndppd(char *ifname)
+{
+	stop_ndppd();
+	return start_ndppd(ifname);
+}
+#endif

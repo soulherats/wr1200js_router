@@ -1282,7 +1282,7 @@ wan_up(char *wan_ifname, int unit, int is_static)
 	if (modem_unit_id || wan_proto != IPV4_WAN_PROTO_IPOE_STATIC) {
 		snprintf(wan_cnt, sizeof(wan_cnt), "%llu", get_ifstats_bytes_rx(wan_ifname));
 		set_wan_unit_value(unit, "bytes_rx", wan_cnt);
-		
+
 		snprintf(wan_cnt, sizeof(wan_cnt), "%llu", get_ifstats_bytes_tx(wan_ifname));
 		set_wan_unit_value(unit, "bytes_tx", wan_cnt);
 	}
@@ -1333,6 +1333,14 @@ wan_up(char *wan_ifname, int unit, int is_static)
 #if defined (USE_IPV6)
 	if (is_wan_ipv6_type_sit() == 1)
 		wan6_up(wan_ifname, unit);
+	else if (nvram_get_int("ip6_lan_relay")) {
+		char *wan6_ifname;
+		if (wan_proto == IPV4_WAN_PROTO_IPOE_DHCP || !is_wan_ipv6_if_ppp())
+			wan6_ifname = wan_ifname;
+		else
+			wan6_ifname = IFNAME_PPP;
+		restart_ndppd(wan6_ifname);
+	}
 #endif
 
 	/* update resolv.conf content */
@@ -1374,9 +1382,17 @@ wan_up(char *wan_ifname, int unit, int is_static)
 	/* di wakeup after 2 secs */
 	notify_run_detect_internet(2);
 
+	/* notify ddnsto */
+	notify_rc(RCN_RESTART_DDNSTO);
+
 	/* call custom user script */
 	if (check_if_file_exist(script_postw))
 		doSystem("%s %s %s %s", script_postw, "up", wan_ifname, wan_addr);
+
+#if defined(APP_SHADOWSOCKS)
+	sleep(3);
+	restart_ss();
+#endif
 }
 
 void
@@ -1389,9 +1405,6 @@ wan_down(char *wan_ifname, int unit, int is_static)
 	logmessage(LOGNAME, "%s %s (%s)", "WAN", "down", wan_ifname);
 
 	notify_pause_detect_internet();
-
-	/* stop ddnsto */
-	stop_ddnsto();
 
 	/* deferred stop static VPN client (prevent rebuild resolv.conf) */
 	nvram_set_temp("vpnc_dns_t", "");

@@ -2223,6 +2223,8 @@ start_firewall_ex(void)
 	if (check_if_file_exist(opt_iptables_script))
 		doSystem("%s update", opt_iptables_script);
 
+	doSystem("/usr/bin/zerotier.sh rule");
+
 	/* enable IPv4 forward */
 	set_ipv4_forward(1);
 

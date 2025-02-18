@@ -171,8 +171,6 @@ start_vpn_server(void)
 	unsigned int vaddr, vmask, vp_b, vp_e;
 	struct in_addr pool_in;
 
-	doSystem("modprobe crypto_k");
-
 	if (nvram_invmatch("vpns_enable", "1") || get_ap_mode())
 		return 0;
 
