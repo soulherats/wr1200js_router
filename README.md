@@ -162,8 +162,7 @@ sudo yum install ncurses-* flex byacc bison zlib-* gmp-* mpfr-* gettext \
 * 克隆源码
 
 ```shell
-git clone --depth=1 https://e.coding.net/hanwckf/rt-n56u/padavan.git /opt/rt-n56u
-#git clone --depth=1 https://github.com/hanwckf/rt-n56u.git /opt/rt-n56u
+git clone --depth=1 https://github.com/soulherats/wr1200js_router.git /opt/rt-n56u
 ```
 
 * 准备工具链
