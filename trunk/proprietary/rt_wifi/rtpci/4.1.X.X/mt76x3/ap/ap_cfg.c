@@ -3331,7 +3331,7 @@ INT RTMPAPSetInformation(
 			UCHAR *Buf;
 			struct wnm_command *cmd_data;
 
-			os_alloc_mem(Buf, (UCHAR **)&Buf, wrq->u.data.length);
+			os_alloc_mem(NULL, (UCHAR **)&Buf, wrq->u.data.length);
 			Status = copy_from_user(Buf, wrq->u.data.pointer, wrq->u.data.length);
 			cmd_data = (struct wnm_command *)Buf;
 			if (wnm_handle_command(pAd, cmd_data) != NDIS_STATUS_SUCCESS)

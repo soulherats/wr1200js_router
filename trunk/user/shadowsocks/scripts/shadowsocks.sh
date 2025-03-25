@@ -68,14 +68,39 @@ get_ipt_ext(){
 	fi
 }
 
+get_gfw_ext(){
+	if [ "$ss_mode" = "2" ]; then
+		echo '-g "gfw"'
+	fi
+}
+
 func_start_ss_redir(){
 	sh -c "$ss_bin -c $ss_json_file $(get_arg_udp) & "
 	return $?
 }
 
+func_dl_list(){
+	if [ ! -f "/tmp/chnlist.txt" ];then
+		wget https://opt.cn2qq.com/opt-file/chinalist.txt -O /tmp/chnlist.txt
+	fi
+	if [ ! -f "/etc/storage/chinadns/gfw_add.txt" ];then
+		touch /etc/storage/chinadns/gfw_add.txt
+	fi
+	if [ ! -f "/etc/storage/chinadns/chnlist.txt" ];then
+		touch /etc/storage/chinadns/chnlist.txt
+	fi
+	if [ "$ss_mode" = "1" ]; then
+		ipset -! restore <<-EOF
+		create chnroute hash:net hashsize 64
+		$(sed -e "s/^/add chnroute /" /etc/storage/chinadns/chnroute.txt 2>/dev/null)
+EOF
+	fi
+	return 0
+}
+
 func_start_ss_rules(){
 	ss-rules -f
-	sh -c "ss-rules -s $ss_server -l $ss_local_port $(get_wan_bp_list) -d SS_SPEC_WAN_AC $(get_ipt_ext) $(get_arg_out) $(get_arg_udp)"
+	sh -c "ss-rules -s $ss_server -l $ss_local_port $(get_wan_bp_list) -d SS_SPEC_WAN_AC $(get_ipt_ext) $(get_arg_out) $(get_arg_udp) $(get_gfw_ext)"
 	return $?
 }
 
@@ -99,36 +124,66 @@ EOF
 }
 
 func_start_ss_dns(){
-	dns=` awk '{print $2}' /etc/resolv.conf| head -n 1`
-	[ "$dns" == "8.8.8.8" ] && { sed -i '/Chinadns/,+4d' /etc/storage/dnsmasq/dnsmasq.conf; return 1; }
-	if [ $(awk '{print $2}' /etc/resolv.conf | wc -l) -gt 1 ]; then
-		dns=`awk '{print $2}' /etc/resolv.conf | head -n2 | sed '1s/$/,/' | tr -d "\n"`
-	fi
-	if [ -z `grep Chinadns /etc/storage/dnsmasq/dnsmasq.conf` ];  then
-		cat >> /etc/storage/dnsmasq/dnsmasq.conf <<EOF
-### Chinadns
+	dns=`echo -n $(awk '!/127.0.0.1/{print $2}' /etc/resolv.conf)| tr -s " " ","`
+cat > "$dns_conf" <<EOF
+bind-addr 127.0.0.1
+bind-port 65353@udp
+hosts /etc/hosts
+no-ipv6 tag:gfw
+EOF
+
+if [ "$ss_mode" != "0" ]; then
+cat >> "$dns_conf" <<EOF
+china-dns $dns
+trust-dns $ss_dns
+gfwlist-file /etc/storage/gfwlist/gfwlist_domain.txt
+gfwlist-file /etc/storage/chinadns/gfw_add.txt
+EOF
+
+if [ "$ss_mode" = "2" ]; then
+cat >> "$dns_conf" <<EOF
+default-tag chn
+add-taggfw-ip ss_spec_dst_fw
+EOF
+else
+cat >> "$dns_conf" <<EOF
+chnlist-file /etc/storage/chinadns/chnlist.txt
+chnlist-file /tmp/chnlist.txt
+ipset-name4 chnroute
+add-tagchn-ip ss_spec_dst_bp
+# verdict 缓存 (用于 tag:none 域名)
+verdict-cache 4096
+EOF
+fi
+
+else
+cat >> "$dns_conf" <<EOF
+trust-dns $ss_dns
+default-tag gfw
+EOF
+
+fi
+
+cat >> "$dns_conf" <<EOF
+
+# dns cache
+cache 4096
+cache-stale 86400
+cache-refresh 20
+
+EOF
+
+cat > "/etc/dnsmasq/dnsmasq_ex.conf" <<EOF
 no-resolv
 no-poll
 server=127.0.0.1#65353
-
 EOF
-		restart_dhcpd
-	fi
-cat > "$dns_conf" <<EOF
-gfwlist-file $gfwlist
-default-tag chn
-ipset-name4 ss_spec_dst_bp
-trust-dns $ss_dns
-china-dns $dns
-no-ipv6 tag:gfw
-hosts /etc/hosts
 
-EOF
+	restart_dhcpd
 	sh -c "chinadns-ng -C $dns_conf &"
 }
 
 func_stop_ss_dns(){
-	sed -i '/Chinadns/,+4d' /etc/storage/dnsmasq/dnsmasq.conf
 	killall -q chinadns-ng
 	restart_dhcpd
 }
@@ -136,6 +191,7 @@ func_stop_ss_dns(){
 func_stop(){
 	func_stop_ss_dns
 	killall -q $ss_bin
+	ipset  destroy  chnroute
 	ss-rules -f && loger $ss_bin "stop"
 }
 
@@ -143,6 +199,7 @@ func_start(){
 	ulimit -n 65536
 	func_gen_ss_json && \
 	func_start_ss_redir && \
+	func_dl_list && \
 	func_start_ss_rules && \
 	func_start_ss_dns && \
 	restart_firewall && \

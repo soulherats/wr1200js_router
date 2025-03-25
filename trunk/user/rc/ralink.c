@@ -1315,6 +1315,12 @@ gen_ralink_config(int is_soc_ap, int is_aband, int disable_autoscan)
 	i_val = nvram_wlan_get_int(is_aband, "HT_AMSDU");
 	fprintf(fp, "HT_AMSDU=%d;%d\n", i_val, i_val);
 
+	//KVR
+	if (!is_aband) {
+		fprintf(fp, "RRMEnable=1;1\n");
+		fprintf(fp, "WNMEnable=1;1\n");
+	}
+
 	//HT_BAWinSize
 	i_val = nvram_wlan_get_int(is_aband, "HT_BAWinSize");
 	if (i_val < 1 || i_val > 256) i_val = 256;

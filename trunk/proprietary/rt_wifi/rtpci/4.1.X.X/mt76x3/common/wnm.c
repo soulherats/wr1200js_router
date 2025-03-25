@@ -2273,7 +2273,7 @@ void WNM_ReadParametersFromFile(
 	RTMP_STRING *tmpbuf,
 	RTMP_STRING *buffer)
 {
-	INT loop;
+	INT loop, ret;
 	RTMP_STRING *macptr;
 
 	if (RTMPGetKeyParameter("WNMEnable", tmpbuf, 255, buffer, TRUE)) {
@@ -2282,12 +2282,14 @@ void WNM_ReadParametersFromFile(
 					macptr = rstrtok(NULL, ";"), loop++) {
 			LONG Enable;
 
-			kstrtol(macptr, 10, &Enable);
-			pAd->ApCfg.MBSSID[loop].WNMCtrl.WNMBTMEnable =
-				(Enable > 0) ? TRUE : FALSE;
-			DBGPRINT(RT_DEBUG_TRACE, ("%s::(bDot11vWNMEnable[%d]=%d\n",
-				__func__, loop,
-				pAd->ApCfg.MBSSID[loop].WNMCtrl.WNMBTMEnable));
+			ret = kstrtol(macptr, 10, &Enable);
+			if (ret == 0) {
+				pAd->ApCfg.MBSSID[loop].WNMCtrl.WNMBTMEnable =
+					(Enable > 0) ? TRUE : FALSE;
+				DBGPRINT(RT_DEBUG_TRACE, ("%s::(bDot11vWNMEnable[%d]=%d\n",
+					__func__, loop,
+					pAd->ApCfg.MBSSID[loop].WNMCtrl.WNMBTMEnable));
+			}
 		}
 	} else {
 		for (loop = 0; loop < MAX_MBSSID_NUM(pAd); loop++)

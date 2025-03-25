@@ -207,6 +207,7 @@ func_fill()
 	script_vpnsc="$dir_storage/vpns_client_script.sh"
 	script_vpncs="$dir_storage/vpnc_server_script.sh"
 	script_ezbtn="$dir_storage/ez_buttons_script.sh"
+	script_ipv6="$dir_storage/monitor_ipv6_route.sh"
 
 	user_hosts="$dir_dnsmasq/hosts"
 	user_dnsmasq_conf="$dir_dnsmasq/dnsmasq.conf"
@@ -217,7 +218,9 @@ func_fill()
 	user_sswan_conf="$dir_sswan/strongswan.conf"
 	user_sswan_ipsec_conf="$dir_sswan/ipsec.conf"
 	user_sswan_secrets="$dir_sswan/ipsec.secrets"
-	
+	user_chnlist="$dir_chnroute/chnlist.txt"
+	user_gfwlist="$dir_chnroute/gfw_add.txt"
+
 	chnroute_file="/etc_ro/chnroute.bz2"
 	gfwlist_conf_file="/etc_ro/gfwlist.bz2"
 
@@ -232,11 +235,16 @@ func_fill()
 		if [ -f "$chnroute_file" ]; then
 			mkdir -p "$dir_chnroute" && tar jxf "$chnroute_file" -C "$dir_chnroute"
 		fi
+		echo "bing.com" > $user_chnlist
+		cat > "$user_gfwlist" <<EOF
+chatgpt.com
+openai.com
+EOF
 	fi
 
 	# create gfwlist
 	if [ ! -d "$dir_gfwlist" ] ; then
-		if [ -f "$gfwlist_conf_file" ]; then	
+		if [ -f "$gfwlist_conf_file" ]; then
 			mkdir -p "$dir_gfwlist" && tar jxf "$gfwlist_conf_file" -C "$dir_gfwlist"
 		fi
 	fi
@@ -262,8 +270,14 @@ func_fill()
 #modprobe ip_set_list_set
 #modprobe xt_set
 
+# zerotier
+/usr/bin/zerotier.sh start
+
 #drop caches
 sync && echo 3 > /proc/sys/vm/drop_caches
+
+#GET IPV6 prefix
+#$script_ipv6 down & #Modification take effect after reboot
 
 # Roaming assistant for mt76xx WiFi
 #iwpriv ra0 set KickStaRssiLow=-85
@@ -320,10 +334,6 @@ EOF
 ### \$2 - WAN interface name (e.g. eth3 or ppp0)
 ### \$3 - WAN IPv4 address
 
-if [ \$1 = "up" ]; then
-
-fi
-
 EOF
 		chmod 755 "$script_postw"
 	fi
@@ -342,6 +352,34 @@ logger -t "di" "Internet state: \$1, elapsed time: \$2s."
 
 EOF
 		chmod 755 "$script_inets"
+	fi
+
+	# create post-wan script
+	if [ ! -f "$script_ipv6" ] ; then
+		cat > "$script_ipv6" <<EOF
+#!/bin/sh
+
+### Custom user script
+### Called after internal WAN up/down action
+### \$1 - WAN IPV6 listen action (up/down)
+
+if [ \$1 = "up" ]; then
+	ip -6 monitor route | while read line; do
+		if [[ \$line == *"eth3"* ]]; then
+			prefix = \${line%%?::*}
+			prefix_old = \$(ip -6 route |grep br0|grep -v fe80|awk -F "::" '{print $1}')
+			if [[ "\$prefix" != "fe80" && "\$prefix" != "\${prefix_old:0:-1}" ]]; then
+				nvram set ip6_lan_addr=\${prefix}4::1
+				restart_dhcpd
+			fi
+		fi
+	done
+elif [ \$1 = "down" ]; then
+	kill \$(pgrep -f monitor_ipv6_route.sh)
+fi
+
+EOF
+		chmod 755 "$script_ipv6"
 	fi
 
 	# create vpn server action script

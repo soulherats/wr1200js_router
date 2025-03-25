@@ -166,6 +166,10 @@ EOF
 
 include_ac_rules() {
 	local protocol=$([ "$1" = "mangle" ] && echo udp || echo tcp)
+	local chain="SS_SPEC_WAN_FW"
+	if [ -n "$GFW_ARGS" ]; then
+		chain="RETURN"
+	fi
 	iptables-restore -n <<-EOF
 	*$1
 	:SS_SPEC_LAN_DG - [0:0]
@@ -180,7 +184,7 @@ include_ac_rules() {
 	-A SS_SPEC_LAN_AC -j ${LAN_TARGET:=SS_SPEC_WAN_AC}
 	-A SS_SPEC_WAN_AC -m set --match-set ss_spec_dst_fw dst -j SS_SPEC_WAN_FW
 	-A SS_SPEC_WAN_AC -m set --match-set ss_spec_dst_bp dst -j RETURN
-	-A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
+	-A SS_SPEC_WAN_AC -j $chain
 	$(gen_prerouting_rules $protocol)
 	COMMIT
 EOF
@@ -193,7 +197,7 @@ gen_prerouting_rules() {
 	done
 }
 
-while getopts ":s:l:S:L:B:b:W:w:I:d:a:e:oOuUfh" arg; do
+while getopts ":s:l:S:L:B:b:W:w:I:d:a:e:g:oOuUfh" arg; do
 	case "$arg" in
 		s)
 			server=$(for ip in $OPTARG; do echo $ip; done)
@@ -230,6 +234,9 @@ while getopts ":s:l:S:L:B:b:W:w:I:d:a:e:oOuUfh" arg; do
 			;;
 		e)
 			EXT_ARGS=$OPTARG
+			;;
+		g)
+			GFW_ARGS=$OPTARG
 			;;
 		o)
 			OUTPUT=SS_SPEC_WAN_AC

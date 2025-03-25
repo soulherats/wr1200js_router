@@ -27,9 +27,7 @@ function restart_needed_time(second){
 }
 
 function Callback(){
-	document.redirectForm.action = "/Shadowsocks.asp";
-	document.redirectForm.target = "_parent";
-	document.redirectForm.submit();
+	setTimeout("document.redirectForm.submit();window.parent.document.documentElement.style.overflowY = 'visible';", 1000);
 }
 </script>
 </head>
@@ -37,7 +35,7 @@ function Callback(){
 <body onLoad="Callback();">
 <% shadowsocks_action(); %>
 
-<form method="post" name="redirectForm">
+<form method="get" name="redirectForm" action="Shadowsocks_conf.asp" target="_self">
 </form>
 
 </body>

@@ -361,6 +361,7 @@ function changeBgColor(obj, num){
 }
 .table-list td {
     padding: 6px 4px;
+    text-align: center;
 }
 .table-list input,
 .table-list select {
@@ -368,7 +369,7 @@ function changeBgColor(obj, num){
     margin-bottom: 0px;
 }
 .table-list tr:nth-child(2) {
-    font-size: 75%;
+    font-size: 96%;
     font-weight: bold;
 }
 </style>

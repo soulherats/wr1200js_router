@@ -419,6 +419,7 @@ start_ddnsto(void)
 			ddnsto_argv[argv_index++] = "-x";
 			ddnsto_argv[argv_index++] = idx_s;
 		}
+		ddnsto_argv[argv_index++] = "-d";
 		_eval(ddnsto_argv, NULL, 0, NULL);
         }
 }
@@ -428,7 +429,6 @@ stop_ddnsto(void)
 {
 	char* svcs[] = { "ddnsto", NULL };
 	kill_services(svcs, 3, 1);
-	doSystem("killall %s", svcs[0]);
 }
 
 void restart_ddnsto(void){
@@ -654,6 +654,7 @@ start_services_once(int is_ap_mode)
 	start_crond();
 	start_networkmap(1);
 	start_rstats();
+	start_ddnsto();
 #if defined(APP_MENTOHUST)
 	start_mentohust();
 #endif
@@ -689,6 +690,7 @@ stop_services(int stopall)
 #if defined(APP_TTYD)
 	stop_ttyd();
 #endif
+	stop_ddnsto();
 	stop_networkmap();
 	stop_lltd();
 	stop_detect_internet();

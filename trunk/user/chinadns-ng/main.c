@@ -1,294 +1,352 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 #include <curl/curl.h>
 
-#define BASE64_SUCCESS 0
-#define BASE64_ERROR 1
-#define BASE64_ERR_BASE64_BAD_MSG 2
+#define PAD_MEM 100
 
-// 回调函数处理HTTP响应
-size_t write_callback(void *ptr, size_t size, size_t nmemb, void **stream) {
-    size_t realsize = size * nmemb;
-    if(NULL != *stream)
-    {
-	size_t len = strlen(*(char **)stream);
-    	*stream = (char*)realloc(*stream, realsize + len + 1);
-	memcpy(*stream + len, (char*)ptr, realsize);
-	(*(char **)stream)[len + realsize] = '\0';
-    } else {
-	*stream = (char*)malloc(realsize + 1);
-	memcpy(*stream,(char*)ptr, realsize);
-	(*(char **)stream)[realsize] = '\0';
+const char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+// 自定义数据结构，用于存储下载的数据
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
+void base64_decode(const char *input, unsigned char *output, size_t *output_length) {
+    int len = strlen(input);
+    int pad = 0;
+    if (input[len - 1] == '=') pad++;
+    if (input[len - 2] == '=') pad++;
+
+    *output_length = 3 * (len / 4) - pad;
+    unsigned char *p = output;
+
+    for (int i = 0; i < len; i += 4) {
+        int n = (strchr(base64_table, input[i]) - base64_table) << 18 |
+                (strchr(base64_table, input[i + 1]) - base64_table) << 12 |
+                (strchr(base64_table, input[i + 2]) ? (strchr(base64_table, input[i + 2]) - base64_table) << 6 : 0) |
+                (strchr(base64_table, input[i + 3]) ? (strchr(base64_table, input[i + 3]) - base64_table) : 0);
+
+        *p++ = (n >> 16) & 0xFF;
+        if (input[i + 2] != '=') *p++ = (n >> 8) & 0xFF;
+        if (input[i + 3] != '=') *p++ = n & 0xFF;
     }
-
-    return realsize;
 }
 
-int http_get_upgrade_file(char** response, const char* url)
-{
-    CURL *curl;
-    CURLcode __attribute__ ((unused)) res;
-    char *final_url = NULL;
-    curl = curl_easy_init();
-    long httpcode = -1;
-    if(curl)
-    {
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        if(strstr(url,"https"))
-        {
-            curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-        }
-        else
-        {
-            curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "http");
-        }
-	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 60L);
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 60L);
-        res = curl_easy_perform(curl);
-	if(res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpcode);
-	curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &final_url);
-        curl_easy_cleanup(curl);
+// 回调函数用于处理返回的数据
+size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t total_size = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+    // 重新分配内存以容纳新数据
+    char *ptr = realloc(mem->memory, mem->size + total_size + 1);
+    if(ptr == NULL) {
+        // 内存分配失败
+        fprintf(stderr, "Not enough memory (realloc returned NULL)\n");
+        return 0;
     }
 
-    if (httpcode != 200)
-    {
-	printf("HttpCode error:%ld try to check ip\n", httpcode);
-        return -1;
+    // 更新指针和大小
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), contents, total_size);
+    mem->size += total_size;
+    mem->memory[mem->size] = 0; // 终止字符串
+
+    return total_size;
+}
+
+size_t calculate_length(size_t len) {
+    return len + (4 - (len % 4)) % 4; // 计算需要的填充符数量
+}
+
+int is_base64(char *str) {
+    size_t len = strlen(str);
+
+    // Base64字符串长度必须为4的倍数
+    if (len % 4 != 0) {
+        return 1;
     }
+
+    // 检查有效字符和填充条件并替换-_
+    for (size_t i = 0; i < len; ++i) {
+        if (!isalnum(str[i]) && str[i] != '+' && str[i] != '/' && str[i] != '=' && str[i] != '-' && str[i] != '_') {
+            return 1;
+        } else if (str[i] == '-') {
+	    str[i] = '+';
+	} else if (str[i] == '_') {
+	    str[i] = '/';
+	}
+    }
+
+    // 检查填充符号是否只在末尾，并且不能超过两个
+    int padding_count = 0;
+    for (int i = len - 1; i >= 0 && str[i] == '='; --i) {
+        padding_count++;
+    }
+    if (padding_count > 2) {
+        return 1;
+    }
+
+    // 'P' should not be between characters
+    for (size_t i = 0; i < len - padding_count; ++i) {
+        if (str[i] == '=') {
+            return 1;
+        }
+    }
+
     return 0;
 }
 
-static uint8_t get_index_from_char(char c)
-{
-    if ((c >= 'A') && (c <= 'Z'))           return (c - 'A');
-    else if ((c >= 'a') && (c <= 'z'))      return (c - 'a' + 26);
-    else if ((c >= '0') && (c <= '9'))      return (c - '0' + 52);
-    else if (c == '+' || c == '-')                      return 62;
-    else if (c == '/' || c == '_')                      return 63;
-    else if (c == '=')                      return 64;
-    else if ((c == 'r') || (c == 'n'))    return 254;
-    else                                    return 255;
+int hex_to_int(char c) {
+    if ('0' <= c && c <= '9') return c - '0';
+    if ('a' <= c && c <= 'f') return c - 'a' + 10;
+    if ('A' <= c && c <= 'F') return c - 'A' + 10;
+    return -1; // 非法字符
 }
 
-static char get_char_from_index(uint8_t i)
-{
-    if ((i >= 0) && (i <= 25))              return (i + 'A');
-    else if ((i >= 26) && (i <= 51))        return (i - 26 + 'a');
-    else if ((i >= 52) && (i <= 61))        return (i - 52 + '0');
-    else if (i == 62)                       return '+';
-    else if (i == 63)                       return '/';
-    else                                    return '=';
-}
-
-int base64_encode(const uint8_t *in, uint16_t in_len, char *out)
-{
-    int i;
-    uint32_t tmp = 0;
-    uint16_t out_len = 0;
-    uint16_t left = in_len;
-
-    if ((!in) || (!out)) {
-        //invalid parameter
-        return BASE64_ERROR;
-    }
-
-    for (i = 0; i < in_len;) {
-        if (left >= 3) {
-            tmp = in[i];
-            tmp = (tmp << 8) + in[i+1];
-            tmp = (tmp << 8) + in[i+2];
-            out[out_len++] = get_char_from_index((tmp & 0x00FC0000) >> 18);
-            out[out_len++] = get_char_from_index((tmp & 0x0003F000) >> 12);
-            out[out_len++] = get_char_from_index((tmp & 0x00000FC0) >> 6);
-            out[out_len++] = get_char_from_index(tmp & 0x0000003F);
-            left -= 3;
-            i += 3;
+void url_decode(const char *src, char *dest) {
+    char *p = dest;
+    while (*src) {
+        if (*src == '%') {
+            if (isxdigit((unsigned char)src[1]) && isxdigit((unsigned char)src[2])) {
+                // 解码%xx
+                int high = hex_to_int(src[1]);
+                int low = hex_to_int(src[2]);
+                *p++ = (char)((high << 4) | low);
+                src += 3;
+            } else {
+                // 如果%后不是合法的两位16进制，直接跳过
+                *p++ = *src++;
+            }
+        } else if (*src == '+') {
+            // '+' 转换为空格
+            *p++ = ' ';
+            src++;
         } else {
-            break;
+            // 其他字符原样复制
+            *p++ = *src++;
         }
     }
-
-    if (left == 2) {
-        tmp = in[i];
-        tmp = (tmp << 8) + in[i+1];
-        out[out_len++] = get_char_from_index((tmp & 0x0000FC00) >> 10);
-        out[out_len++] = get_char_from_index((tmp & 0x000003F0) >> 4);
-        out[out_len++] = get_char_from_index((tmp & 0x0000000F) << 2);
-        out[out_len++] = get_char_from_index(64);
-    } else if (left == 1) {
-        tmp = in[i];
-        out[out_len++] = get_char_from_index((tmp & 0x000000FC) >> 2);
-        out[out_len++] = get_char_from_index((tmp & 0x00000003) << 4);
-        out[out_len++] = get_char_from_index(64);
-        out[out_len++] = get_char_from_index(64);
-    }
-
-    out[out_len] = '\0';
-
-    return BASE64_SUCCESS;
+    *p = '\0'; // 确保字符串以NULL结尾
 }
 
-int base64_decode(const char *in, uint8_t *out, uint16_t *out_len)
-{
-    uint16_t i = 0, cnt = 0;
-    uint8_t c, in_data_cnt;
-    int error_msg = 0;
-    uint32_t tmp = 0;
-
-    if ((!in) || (!out) || (!out_len)) {
-        //invalid parameter
-        return BASE64_ERROR;
+char* url_encode(const char *str) {
+    size_t len = strlen(str);
+    // 分配足够的内存来存储编码后的字符串，最多是原字符串的 3 倍
+    char *encoded = malloc(len * 3 + 1);
+    if (!encoded) {
+        return NULL;  // 内存分配失败
     }
 
-    in_data_cnt = 0;
-    while (in[i] != '\0') {
-        c = get_index_from_char(in[i++]);
-        if (c == 255) {
-	    *out_len = i - 1;
-            return BASE64_ERR_BASE64_BAD_MSG;
-        } else if (c == 254) {
-            continue;           // Carriage return or newline feed, skip
-        } else if (c == 64) {
-            break;              // Meet '=', break
-        }
+    char *ptr = encoded;
+    for (size_t i = 0; i < len; i++) {
+        unsigned char c = str[i];
 
-        tmp = (tmp << 6) | c;
-        if (++in_data_cnt == 4) {
-            out[cnt++] = (uint8_t)((tmp >> 16) & 0xFF);
-            out[cnt++] = (uint8_t)((tmp >> 8) & 0xFF);
-            out[cnt++] = (uint8_t)(tmp & 0xFF);
-            in_data_cnt = 0;
-            tmp = 0;
+        // 如果字符是字母数字或者特殊字符，则直接复制
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            *ptr++ = c;
+        } else {
+            // 否则进行 URL 编码
+            sprintf(ptr, "%%%02X", c);
+            ptr += 3;
         }
     }
-
-    // Meet '=' or ''
-    if (in_data_cnt == 3) {          // 3 chars before '=', encoded msg like xxx= OR
-        tmp = (tmp << 6);           // 3 chars before '', encoded msg like xxx, considered '=' omitted
-        out[cnt++] = (uint8_t)((tmp >> 16) & 0xFF);
-        out[cnt++] = (uint8_t)((tmp >> 8) & 0xFF);
-    } else if (in_data_cnt == 2) {   // 2 chars before '=', encoded msg like xx== OR
-        tmp = (tmp << 6);           // 2 chars before '', encoded msg like xx, considered '=' omitted
-        tmp = (tmp << 6);
-        out[cnt++] = (uint8_t)((tmp >> 16) & 0xFF);
-    } else if (in_data_cnt != 0) {
-        error_msg = 0;           // Warn that the message format is wrong, but we tried our best to decode
-    }
-
-    *out_len = cnt;
-
-    return (error_msg ? BASE64_ERROR : BASE64_SUCCESS);
+    *ptr = '\0';  // 末尾加上 '\0'
+    return encoded;
 }
 
-size_t print_ss(char *str, char *name, char *proto, char* decode_data) {
-	uint16_t j = 0, len, total = 0; //计数器
-	char seps[] = ":@/?&", *token = NULL, *context = NULL, *data = decode_data;
+void ssr_decode(char *p, size_t *alen) {
+	char c = ':', end[] = "/?", sep[] = "=", sep_end[] = "&";
+	char *ptr, *p_end, *p_current;
+	char str[100] = {0}, pad[] = "===";
+	size_t len = 0;
+	//找到最后一个字符:
+	ptr = strrchr(p, c);
+	if (!ptr) return;
+	p_current = ++ptr;
+	p_end = strpbrk(ptr, end);
+	if (!p_end) return;
+	do {
+		len = p_end - ptr;
+		memcpy(str, ptr, len);
+		str[len] = '\0';
+		strncat(str, pad, (4 - len % 4) % 4);
+		if (is_base64(str) == 0) {
+			base64_decode(str, p_current, &len);
+		}
+		p_current += len;
+		if (p_end != p + *alen && (ptr = strstr(p_end, sep)) != NULL) {
+			memcpy(p_current, p_end, ptr - p_end + 1);
+			p_current += ptr - p_end + 1;
+		} else {
+			break;
+		}
+		p_end = strpbrk(ptr++, sep_end);
+		if (!p_end) p_end = p + *alen;
+	} while (ptr);
+	*p_current ='\0';
+	*alen = (size_t)(p_current - p);
+}
 
-	data += sprintf(data,"[\"%s\",", proto);
-	for(token = strtok_r(str, seps, &context); token != NULL; token = strtok_r( NULL, seps, &context), j++) {
-		if (j >= 5) {
-			char *ptr = NULL, sep[] = "=" , *ret, *rd = NULL;
-			int flag = 0;
-			if (token[strlen(token) - 1] == '=') flag = 1;
-			for(ptr = strtok_r(token, sep, &rd); ptr != NULL; ptr = strtok_r( NULL, sep, &rd)) {
-				if (j % 2) {
-					base64_decode(ptr, ptr, &len);
-					ptr[len] = '\0';
-					//if (j == 5) data += sprintf(data, "password:");
-					data += sprintf(data,"\"%s\"", ptr);
-					if (j != 13) data += sprintf(data,",");
-				} else {
-					j++;
-					//没有混淆参数 plain
-					if (j == 7 && strcmp(ptr, "obfsparam")) {
-						//data += sprintf(data, "\"obfsparam\":");
-						data += sprintf(data,"\"\",");
-						j = 9;
+int main(int argc, char* argv[]) {
+    CURL *curl_handle;
+    CURLcode res;
+    char* output = NULL;
+    size_t output_length;
+    char deli[] = "://", sep[] = "@#", pad[] = "===";
+    char ss_file[] = "/tmp/ss_link";
+    FILE *fp;
+
+    if (argc == 1) {
+	printf("Usage: %s [URL]\n", argv[0]);
+	return 1;
+    }
+
+   // 初始化存储结构
+    struct MemoryStruct chunk;
+    chunk.memory = malloc(1);  // 初始分配
+    chunk.size = 0;    // 初始大小
+
+    // 全局libcurl初始化
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
+    // 初始化curl会话
+    curl_handle = curl_easy_init();
+    if(curl_handle) {
+        // 设置URL
+        curl_easy_setopt(curl_handle, CURLOPT_URL, argv[1]);
+
+	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+
+        // 设置回调函数和用户数据
+        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+        // 执行请求
+        res = curl_easy_perform(curl_handle);
+
+        // 检查请求是否成功
+        if(res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        } else {
+	    if (!is_base64(chunk.memory)) {
+		char *p, *line, *temp, *ptr, *data, *saveptr;
+		size_t count = 0, decode_len = 0;
+		output = (unsigned char*)malloc(chunk.size);
+		base64_decode(chunk.memory, output, &output_length);
+		output[output_length] = '\0';  // Null-terminate the output string
+		memset(chunk.memory, 0, chunk.size);
+
+		// memory for padding
+		ptr = (char *)malloc(PAD_MEM);
+		if (ptr == NULL) {
+			printf("alloc fail\n");
+		}
+
+		// file operate
+		fp=fopen(ss_file, "w+");
+		if (fp) fprintf(fp, "["); //start
+
+		// 逐行处理
+		line = strtok_r(output, "\n", &saveptr);
+		while (line) {
+			p = strstr(line, deli);
+			if (p) {
+				p += 3;
+				memcpy(chunk.memory + count, line, p - line);
+				count += p - line;
+				data = chunk.memory + count; //start of proto
+				temp = strpbrk(p, sep);
+				decode_len = temp ? temp - p : strlen(line) - (size_t)(p - line);
+				if (!strncmp("trojan", line, 6)) { //trojan no need decode_base64
+					memcpy(chunk.memory + count, p, decode_len);
+					count += decode_len;
+					p = temp;
+					goto decode;
+				}
+				if (decode_len > PAD_MEM - 3) {
+					ptr = realloc(ptr, calculate_length(decode_len) + 1);
+					if (!ptr) break;
+				}
+				memcpy(ptr, p, decode_len);
+				p += decode_len;
+				ptr[decode_len] = '\0';
+				if (decode_len % 4) {
+					strncat(ptr, pad, 4 - decode_len % 4);
+				}
+				if (is_base64(ptr) == 0) {
+					base64_decode(ptr, chunk.memory + count, &decode_len);
+					if (!strncmp("ssr", line, 3)) {
+						memcpy(ptr, chunk.memory + count, decode_len + 1);
+						ssr_decode(ptr, &decode_len);
+						memcpy(chunk.memory + count, ptr, decode_len + 1);
 					}
-					//data += sprintf(data,"\"%s\":", ptr);
+					count += decode_len;
+				}
+decode:
+				if (p && *p) {
+					url_decode(p, ptr);
+					memcpy(chunk.memory + count, ptr, strlen(ptr));
+					count += strlen(ptr) + 1;
+				} else {
+					count ++;
 				}
 			}
-			//if (flag) data += sprintf(data,"\"\"},");
-			if (flag) data += sprintf(data,"\"\",");
-		} else
-			data += sprintf(data,"\"%s\",", token);
-	}
-	if (!proto[2]) data += sprintf(data,"\"%s\"", name);
-	data += sprintf(data,"]");
-	return data - decode_data;
+			// json
+			if (fp && !strncmp("ss", line, 2) && line[2] == ':') {
+				fseek(fp, -1, SEEK_CUR);
+				if (fgetc(fp) == '}') fprintf(fp, ",\n"); 
+				strcpy(output, data);
+				char ss[][10] = {"method", "password", "server", "port", "name"}, ss_deli[]=":@#";
+				char *token, *ptr, *encoded_str;
+				int i = 0;
+				fprintf(fp, "{\"proto\":\"ss\""); //start
+				token = strtok_r(output, ss_deli, &ptr);
+				while (token != NULL) {
+					encoded_str = url_encode(token);
+					fprintf(fp, ",\"%s\":\"%s\"", ss[i++], encoded_str);
+					if (encoded_str) {
+						free(encoded_str);
+						encoded_str = NULL;
+					}
+					token = strtok_r(NULL, ss_deli, &ptr);
+				}
+				fprintf(fp, "}"); //end
+			}
+			line = strtok_r(NULL, "\n", &saveptr);
+			chunk.memory[count - 1] = (line ? '\n' : '\0');
+		}
+		if (fp) {
+			fprintf(fp, "]\n"); //end
+			fclose(fp);
+		}
+		printf("%s\n", chunk.memory);
+
+		if (ptr) {
+			free(ptr);
+		}
+
+		if (output) {
+			free(output);
+		}
+	    }
+        }
+
+        // 清理curl句柄
+        curl_easy_cleanup(curl_handle);
+    }
+
+    // 清理动态分配的内存
+    if(chunk.memory) {
+        free(chunk.memory);
+    }
+
+    // 全局libcurl清理
+    curl_global_cleanup();
+
+    return 0;
 }
 
-size_t ParseProtocol(char *str, char* out_buff) {
-	char proto[6] = {0}, name[64] = {0}, *ptr = str, ch;
-	char tmp[512];
-	uint16_t len = 0;
-	sscanf(str, "%[^:]://%[^#]#%s", proto, str, name);
-	if (strcmp(proto,"ssr") && strcmp(proto,"ss"))  return 0; //丢弃非链接
-
-	if (base64_decode(str, tmp, &len)) {
-		ptr += len;
-		ch = str[len];
-		str[len] = '\0';
-		base64_decode(str, str, &len);
-		*ptr = ch;
-		memcpy(str + len, ptr, strlen(ptr) + 1);
-	} else {
-		base64_decode(str, str, &len);
-		str[len] = '\0';
-	}
-
-	return print_ss(str, name, proto, out_buff);
-}
-
-void ParseData(char* data, char* decode) {
-	char buffer[512], *ptr = data, *ptw = decode; /*ptw for write*/
-	size_t len = 0;
-	sprintf(ptw++,"[");
-	while (sscanf(ptr, "%s", buffer) == 1) {
-		if (ptr != data) sprintf(ptw++,",");
-		for (ptr += strlen(buffer); *ptr && *ptr != '\n' && *ptr != '\r'; ptr++) {};
-		ptw += ParseProtocol(buffer, ptw);
-		if (ptw - 2 == decode) *(--ptw) = '\0';
-	}
-	sprintf(ptw,"]\n");
-}
-
-int main(int argc, char *argv[])
-{
-	FILE *fp = NULL;
-	char *data = NULL;
-	char *tmp_data = NULL;
-	uint16_t tmp_length = 0;
-
-	if (argc < 2) {
-		printf("Usage: %s [URL]\n", argv[0]);
-		return 1;
-	}
-
-	if (!http_get_upgrade_file(&data, argv[1])) {
-		tmp_data = (char*)malloc(strlen(data));
-		base64_decode(data, tmp_data, &tmp_length);
-		tmp_data[tmp_length] = '\0';
-		memset(data, 0, strlen(data));
-		ParseData(tmp_data, data);
-	}
-
-	fp = fopen("/tmp/ss_link", "wb");
-	if (fp) {
-		fprintf(fp, "%s", data);
-		fclose(fp);
-	}
-
-	if (data) free(data);  // 释放动态分配的内存
-	if (tmp_data) free(tmp_data);
-	return 0;
-}

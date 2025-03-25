@@ -1382,9 +1382,6 @@ wan_up(char *wan_ifname, int unit, int is_static)
 	/* di wakeup after 2 secs */
 	notify_run_detect_internet(2);
 
-	/* notify ddnsto */
-	notify_rc(RCN_RESTART_DDNSTO);
-
 	/* call custom user script */
 	if (check_if_file_exist(script_postw))
 		doSystem("%s %s %s %s", script_postw, "up", wan_ifname, wan_addr);
@@ -1700,8 +1697,8 @@ update_resolvconf(int is_first_run, int do_not_notify)
 	fp = fopen((is_first_run) ? DNS_RESOLV_CONF : resolv_temp, "w+");
 	if (fp) {
 		/* dnsmasq will resolve localhost DNS queries */
-		// fprintf(fp, "nameserver %s\n", "127.0.0.1");
-		
+		fprintf(fp, "nameserver %s\n", "127.0.0.1");
+
 		/* DNS servers for static VPN client */
 		if (!is_first_run && i_pdns > 0) {
 			wan_dns = nvram_safe_get("vpnc_dns_t");

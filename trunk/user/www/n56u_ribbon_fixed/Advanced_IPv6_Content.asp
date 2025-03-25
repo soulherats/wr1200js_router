@@ -26,6 +26,7 @@ $j(document).ready(function() {
 	init_itoggle('ip6_dns_auto', change_ip6_dns_auto);
 	init_itoggle('ip6_lan_auto', change_ip6_lan_auto);
 	init_itoggle('ip6_lan_radv', change_ip6_lan_radv);
+	init_itoggle('ip6_lan_relay');
 });
 
 </script>
@@ -335,6 +336,7 @@ function change_ip6_lan_auto(){
 	var v = !document.form.ip6_lan_auto[0].checked;
 	showhide_div('row_ip6_lan_addr', v);
 	showhide_div('row_ip6_lan_size', v);
+	showhide_div('row_ip6_lan_relay', v);
 }
 
 function change_ip6_lan_radv(){
@@ -624,6 +626,22 @@ function change_ip6_lan_dhcp(){
                                                 <input type="text" maxlength="3" style="width: 30px;" class="input" size="4" name="ip6_lan_size" value="<% nvram_get_x("", "ip6_lan_size"); %>" onkeypress="return is_number(this,event);" onblur="return validate_range(this, 48, 64);" />
                                             </td>
                                         </tr>
+                                        <tr id="row_ip6_lan_relay">
+                                            <th width="50%"><#IP6_LAN_Relay#></th>
+                                            <td>
+                                                <div class="main_itoggle">
+                                                    <div id="ip6_lan_relay_on_of">
+                                                        <input type="checkbox" id="ip6_lan_relay_fake" <% nvram_match_x("", "ip6_lan_relay", "1", "value=1 checked"); %><% nvram_match_x("", "ip6_lan_relay", "0", "value=0"); %> />
+                                                    </div>
+                                                </div>
+
+                                                <div style="position: absolute; margin-left: -10000px;">
+                                                    <input type="radio" name="ip6_lan_relay" id="ip6_lan_relay_1" class="input" value="1" <% nvram_match_x("", "ip6_lan_relay", "1", "checked"); %>/><#checkbox_Yes#>
+                                                    <input type="radio" name="ip6_lan_relay" id="ip6_lan_relay_0" class="input" value="0" <% nvram_match_x("", "ip6_lan_relay", "0", "checked"); %>/><#checkbox_No#>
+                                                </div>
+                                            </td>
+                                        </tr>
+
                                         <tr>
                                             <th width="50%"><#IP6_LAN_RAdv#></th>
                                             <td>
