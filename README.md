@@ -130,6 +130,8 @@ sh dl_toolchain.sh
 ./clean_toolchain
 ./build_toolchain
 
+# kernel header patch to support l2tp ipv6
+sh dl_toolchain.sh
 ```
 
 * (可选) 修改机型配置文件
