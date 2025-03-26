@@ -252,6 +252,7 @@ Domain name in a message can be represented as either:
 #include <sys/utsname.h>
 #include <sys/un.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/param.h>
 #include <bits/uClibc_mutex.h>
 #include "internal/parse_config.h"
@@ -1155,6 +1156,20 @@ static int __decode_answer(const unsigned char *message, /* packet */
 	return i + RRFIXEDSZ + a->rdlength;
 }
 
+uint16_t dnsrand_next(int urand_fd, int def_value) {
+   if (urand_fd == -1) return def_value;
+   uint16_t val;
+   if(read(urand_fd, &val, 2) != 2) return def_value;
+   return val;
+}
+
+int dnsrand_setup(int *urand_fd, int def_value) {
+   if (*urand_fd > 0) return dnsrand_next(*urand_fd, def_value);
+   *urand_fd = open("/dev/urandom", O_RDONLY);
+   if (*urand_fd == -1) return def_value;
+   return dnsrand_next(*urand_fd, def_value);
+}
+
 /* On entry:
  *  a.buf(len) = auxiliary buffer for IP addresses after first one
  *  a.add_count = how many additional addresses are there already
@@ -1180,6 +1195,7 @@ int __dns_lookup(const char *name,
 	/* Protected by __resolv_lock: */
 	static int last_ns_num = 0;
 	static uint16_t last_id = 1;
+	static int urand_fd = -1;
 
 	int i, j, fd, rc;
 	int packet_len;
@@ -1258,7 +1274,7 @@ int __dns_lookup(const char *name,
 		}
 		/* first time? pick starting server etc */
 		if (local_ns_num < 0) {
-			local_id = last_id;
+			local_id = dnsrand_setup(&urand_fd, last_id);
 /*TODO: implement /etc/resolv.conf's "options rotate"
  (a.k.a. RES_ROTATE bit in _res.options)
 			local_ns_num = 0;
@@ -1268,7 +1284,7 @@ int __dns_lookup(const char *name,
 		}
 		if (local_ns_num >= __nameservers)
 			local_ns_num = 0;
-		local_id++;
+		local_id = dnsrand_next(urand_fd, local_id++);
 		local_id &= 0xffff;
 		/* write new values back while still under lock */
 		last_id = local_id;
