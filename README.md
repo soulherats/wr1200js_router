@@ -65,53 +65,6 @@ Contributors of this project are not responsible for what happens next.
 >- [wireguard-go](https://git.zx2c4.com/wireguard-go/) ```CONFIG_FIRMWARE_INCLUDE_WIREGUARD```
 >- [smartdns](https://github.com/pymumu/smartdns) ```CONFIG_FIRMWARE_INCLUDE_SMARTDNS```
 
-- 已适配除官方适配外的以下机型
->- PSG1208
->- PSG1218
->- 5K-W20 (USB)
->- OYE-001 (USB)
->- NEWIFI-MINI (USB)
->- MI-MINI (USB)
->- MI-3 (USB)
->- MI-3C
->- MI-4
->- MI-R3G (USB)
->- MI-R4A
->- MI-R3P (USB)
->- HC5661A
->- HC5761A (USB)
->- HC5861B
->- 360P2 (USB)
->- MI-NANO
->- MZ-R13
->- MZ-R13P
->- RT-AC1200GU (USB)
->- XY-C1 (USB)
->- WR1200JS (USB)
->- NEWIFI3 (USB)
->- B70 (USB)
->- A3004NS (USB)
->- K2P
->- K2P-USB (USB)
->- JCG-836PRO (USB)
->- JCG-AC860M (USB)
->- DIR-882 (USB)
->- DIR-878
->- MR2600 (USB)
->- WDR7300
->- RM2100
->- CR660x (CR6606, CR6608, CR6609)
->- R2100
->- JCG-Y2 (USB)
->- E8820V2 (USB)
->- ZTE_E8820S (USB)
->- MSG1500 (USB)
->- R6220 (USB)
->- NETGEAR-CHJ (R6260, R6350, R6850, WAC124)
->- NETGEAR-BZV (R6800, R6700-v2, R7200, Nighthawk AC2400)
-
-***
-
 ### 编译说明 ###
 
 * 安装依赖包
