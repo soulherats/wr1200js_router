@@ -40,6 +40,8 @@ jobs:
         run: |
           cd toolchain-mipsel
           sh dl_toolchain.sh
+          cd ../trunk
+          sh build_pre.sh
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
