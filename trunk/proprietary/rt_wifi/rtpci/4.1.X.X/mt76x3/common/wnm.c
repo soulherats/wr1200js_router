@@ -1716,7 +1716,7 @@ VOID WaitPeerBTMReqTimeout(
 	PRTMP_ADAPTER pAd = NULL;
 	BTM_EVENT_DATA event;
 
-	MTWF_LOG(DBG_CAT_PROTO, DBG_SUBCAT_ALL, DBG_LVL_OFF,
+	MTWF_LOG(DBG_CAT_PROTO, DBG_SUBCAT_ALL, DBG_LVL_TRACE,
 			("%s BTMPeerEntry:%p\n", __func__, BTMPeerEntry));
 	if (!BTMPeerEntry)
 		return;
@@ -2125,8 +2125,8 @@ static VOID BTMReqTimeout(
 	INT32 Ret;
 	BOOLEAN Cancelled;
 
-	DBGPRINT(RT_DEBUG_OFF,
-		("%s\n", __func__));
+	//DBGPRINT(RT_DEBUG_OFF,
+	//	("%s\n", __func__));
 
 	RTMPMoveMemory(&event, Elem->Msg, sizeof(event));
 
@@ -2149,9 +2149,9 @@ static VOID BTMReqTimeout(
 				__func__));
 	} else {
 		/*timeout; need delete BTMPeerEntry*/
-		DBGPRINT(RT_DEBUG_OFF,
+		/*DBGPRINT(RT_DEBUG_OFF,
 				("%s receive btm req timeout the uplayer does not send btm req in time\n",
-				 __func__));
+				 __func__));*/
 		RTMP_SEM_EVENT_WAIT(&pWNMCtrl->BTMPeerListLock, Ret);
 		DlListDel(&BTMPeerEntry->List);
 		RTMP_SEM_EVENT_UP(&pWNMCtrl->BTMPeerListLock);

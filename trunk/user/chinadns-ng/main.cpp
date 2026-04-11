@@ -10,6 +10,11 @@
 
 using namespace tiny;
 
+// 内联函数
+inline bool isHex(char c) {
+    return std::isxdigit(static_cast<unsigned char>(c));
+}
+
 // 全局函数
 const std::vector<std::string> split(const std::string &str, const char &delimiter) {
     std::vector<std::string> result;
@@ -20,6 +25,15 @@ const std::vector<std::string> split(const std::string &str, const char &delimit
         result.push_back(tok);
     }
     return result;
+}
+
+bool hasUrlEncoded(const std::string& s) {
+    for (size_t i = 0; i + 2 < s.size(); ++i) {
+        if (s[i] == '%' && isHex(s[i + 1]) && isHex(s[i + 2])) {
+            return true;
+        }
+    }
+    return false;
 }
 
 class Protocol {
@@ -166,7 +180,7 @@ public:
 	}
 
 	Shadowsocks(const std::string& a, const std::string& b, unsigned int c, \
-			const std::string& d, const std::string& e) {
+			const std::string& d, const std::string& e, const std::string& f) {
 		++count;
 		name = a;
 		server_name = b;
@@ -174,16 +188,21 @@ public:
 		password = d;
 		protocol = "ss";
 		method = e;
+		obfs = f;
 	}
 
 	TinyJson json_output() override {
 		TinyJson ss_json;
+		std::string ss_name = name;
 		ss_json["proto"].Set(protocol);
 		ss_json["server"].Set(server_name);
 		ss_json["port"].Set(port);
 		ss_json["method"].Set(method);
 		ss_json["password"].Set(password);
 		ss_json["name"].Set(Base64Encode((const unsigned char*)name.c_str(), (int)name.size()));
+
+		if (hasUrlEncoded(ss_name)) ss_name = urlDecode(name); 
+		std::cout << ss_name << " " << protocol <<  " " << server_name << " " << port << " " << method << " " << password << " " << obfs << std::endl; // 输出解码后的字符串
 		return ss_json; 
 	}
 
@@ -222,7 +241,7 @@ CURLcode curl_get_req(const std::string &url, std::string &response)
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // url
        	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // if want to use https
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); // set peer and host verify false
-	curl_easy_setopt(curl, CURLOPT_USERAGENT, "MyApp/1.0 libcurl-agent");
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, req_reply);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -273,7 +292,6 @@ int main(int argc, char *argv[]) {
 		std::string str = jsonarray.WriteJson(2);
 		f.open(ss_file,std::ios::out);
 		f << str << std::endl;
-		std::cout << str << std::endl; // 输出解码后的字符串
     }
     return 0;
 }
