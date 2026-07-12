@@ -654,9 +654,8 @@ function checkDDNSReturnCode(){
                                                     <option value="27" <% nvram_match_x("", "ddns_checkip", "27","selected"); %>>checkip6.spdyn.de</option>
                                                     <option value="28" <% nvram_match_x("", "ddns_checkip", "28","selected"); %>>v4.ipv6-test.com/api/myip.php</option>
                                                     <option value="29" <% nvram_match_x("", "ddns_checkip", "29","selected"); %>>v6.ipv6-test.com/api/myip.php</option>
-                                                    <option value="30" <% nvram_match_x("", "ddns_checkip", "30","selected"); %>>4.ipw.cn</option>
-                                                    <option value="31" <% nvram_match_x("", "ddns_checkip", "31","selected"); %>>6.ipw.cn</option>
-                                                    <option value="32" <% nvram_match_x("", "ddns_checkip", "32","selected"); %>>test.ipw.cn</option>
+                                                    <option value="30" <% nvram_match_x("", "ddns_checkip", "30","selected"); %>>ipv6.icanhazip.com</option>
+                                                    <option value="31" <% nvram_match_x("", "ddns_checkip", "31","selected"); %>>ip.zxinc.org/getip</option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -694,9 +693,8 @@ function checkDDNSReturnCode(){
                                                     <option value="27" <% nvram_match_x("", "ddns2_checkip", "27","selected"); %>>checkip6.spdyn.de</option>
                                                     <option value="28" <% nvram_match_x("", "ddns2_checkip", "28","selected"); %>>v4.ipv6-test.com/api/myip.php</option>
                                                     <option value="29" <% nvram_match_x("", "ddns2_checkip", "29","selected"); %>>v6.ipv6-test.com/api/myip.php</option>
-                                                    <option value="30" <% nvram_match_x("", "ddns2_checkip", "30","selected"); %>>4.ipw.cn</option>
-                                                    <option value="31" <% nvram_match_x("", "ddns2_checkip", "31","selected"); %>>6.ipw.cn</option>
-                                                    <option value="32" <% nvram_match_x("", "ddns2_checkip", "32","selected"); %>>test.ipw.cn</option>
+                                                    <option value="30" <% nvram_match_x("", "ddns2_checkip", "30","selected"); %>>ipv6.icanhazip.com</option>
+                                                    <option value="31" <% nvram_match_x("", "ddns_checkip", "31","selected"); %>>ip.zxinc.org/getip</option>
                                                 </select>
                                             </td>
                                         </tr>

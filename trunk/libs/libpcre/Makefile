@@ -45,4 +45,4 @@ install:
 	$(MAKE) -C $(SRC_NAME) install DESTDIR=""
 
 romfs:
-	cp -fP $(DESTDIR)/lib/libpcre.so* $(ROMFSDIR)/lib
+	#cp -fP $(DESTDIR)/lib/libpcre.so* $(ROMFSDIR)/lib

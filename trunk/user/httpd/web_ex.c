@@ -2089,17 +2089,18 @@ ej_decode_link(int eid, webs_t wp, int argc, char **argv)
 {
 	int sys_result;
 	char ss_file[] = "/tmp/ss_link";
+	FILE* fp = NULL;
+	char buf[MAX_FILE_LINE_SIZE];
 	if (!get_login_safe()) goto exit;
-	sys_result = doSystem("/usr/bin/decode \"%s\"", nvram_safe_get("ss_link"));
-	if (!sys_result && f_exists(ss_file)) {
-		FILE* fp = fopen(ss_file, "r");
-		char buf[MAX_FILE_LINE_SIZE];
-		if (fp == NULL) return -1;
-		while (fgets(buf, sizeof(buf), fp)!=NULL){
-			fputs(buf, wp);
-		}
-		fclose(fp);
+	if (!f_exists(ss_file)) {
+		sys_result = doSystem("/usr/bin/decode \"%s\"", nvram_safe_get("ss_link"));
 	}
+	fp = fopen(ss_file, "r");
+	if (fp == NULL) return -1;
+	while (fgets(buf, sizeof(buf), fp)!=NULL){
+		fputs(buf, wp);
+	}
+	fclose(fp);
 exit:
 	return 0;
 }

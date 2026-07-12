@@ -584,6 +584,7 @@ struct nvram_pair router_defaults[] = {
 	{ "ss_obfs", "plain"},
 	{ "ss_obfs_param", ""},
 	{ "ss_simple_obfs", "0"},
+	{ "ss_uot", "0" },
 
 	{ "ss_watchcat", "1" },
 	{ "ss_update_chnroute", "0" },

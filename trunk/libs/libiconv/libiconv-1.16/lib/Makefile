@@ -13,7 +13,7 @@ libdir = ${exec_prefix}/lib
 
 # Programs used by "make":
 CC = /opt/rt-n56u/trunk/../toolchain-mipsel/toolchain-3.4.x/bin/mipsel-linux-uclibc-gcc -mips32r2 -march=mips32r2 -mtune=1004kc
-CFLAGS = -Os -fomit-frame-pointer -pipe  -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -fvisibility=hidden
+CFLAGS = -Os -fomit-frame-pointer -pipe -DEMBED -I/opt/rt-n56u/trunk/stage/include -Dlinux -D__linux__ -Dunix -Wall -Wno-trigraphs -Wno-strict-aliasing -Wno-format-security -fno-tree-slsr -fno-aggressive-loop-optimizations -Wno-pointer-sign -Wno-unused -ffunction-sections -fdata-sections -fvisibility=hidden
 CPPFLAGS = 
 LDFLAGS = -L/opt/rt-n56u/trunk/stage/lib -Wl,--gc-sections $(LDFLAGS_no)
 LDFLAGS_yes = -Wl,--export-all-symbols

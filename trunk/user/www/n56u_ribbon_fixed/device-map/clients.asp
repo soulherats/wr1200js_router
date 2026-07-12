@@ -336,7 +336,23 @@ function networkmap_update(s){
 </script>
 
 <style>
-    .table th, .table td{vertical-align: middle; text-align: center; height: 28px; }
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center;
+        height: 28px;
+    }
+
+    :is(#Clients_table, #xClients_table) :is(th, td, a) {
+        font-size: clamp(11px, 1.1vw + 3px, 14px) !important;
+        line-height: 1.25 !important;
+        white-space: normal !important;
+        word-break: break-all !important; /* 默认允许其他列（如名称、MAC）自由斩断折行 */
+    }
+
+    :is(#Clients_table, #xClients_table) :is(th:nth-child(3), td:nth-child(3), td:nth-child(3) a, th:nth-child(5), td:nth-child(5)) {
+        word-break: keep-all !important;
+        white-space: nowrap !important;
+    }
 </style>
 
 </head>
@@ -370,14 +386,14 @@ function networkmap_update(s){
 <table id="Clients_table" width="100%" align="center" cellpadding="1" class="table">
     <thead>
         <tr>
-            <th colspan="5" style="text-align: center;"><#ConnectedClient#></th>
+            <th colspan="6" style="text-align: center;"><#ConnectedClient#></th>
         </tr>
         <tr>
             <th width="8%"><a href="javascript:sort(0)"><#Type#></a></th>
             <th><a href="javascript:sort(1)"><#Computer_Name#></a></th>
             <th width="20%"><a href="javascript:sort(2)">IP</a></th>
             <th width="24%"><a href="javascript:sort(3)">MAC</a></th>
-            <th width="8%" id="col_rssi"><a href="javascript:sort(4)">RSSI</a></th>
+            <th width="8%" id="col_rssi"><a href="javascript:sort(4)"><i class="icon-signal" title="RSSI"></i></a></th>
             <th width="0%" id="col_block"></th>
         </tr>
     </thead>
@@ -389,14 +405,14 @@ function networkmap_update(s){
 <table id="xClients_table" width="100%" align="center" class="table">
     <thead>
         <tr>
-            <th colspan="5" style="text-align: center;"><#BlockedClient#></th>
+            <th colspan="6" style="text-align: center;"><#BlockedClient#></th>
         </tr>
         <tr>
             <th width="8%"><#Type#></th>
             <th><#Computer_Name#></th>
             <th width="20%">IP</th>
             <th width="24%">MAC</th>
-            <th width="8%" id="col_unrssi">RSSI</th>
+            <th width="8%" id="col_unrssi"><i class="icon-signal" title="RSSI"></i></th>
             <th width="0%" id="col_unblock"></th>
         </tr>
     </thead>

@@ -294,7 +294,8 @@ ifeq ($(CONFIG_MT7603E_DOT11K_RRM_SUPPORT),y)
 	EXTRA_CFLAGS += -DDOT11K_RRM_SUPPORT -DAP_SCAN_SUPPORT -DSCAN_SUPPORT -DAPPLE_11K_IOT
 spec_objs += $(RT_WIFI_DIR)/common/rrm_tlv.o\
                     $(RT_WIFI_DIR)/common/rrm_sanity.o\
-                    $(RT_WIFI_DIR)/common/rrm.o
+                    $(RT_WIFI_DIR)/common/rrm.o \
+                    $(RT_WIFI_DIR)/common/nr_5g_neighbor.o
 endif
 
 # WNM

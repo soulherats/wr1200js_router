@@ -325,7 +325,7 @@ function fill_ss_status(status_code){
 
                                         <tr id="row_ss_obfs_para" style="display:none;"> <th width="50%"><#menu5_16_25#></th>
                                             <td>
-                                                <input type="text" maxlength="72" class="input" size="64" name="ss_obfs_param" value="<% nvram_get_x("","ss_obfs_param"); %>" />
+                                                <input type="text" maxlength="100" class="input" size="64" name="ss_obfs_param" value="<% nvram_get_x("","ss_obfs_param"); %>" />
                                             </td>
                                         </tr>
 

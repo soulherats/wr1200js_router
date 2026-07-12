@@ -13,7 +13,7 @@ PACKAGE = libiconv
 VERSION = 1.16
 PACKAGE_BUGREPORT = 
 
-SED = /bin/sed
+SED = /usr/bin/sed
 SHELL = /bin/bash
 
 
@@ -40,7 +40,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 # versions, $(mkinstalldirs) and $(install_sh) are unused.
 mkinstalldirs = $(SHELL) ${SHELL} /opt/rt-n56u/trunk/libs/libiconv/libiconv-1.16/build-aux/install-sh -d
 install_sh = $(SHELL) ${SHELL} /opt/rt-n56u/trunk/libs/libiconv/libiconv-1.16/build-aux/install-sh
-MKDIR_P = /bin/mkdir -p
+MKDIR_P = /usr/bin/mkdir -p
 mkdir_p = $(MKDIR_P)
 
 # When building gettext-tools, we prefer to use the built programs

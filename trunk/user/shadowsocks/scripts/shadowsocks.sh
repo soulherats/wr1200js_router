@@ -114,19 +114,6 @@ func_start_ss_rules(){
 }
 
 func_gen_ss_json(){
-	result=$(curl -s -k 'https://uapis.cn/api/v1/network/dns?domain='$ss_server'&type=A' -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)' \
-		| grep -o '"target":"[^"]*"' | sed 's/"target":"//;s/"//' \
-		| xargs -n1 -I {} bash -c ' \
-			IP="{}"
-			TIME=$(ping -c1 -w1 "$IP" 2>/dev/null | grep "time=" | sed -n "s/.*time=\(.*\) ms/\1/p")
-			if [ -n "$TIME" ]; then
-				echo "$TIME $IP"
-			fi
-		' \
-		| sort -n | head -n1 | awk '{print $2}')
-	if [ -n "$result" ]; then
-		ss_server=$result
-	fi
 cat > "$ss_json_file" <<EOF
 {
     "server": "$ss_server",
@@ -236,7 +223,6 @@ func_start(){
 	func_dl_list && \
 	func_start_ss_rules && \
 	func_start_ss_dns && \
-	restart_firewall && \
 	loger $ss_bin "start done" || { ss-rules -f && func_stop && loger $ss_bin "start fail!";}
 }
 

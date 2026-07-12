@@ -188,6 +188,7 @@ dir_$(LIBS_INCLUDE_LIBJSON_C)			+= libjson-c
 dir_$(LIBS_INCLUDE_LIBUV)				+= libuv
 dir_$(LIBS_INCLUDE_LIBWEBSOCKETS)		+= libwebsockets
 dir_$(LIBS_INCLUDE_LIBPCRE)			+= libpcre
+dir_$(LIBS_INCLUDE_LIBPCRE)			+= libpcre2
 dir_$(LIBS_INCLUDE_LIBEV)			+= libev
 dir_$(LIBS_INCLUDE_LIBSODIUM)			+= libsodium
 dir_$(LIBS_INCLUDE_LIBUDNS)			+= libudns

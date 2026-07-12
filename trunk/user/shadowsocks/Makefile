@@ -1,6 +1,6 @@
 THISDIR = $(shell pwd)
 
-SRC_SS_NAME=shadowsocks-libev-3.3.5
+SRC_SS_NAME=shadowsocks-libev-3.3.6
 #https://github.com/shadowsocks/shadowsocks-libev.git
 
 SRC_SSR_NAME=shadowsocksr-libev-master
@@ -15,7 +15,7 @@ all: gfwlist_dl extract_test config_test
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	$(MAKE) -j$(HOST_NCPU) -C $(SRC_SSR_NAME)
 endif
-	$(MAKE) -j$(HOST_NCPU) -C $(SRC_SS_NAME)
+	$(MAKE) -j$(HOST_NCPU) -C $(SRC_SS_NAME)/build
 
 gfwlist_dl:
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
@@ -79,15 +79,22 @@ configure_ssr:
 	)
 
 configure_ss:
-	( cd $(SRC_SS_NAME) ; \
-	ac_cv_prog_PCRE_CONFIG="$(STAGEDIR)/bin/pcre-config" \
-	./configure \
-		--prefix=/usr \
-		--disable-documentation \
-		--disable-ssp \
-		--disable-assert \
-		--host=$(HOST_TARGET) \
-		--build=$(HOST_BUILD) ; \
+	(  mkdir -p $(SRC_SS_NAME)/build && cd $(SRC_SS_NAME)/build ; \
+                cmake \
+                        -DCMAKE_TOOLCHAIN_FILE=../../cross-mipsel-linux.cmake \
+                        -DCMAKE_INSTALL_PREFIX=/usr \
+                        -DENABLE_DOCUMENTATION=OFF \
+                        -DENABLE_SSP=OFF \
+                        -DBUILD_TESTING=OFF \
+                        -DCMAKE_BUILD_TYPE=Release \
+                        -DCMAKE_C_FLAGS="-O2 -fno-stack-protector -U_FORTIFY_SOURCE" \
+                        -DCMAKE_CXX_FLAGS="-O2 -fno-stack-protector -U_FORTIFY_SOURCE" \
+                        -DCMAKE_EXE_LINKER_FLAGS="-fno-stack-protector -L$(STAGEDIR)/lib -lcares -lmbedx509 -lmbedcrypto -lmbedtls -lz" \
+			-DCMAKE_SHARED_LINKER_FLAGS="-fno-stack-protector" \
+                        -DMBEDTLS_INCLUDE_DIR=$(STAGEDIR)/include \
+                        -DCARES_INCLUDE_DIR=$(STAGEDIR)/include \
+                        -DWITH_MBEDTLS=ON \
+                        .. ; \
 	)
 
 clean: clean_ssr clean_ss
@@ -111,8 +118,8 @@ ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	$(ROMFSINST) $(THISDIR)/gfwlist/gfwlist.bz2 /etc_ro/gfwlist.bz2
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-redir /usr/bin/ssr-redir
 	#$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-local /usr/bin/ssr-local
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/src/ss-redir /usr/bin/ss-orig-redir
-	#$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/src/ss-local /usr/bin/ss-orig-local
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/bin/ss-redir /usr/bin/ss-orig-redir
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/bin/ss-local /usr/bin/ss-local
 	ln -sf /var/ss-redir $(ROMFSDIR)/usr/bin/ss-redir
 	#ln -sf /var/ss-tunnel $(ROMFSDIR)/usr/bin/ss-local
 endif

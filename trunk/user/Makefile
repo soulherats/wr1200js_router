@@ -157,6 +157,7 @@ else
 dir_$(SAMBA_ENABLED)				+= samba3
 endif
 dir_$(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS)	+= chnroute
+dir_$(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS)	+= uot
 dir_$(CONFIG_FIRMWARE_INCLUDE_TTYD)		+= ttyd
 dir_$(FRP_ENABLE)				+= frp
 dir_$(SOFTETHERVPN_ENABLE)			+= softethervpn

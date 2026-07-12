@@ -946,9 +946,8 @@ static const struct _inadyn_checkip_url {
 	{ "checkip6.spdyn.de",        "/"     , false },
 	{ "v4.ipv6-test.com",         "/api/myip.php", true },
 	{ "v6.ipv6-test.com",         "/api/myip.php", true },
-	{ "4.ipw.cn",		      "/"     , true },
-	{ "6.ipw.cn",                 "/"     , true },
-	{ "test.ipw.cn",              "/"     , true },
+	{ "ipv6.icanhazip.com",	      "/"     , true },
+	{ "ip.zxinc.org",	      "/getip"     , true },
 };
 
 static const char *

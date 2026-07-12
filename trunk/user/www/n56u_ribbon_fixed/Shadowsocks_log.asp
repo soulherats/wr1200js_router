@@ -26,43 +26,69 @@ function initial(){
   show_footer();
 }
 
+function copyToClipboard(text) {
+    var textField = document.createElement('textarea');
+    textField.innerText = text;
+    document.body.appendChild(textField);
+    textField.select();
+    try {
+        document.execCommand('copy');
+        console.log('已复制到剪贴板: ' + text);
+    } catch (err) {
+        console.error('无法复制', err);
+    }
+    textField.remove();
+}
+
 function get_sslink(){
-	$j.ajax({
-		url: url,
-		dataType: 'json',
-		cache: true,
-		error: function(xhr){
-			;
-		},
-		success: function(data){
-			$j('.load').remove();
-			$j.each(data, function(index, item) {
-				var t_body = '';
-				var proto, name, hostname, port, password;
-				proto = item.proto;
-				if (proto == "ss") {
-					name = decodeURIComponent(atob(item.name));
-					hostname = item.server;
-					password = item.password;
-					port = item.port;
-				}
-				t_body += '<tr>\n';
-				t_body += '  <td>'+proto+'</td>\n';
-				t_body += '  <td>'+name+'</td>\n';
-				t_body += '  <td>'+hostname+'</td>\n';
-				t_body += '  <td>'+password+'</td>\n';
-				t_body += '  <td>'+port+'</td>\n';
-				t_body += '</tr>\n';
-				$j('#ss_table').append(t_body);
-			});
-		}
-	});
+        $j.ajax({
+                url: url,
+                dataType: 'json',
+                cache: true,
+                error: function(xhr){
+                        ;
+                },
+                success: function(data){
+                        $j('.load').remove();
+                        $j.each(data, function(index, item) {
+                                var t_body = '';
+                                var proto, name, hostname, port, password;
+                                proto = item.proto;
+                                if (proto == "ss") {
+                                        name = decodeURIComponent(atob(item.name));
+                                        
+                                        if (!/[\u{1F1E6}-\u{1F1FF}]{2}/u.test(name)) {
+                                                var countryMatch = name.match(/[A-Z]{2}/);
+                                                if (countryMatch) {
+                                                        var code = countryMatch[0];
+                                                        var flag = String.fromCodePoint(...code.split('').map(c => c.charCodeAt() + 127397));
+                                                        var pattern = new RegExp(code + "-?");
+                                                        name = flag + " " + name.replace(pattern, "").trim();
+                                                } else {
+                                                        name = "🚀 " + name; 
+                                                }
+                                        }
+                                        
+                                        hostname = item.server;
+                                        password = item.password;
+                                        port = item.port;
+                                }
+                                t_body += '<tr>\n';
+                                t_body += '  <td>'+proto+'</td>\n';
+                                t_body += '  <td>'+name+'</td>\n';
+                                t_body += '  <td title="' + hostname + '" oncontextmenu="copyToClipboard(\'' + hostname + '\'); return false;">' + hostname + '</td>\n';
+                                t_body += '  <td title="' + password + '" oncontextmenu="copyToClipboard(\'' + password + '\'); return false;">' + password + '</td>\n';
+                                t_body += '  <td>'+port+'</td>\n';
+                                t_body += '</tr>\n';
+                                $j('#ss_table').append(t_body);
+                        });
+                }
+        });
 }
 
 $j(document).ready(function(){
 	get_sslink();
 });
-
 </script>
  
 <style>
@@ -113,22 +139,34 @@ body.body_iframe{
 }
 
 #ss_table {
-    table-layout:fixed;
+    table-layout: auto; /* 改为自动布局，优先撑开内容 */
+    width: 100%;
 }
 
-#ss_table td,th {
-    border: 1px solid #4e4040; /* 定义单元格的边框样式 */
-    padding: 8px; /* 设置单元格内边距 */
+#ss_table th, #ss_table td {
+    border: 1px solid #4e4040;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap; /* 默认不换行 */
+}
+
+#ss_table td:nth-child(3),
+#ss_table td:nth-child(4) {
+    max-width: 120px;       /* 默认最大宽度，可根据需要调整 */
     overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-    text-overflow:ellipsis;
-     text-align: center; /* 水平居中 */
-      vertical-align: middle;
+    cursor: pointer;        /* 鼠标移上去显示手指形状，提示可交互 */
+    transition: all 0.2s ease-in-out; /* 平滑过渡效果 */
 }
 
-#ss_table th {
-    background-color: #35254b; /* 表头背景色 */
-    text-align: center; /* 居中内容 */
+#ss_table td:nth-child(3),
+#ss_table td:nth-child(4) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
 </head>
@@ -173,32 +211,17 @@ body.body_iframe{
                   <div class="row-fluid">
                     <div id="tabMenu" class="submenuBlock"></div>
                     <table width="100%" cellpadding="4" cellspacing="0" class="table" id="ss_table">
-                      <col style="width:10%" />
-                      <col style="width:20%" />
-                      <col style="width:20%" />
-                      <col style="width:40%" />
-                      <col style="width:10%" />
                       <tr>
                         <th colspan="5" style="background-color: rgba(171, 168, 167,0.2);">
                           <#menu5_16_32#>
                         </th>
                       </tr>
                       <tr>
-                        <th width="10%">
-                          <#ss_proto#>
-                        </th>
-                        <th width="20%">
-                          <#ss_name#>
-                        </th>
-                        <th width="20%">
-                          <#ss_server#>
-                        </th>
-                        <th width="40%">
-                          <#AiDisk_Password#>
-                        </th>
-                        <th width="10%">
-                          <#ss_port#>
-                        </th>
+                        <th><#ss_proto#></th>
+                        <th><#ss_name#></th>
+                        <th><#ss_server#></th>
+                        <th><#AiDisk_Password#></th>
+                        <th><#ss_port#></th>
                       </tr>
                     </table>
                     <div class="load">
