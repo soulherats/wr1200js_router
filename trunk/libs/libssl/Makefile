@@ -66,6 +66,7 @@ clean:
 	if [ -f $(SRC_NAME)/Makefile ] ; then \
 		$(MAKE) -C $(SRC_NAME) clean ; \
 	fi ; \
+	rm -rf $(SRC_NAME)
 	rm -f config_done
 
 install:

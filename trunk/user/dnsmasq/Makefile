@@ -27,7 +27,10 @@ extract_test:
 	fi )
 
 clean:
-	$(MAKE) -C $(SRC_NAME) clean
+	if [ -f $(SRC_NAME)/Makefile ] ; then \
+		$(MAKE) -C $(SRC_NAME) clean ; \
+	fi ; \
+	rm -rf $(SRC_NAME)
 	rm -f dnsmasq
 
 romfs:
