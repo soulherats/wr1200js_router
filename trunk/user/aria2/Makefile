@@ -1,27 +1,16 @@
 SRC_NAME=aria2-1.35.0
 SRC_URL=https://github.com/aria2/aria2/releases/download/release-1.35.0/aria2-1.35.0.tar.xz
 
-SRC_ARIA_NG_NAME=AriaNg-1.1.7-AllInOne
-SRC_ARIA_NG_URL=https://github.com/mayswind/AriaNg/releases/download/1.1.7/AriaNg-1.1.7-AllInOne.zip
-
 CFLAGS  += -ffunction-sections -fdata-sections -fvisibility=hidden
 CXXFLAGS += -ffunction-sections -fdata-sections -fvisibility-inlines-hidden
 LDFLAGS += -Wl,--gc-sections -lstdc++
 
 THISDIR = $(shell pwd)
 
+# ariaweb is the pre-built, minified webui-aria2 (committed to repo).
+# index.html + app.css + app.js + vendor.js were minified with terser/csso.
 all: download_test extract_test config_test
 	$(MAKE) -j$(HOST_NCPU) -C $(SRC_NAME)
-ifeq ($(CONFIG_FIRMWARE_INCLUDE_ARIA_WEB_CONTROL),y)
-	( if [ ! -f $(THISDIR)/$(SRC_ARIA_NG_NAME).zip ]; then \
-		wget -t5 --timeout=20 --no-check-certificate -O $(SRC_ARIA_NG_NAME).zip $(SRC_ARIA_NG_URL); \
-	fi )
-	( if [ ! -d $(THISDIR)/ariaweb ]; then \
-		mkdir -p ariaweb; \
-		unzip -qq $(SRC_ARIA_NG_NAME).zip -d ariaweb; \
-	fi )
-endif
-
 download_test:
 	( if [ ! -f $(SRC_NAME).tar.xz ]; then \
 		wget -t5 --timeout=20 --no-check-certificate -O $(SRC_NAME).tar.xz $(SRC_URL); \
@@ -70,7 +59,6 @@ clean:
 	if [ -f $(SRC_NAME)/Makefile ] ; then \
 		$(MAKE) -C $(SRC_NAME) distclean ; \
 	fi ; \
-	rm -rf ariaweb
 	rm -f config_done
 
 romfs:
