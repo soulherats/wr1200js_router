@@ -12,6 +12,7 @@
 #include <asm/rt2880/irq.h>
 #include <asm/rt2880/surfboardint.h>
 #include "mtk_pecApi.h"
+#include "mtk_crypto_api.h"
 #include <net/mtk_esp.h>
 #include <linux/proc_fs.h>
 
@@ -132,6 +133,13 @@ VDriver_Init(
 	memset(&mcrypto_proc, 0, sizeof(mcrypto_proc_type));
     
 	mtk_ipsec_init();
+	if (mtk_crypto_api_init() != 0)
+	{
+		printk("\n !Crypto API AES-CBC registration failed! \n");
+		Adapter_UnInit();
+		PEC_UnInit();
+		return -1;
+	}
     
     return 0;   // success
 }
@@ -143,6 +151,7 @@ VDriver_Exit(
 	void
 )
 {
+	mtk_crypto_api_exit();
     Adapter_UnInit();
 	
 	PEC_UnInit();
@@ -151,7 +160,8 @@ VDriver_Exit(
 #endif	
 }
 
-MODULE_LICENSE("Proprietary");
+/* Crypto API registration uses GPL-only kernel exports. */
+MODULE_LICENSE("GPL");
 
 module_init(VDriver_Init);
 module_exit(VDriver_Exit);

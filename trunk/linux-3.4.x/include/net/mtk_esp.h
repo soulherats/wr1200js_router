@@ -4,11 +4,14 @@
 #include <linux/skbuff.h>
 #include <linux/dma-mapping.h>
 #include <linux/kernel.h>
+#include <linux/atomic.h>
 
 #define HASH_DIGEST_OUT			0
 #define HASH_DIGEST_IN			1
 #define CRYPTO_ENCRYPTION		1
 #define CRYPTO_DECRYPTION		2
+
+#define MTK_EIP93_USERID_GENERIC	0x1U
 
 
 /************************************************************************
@@ -64,6 +67,7 @@ typedef struct eip93DescpHandler_s
 	addrHandler_t	stateAddr;
 	addrHandler_t	arc4Addr;
 	unsigned int	userId;
+	unsigned int	userIdIsPacket;
 	peLength_t		peLength;
 
 } eip93DescpHandler_t;
@@ -95,6 +99,9 @@ typedef struct ipsecEip93Adapter_s
 	eip93DescpHandler_t 		*cmdHandler; //for encrypt/decrypt
 	spinlock_t 					lock;
 	unsigned int 				addedLen; //refer to ssh_hwaccel_alloc_combined() in safenet_la.c
+	atomic_t					refs;
+	atomic_t					pending;
+	atomic_t					state;
 
 } ipsecEip93Adapter_t;
 
@@ -141,7 +148,7 @@ extern int
 	unsigned int spi, 
 	unsigned int padCrtlStat
 );
-extern void 
+extern void
 (*ipsec_espNextHeader_set)(
 	eip93DescpHandler_t *cmdHandler, 
 	unsigned char protocol	
@@ -163,12 +170,12 @@ extern unsigned int
 	eip93DescpHandler_t *resHandler
 );
 
-extern void 
+extern void
 (*ipsec_addrsDigestPreCompute_free)(
 	ipsecEip93Adapter_t *currAdapterPtr
 );
 
-extern void 
+extern void
 (*ipsec_cmdHandler_free)(
 	eip93DescpHandler_t *cmdHandler
 );
@@ -201,6 +208,11 @@ ipsec_BH_handler_resultGet(
 	void
 );
 
+extern void
+ipsec_eip93Adapter_cmd_done(
+	ipsecEip93Adapter_t *adapter
+);
+
 #define PROCNAME    "mcrypto"
 
 typedef struct mcrypto_proc_t {
@@ -216,4 +228,3 @@ extern mcrypto_proc_type mcrypto_proc;
 #define HWCRYPTO_OK			1
 #define HWCRYPTO_NOMEM		0x80
 #endif
-

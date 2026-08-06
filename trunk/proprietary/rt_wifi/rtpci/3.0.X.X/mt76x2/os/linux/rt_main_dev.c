@@ -395,6 +395,15 @@ int rt28xx_open(VOID *dev)
 	CoexChannelBw = -1;
 #endif
 
+
+		/* Push 5G AP info to MT7603 neighbor table on ifup */
+#ifdef DOT11K_RRM_SUPPORT
+	{
+		extern int push_5g_ap_info(void *);
+		push_5g_ap_info(pAd);
+	}
+#endif /* DOT11K_RRM_SUPPORT */
+
 	return (retval);
 
 err:

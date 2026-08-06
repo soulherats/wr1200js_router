@@ -48,6 +48,10 @@ int wl_proc_exit(void);
 #define PROCREG_DIR             "rt2883"
 #endif /* CONFIG_RALINK_RT2883 */
 
+
+#ifdef CONFIG_RALINK_MT7621
+#define PROCREG_DIR             "mt7621"
+#endif /* CONFIG_RALINK_MT7621 */
 #ifdef CONFIG_RALINK_RT3883
 #define PROCREG_DIR             "rt3883"
 #endif /* CONFIG_RALINK_RT3883 */
@@ -63,11 +67,12 @@ int wl_proc_exit(void);
 #ifdef CONFIG_PROC_FS
 extern struct proc_dir_entry *procRegDir;
 
+struct proc_dir_entry *proc_ralink_wl;
+
 #ifdef VIDEO_TURBINE_SUPPORT
 extern BOOLEAN UpdateFromGlobal;
 AP_VIDEO_STRUCT GLOBAL_AP_VIDEO_CONFIG;
-/*struct proc_dir_entry *proc_ralink_platform, *proc_ralink_wl, *proc_ralink_wl_video; */
-struct proc_dir_entry *proc_ralink_wl, *proc_ralink_wl_video;
+struct proc_dir_entry *proc_ralink_wl_video;
 static struct proc_dir_entry *entry_wl_video_Update, *entry_wl_video_Enable, *entry_wl_video_ClassifierEnable, *entry_wl_video_HighTxMode, *entry_wl_video_TxPwr, *entry_wl_video_VideoMCSEnable, *entry_wl_video_VideoMCS, *entry_wl_video_TxBASize, *entry_wl_video_TxLifeTimeMode, *entry_wl_video_TxLifeTime, *entry_wl_video_TxRetryLimit;
 
 
@@ -89,7 +94,7 @@ ssize_t video_Update_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -116,7 +121,7 @@ ssize_t video_Enable_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -143,7 +148,7 @@ ssize_t video_ClassifierEnable_set(struct file *file, const char __user * buffer
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -170,7 +175,7 @@ ssize_t video_HighTxMode_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -197,7 +202,7 @@ ssize_t video_TxPwr_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -224,7 +229,7 @@ ssize_t video_VideoMCSEnable_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -251,7 +256,7 @@ ssize_t video_VideoMCS_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -278,7 +283,7 @@ ssize_t video_TxBASize_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -305,7 +310,7 @@ ssize_t video_TxLifeTimeMode_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -332,7 +337,7 @@ ssize_t video_TxLifeTime_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
 			val = simple_strtoul(buf, NULL, 10);
 
@@ -344,7 +349,7 @@ ssize_t video_TxLifeTime_set(struct file *file, const char __user * buffer,
 ssize_t video_TxRetryLimit_get(char *page, char **start, off_t off, int count,
                           int *eof, void *data_unused)
 {
-	sprintf(page, "0x%x\n", GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit);
+	sprintf(page, "%d\n", GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit);
 	*eof = 1;
         return strlen(page);
 }
@@ -359,9 +364,9 @@ ssize_t video_TxRetryLimit_set(struct file *file, const char __user * buffer,
 
 		if (copy_from_user(buf, buffer, count))
 			return -EFAULT;
-		
+
 		if (buf)
-			val = simple_strtoul(buf, NULL, 16);
+			val = simple_strtoul(buf, NULL, 10);
 
 		GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit = val;
 	}
@@ -370,6 +375,8 @@ ssize_t video_TxRetryLimit_set(struct file *file, const char __user * buffer,
 
 int wl_video_proc_init(void)
 {
+
+	UpdateFromGlobal = FALSE;
 	GLOBAL_AP_VIDEO_CONFIG.Enable = FALSE;
 	GLOBAL_AP_VIDEO_CONFIG.ClassifierEnable = FALSE;
 	GLOBAL_AP_VIDEO_CONFIG.HighTxMode = FALSE;
@@ -380,8 +387,6 @@ int wl_video_proc_init(void)
 	GLOBAL_AP_VIDEO_CONFIG.TxLifeTimeMode = FALSE;
 	GLOBAL_AP_VIDEO_CONFIG.TxLifeTime = 0;
 	GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit = 0;
-
-		proc_ralink_wl = proc_mkdir("wl", procRegDir);
 
 	if (proc_ralink_wl)
 		proc_ralink_wl_video = proc_mkdir("VideoTurbine", proc_ralink_wl);
@@ -458,12 +463,15 @@ int wl_video_proc_init(void)
 
 int wl_video_proc_exit(void)
 {
+	if (entry_wl_video_Update)
+		remove_proc_entry("UpdateFromGlobal", proc_ralink_wl_video);
+
 
 	if (entry_wl_video_Enable)
 		remove_proc_entry("Enable", proc_ralink_wl_video);
-	
+
 	if (entry_wl_video_ClassifierEnable)
-		remove_proc_entry("ClassifierEnabl", proc_ralink_wl_video);
+		remove_proc_entry("ClassifierEnable", proc_ralink_wl_video);
 
 	if (entry_wl_video_HighTxMode)
 		remove_proc_entry("HighTxMode", proc_ralink_wl_video);
@@ -490,7 +498,7 @@ int wl_video_proc_exit(void)
 		remove_proc_entry("TxRetryLimit", proc_ralink_wl_video);
 
 	if (proc_ralink_wl_video)
-		remove_proc_entry("Video", proc_ralink_wl);
+		remove_proc_entry("VideoTurbine", proc_ralink_wl);
 
 	return 0;
 }
@@ -502,9 +510,13 @@ int wl_proc_init(void)
 		procRegDir = proc_mkdir(PROCREG_DIR, NULL);
 
 	if (procRegDir) {
+		proc_ralink_wl = proc_mkdir("wl", procRegDir);
 #ifdef VIDEO_TURBINE_SUPPORT
 		wl_video_proc_init();
 #endif /* VIDEO_TURBINE_SUPPORT */
+#ifdef DOT11K_RRM_SUPPORT
+		nr_5g_neighbor_proc_init();
+#endif /* DOT11K_RRM_SUPPORT */
 	}
 
 	return 0;
@@ -512,16 +524,22 @@ int wl_proc_init(void)
 
 int wl_proc_exit(void)
 {
+#ifdef DOT11K_RRM_SUPPORT
+	nr_5g_neighbor_proc_exit();
+#endif /* DOT11K_RRM_SUPPORT */
+
 #ifdef VIDEO_TURBINE_SUPPORT
 	if (proc_ralink_wl_video) {
 		wl_video_proc_exit();
-		remove_proc_entry("Video", proc_ralink_wl);
+		proc_ralink_wl_video = NULL;
 	}
-	if (proc_ralink_wl)
-		remove_proc_entry("wl", procRegDir);
 #endif /* VIDEO_TURBINE_SUPPORT */
 
-	
+	if (proc_ralink_wl) {
+		remove_proc_entry("wl", procRegDir);
+		proc_ralink_wl = NULL;
+	}
+
 	return 0;
 }
 #else
@@ -536,4 +554,3 @@ int wl_proc_exit(void)
 	return 0;
 }
 #endif /* CONFIG_PROC_FS */
-

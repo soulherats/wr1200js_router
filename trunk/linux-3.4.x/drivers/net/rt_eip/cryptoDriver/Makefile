@@ -68,6 +68,7 @@ crypto_k-objs:= \
   $(SRC_APP)/mtk_eip93Init.o \
   $(SRC_APP)/mtk_pecInit.o \
   $(SRC_APP)/mtk_interruptHelper.o	\
+	$(SRC_APP)/mtk_crypto_api.o \
 	$(SRC_APP)/mtk_init.o
 
 #obj-m	+= crypto_k.o

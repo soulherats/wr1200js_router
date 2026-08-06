@@ -23,6 +23,7 @@ download_test:
 extract_test:
 	( if [ ! -d $(SRC_NAME) ]; then \
 		tar zxf $(SRC_NAME).tar.gz; \
+		patch -p0 < 001-rdnss-stateless-lan.patch; \
 	fi )
 
 clean:

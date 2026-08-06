@@ -32,6 +32,11 @@
 #include "rt_os_net.h"
 #include <linux/pci.h>
 
+/* proc init/exit */
+extern int wl_proc_init(void);
+extern int wl_proc_exit(void);
+
+
 
 /*
 	Driver module load/unload function
@@ -46,7 +51,8 @@ static int __init wifi_drv_init_module(void)
 		printk("Register PCI device driver failed(%d)!\n", status);
 #endif /* RTMP_PCI_SUPPORT */
 
-
+	if (status == 0)
+		wl_proc_init();
 
 	return status;
 }
@@ -56,11 +62,12 @@ static void __exit wifi_drv_cleanup_module(void)
 {
 //	int status = 0;
 
+	wl_proc_exit();
+
 #ifdef RTMP_PCI_SUPPORT
 	rt_pci_cleanup_module();
 	printk("Unregister PCI device driver\n");
 #endif /* RTMP_PCI_SUPPORT */
-
 
 }
 

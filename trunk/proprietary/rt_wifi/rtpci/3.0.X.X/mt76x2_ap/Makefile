@@ -259,6 +259,7 @@ ifeq ($(CONFIG_RT_DOT11K_RRM),y)
 $(RT_DRV_NAME)-objs += $(RT_DRV_PATH)/common/rrm_tlv.o
 $(RT_DRV_NAME)-objs += $(RT_DRV_PATH)/common/rrm_sanity.o
 $(RT_DRV_NAME)-objs += $(RT_DRV_PATH)/common/rrm.o
+$(RT_DRV_NAME)-objs += $(RT_DRV_PATH)/common/push_5g_neighbor.o
 endif
 
 ifeq ($(CONFIG_RT_CFG80211),y)

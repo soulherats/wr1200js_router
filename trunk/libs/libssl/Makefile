@@ -20,7 +20,7 @@ OPENSSL_CIPHERS = no-capieng no-cms no-rfc3779 no-seed \
   no-cast no-whirlpool no-sctp no-srp no-ssl2 no-ssl3 \
   no-async no-blake2 no-hw-padlock no-aria no-hw \
   no-devcryptoeng no-ssl3-method no-tests no-sm2 \
-  no-sm3 no-sm4 no-afalgeng no-comp
+  no-sm3 no-sm4 enable-afalgeng no-comp
 
 ifneq ($(CONFIG_FIRMWARE_INCLUDE_SSWAN),y)
 OPENSSL_CIPHERS += no-rc2
@@ -45,7 +45,8 @@ extract_test:
 	fi )
 
 config_test:
-	( if [ -f ./config_done ]; then \
+	( if [ -f ./config_done ] && grep -q "enable-afalgeng" $(SRC_NAME)/Makefile && \
+		! grep -q "OPENSSL_NO_AFALGENG" $(SRC_NAME)/configdata.pm; then \
 		echo "the same configuration"; \
 	else \
 		make configure && touch config_done; \
@@ -80,4 +81,3 @@ romfs:
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_OPENSSL_EXE),y)
 	$(ROMFSINST) $(SRC_NAME)/apps/openssl /usr/bin/openssl
 endif
-

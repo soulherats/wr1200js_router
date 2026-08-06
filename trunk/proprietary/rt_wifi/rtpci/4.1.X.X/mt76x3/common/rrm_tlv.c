@@ -739,6 +739,48 @@ VOID RRM_EnqueueNeighborRep(
 		}
 	}
 #endif /* AP_SCAN_SUPPORT */
+	/* --- 5G cross-band neighbor entries --- */
+	{
+		int n5g;
+		unsigned long flags;
+
+		spin_lock_irqsave(&g_5g_neighbor_lock, flags);
+		for (n5g = 0; n5g < MAX_5G_NEIGHBOR_NUM; n5g++) {
+			RRM_BSSID_INFO bi;
+
+			if (!g_5g_neighbor_tab[n5g].bValid)
+				continue;
+			if (SsidLen != 0 &&
+			    (SsidLen != g_5g_neighbor_tab[n5g].SsidLen ||
+			     !RTMPEqualMemory(g_5g_neighbor_tab[n5g].Ssid,
+			                         pSsid, SsidLen)))
+				continue;
+			PktLen = FrameLen + sizeof(RRM_NEIGHBOR_REP_INFO);
+			if (PktLen >= MGMT_DMA_BUFFER_SIZE)
+				break;
+
+			bi.word = 0;
+			bi.field.APReachAble = g_5g_neighbor_tab[n5g].APReachable;
+			bi.field.Security = g_5g_neighbor_tab[n5g].bSecurity;
+			bi.field.Qos = g_5g_neighbor_tab[n5g].bQos;
+			bi.field.APSD = g_5g_neighbor_tab[n5g].bAPSD;
+			bi.field.RRM = g_5g_neighbor_tab[n5g].bRRM;
+			bi.field.HT = g_5g_neighbor_tab[n5g].bHT;
+			bi.field.VHT = g_5g_neighbor_tab[n5g].bVHT;
+			RRM_InsertNeighborRepIE(pAd, (pOutBuffer + FrameLen),
+				&FrameLen, sizeof(RRM_NEIGHBOR_REP_INFO),
+				g_5g_neighbor_tab[n5g].Bssid, bi,
+				g_5g_neighbor_tab[n5g].RegulatoryClass,
+				g_5g_neighbor_tab[n5g].Channel,
+				g_5g_neighbor_tab[n5g].PhyType);
+			DBGPRINT(RT_DEBUG_TRACE,
+				("%s: 5G nbr %02x:%02x:%02x:%02x:%02x:%02x ch=%d\n",
+				 __FUNCTION__, PRINT_MAC(g_5g_neighbor_tab[n5g].Bssid),
+				 g_5g_neighbor_tab[n5g].Channel));
+		}
+		spin_unlock_irqrestore(&g_5g_neighbor_lock, flags);
+	}
+	/* --- end of 5G entries --- */
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
 
 	if (pOutBuffer)

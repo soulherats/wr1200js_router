@@ -233,7 +233,8 @@ ifeq ($(HAS_DOT11K_RRM_SUPPORT),y)
 RT28XX_AP_OBJ += \
 	$(RT28xx_DIR)/common/rrm_tlv.o \
 	$(RT28xx_DIR)/common/rrm_sanity.o \
-	$(RT28xx_DIR)/common/rrm.o
+	$(RT28xx_DIR)/common/rrm.o \
+		$(RT28xx_DIR)/common/nr_5g_neighbor.o
 endif
 #endif // DOT11K_RRM_SUPPORT //
 

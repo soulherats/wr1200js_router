@@ -50,7 +50,7 @@ typedef struct _RRM_QUIET_CB
 	UINT8 QuietCnt;
 	UINT8 QuietPeriod;
 	UINT8 QuietDuration;
-	UINT8 QuietOffset;		
+	UINT8 QuietOffset;
 } RRM_QUIET_CB, *PRRM_QUIET_CB;
 
 typedef struct _RRM_CONFIG
@@ -65,6 +65,35 @@ typedef struct _RRM_CONFIG
 	RRM_EN_CAP_IE rrm_capabilities;
 	RRM_EN_CAP_IE max_rrm_capabilities;
 } RRM_CONFIG, *PRRM_CONFIG;
+
+/* 5G cross-band neighbor entry (populated via proc from MT76x2) */
+#define MAX_5G_NEIGHBOR_NUM	16
+
+typedef struct _NR_5G_NEIGHBOR_ENTRY
+{
+	UCHAR	Bssid[MAC_ADDR_LEN];
+	UINT8	Channel;
+	UINT8	RegulatoryClass;
+	UINT8	PhyType;
+	UINT8	SsidLen;
+	CHAR	Ssid[MAX_LEN_OF_SSID];
+	/* BSSID info fields (straight from RRM_BSSID_INFO) */
+	UINT8	APReachable;
+	UINT8	bSecurity;
+	UINT8	bQos;
+	UINT8	bHT;
+	UINT8	bVHT;
+	UINT8	bRRM;
+	UINT8	bAPSD;
+	BOOLEAN	bValid;
+} NR_5G_NEIGHBOR_ENTRY, *PNR_5G_NEIGHBOR_ENTRY;
+
+extern NR_5G_NEIGHBOR_ENTRY g_5g_neighbor_tab[MAX_5G_NEIGHBOR_NUM];
+extern UINT8 g_5g_neighbor_cnt;
+extern spinlock_t g_5g_neighbor_lock;
+
+int nr_5g_neighbor_proc_init(void);
+void nr_5g_neighbor_proc_exit(void);
 
 typedef union _RRM_BCN_REQ_CAP
 {
@@ -203,4 +232,3 @@ DECLARE_TIMER_FUNCTION(WaitNRRspTimeout);
 #endif /* DOT11K_RRM_SUPPORT */
 
 #endif /* __RRM_CMM_H */
-

@@ -180,6 +180,72 @@ EXPORT_SYMBOL(ipsec_hashDigests_get);
 EXPORT_SYMBOL(ipsec_hashDigests_set);
 EXPORT_SYMBOL(ipsec_espSeqNum_get);
 
+static void ipsec_eip93Adapter_try_release(ipsecEip93Adapter_t *adapter);
+
+static void ipsec_eip93Adapter_put(ipsecEip93Adapter_t *adapter)
+{
+	if (adapter && atomic_dec_and_test(&adapter->refs))
+		ipsec_eip93Adapter_try_release(adapter);
+}
+
+static void ipsec_eip93Adapter_get(ipsecEip93Adapter_t *adapter)
+{
+	if (adapter && atomic_read(&adapter->state) == 0)
+		atomic_inc(&adapter->refs);
+}
+
+static void ipsec_eip93Adapter_cmd_submit(ipsecEip93Adapter_t *adapter)
+{
+	atomic_inc(&adapter->pending);
+}
+
+static void ipsec_eip93Adapter_drop_packet_ref(struct sk_buff *skb)
+{
+	ipsecEip93Adapter_t *adapter;
+
+	if (!skb)
+		return;
+	adapter = (ipsecEip93Adapter_t *)(*(unsigned int *)&skb->cb[36]);
+	if (adapter)
+		ipsec_eip93Adapter_put(adapter);
+}
+
+void ipsec_eip93Adapter_cmd_done(ipsecEip93Adapter_t *adapter)
+{
+	if (!adapter)
+		return;
+	if (atomic_read(&adapter->pending) > 0)
+		atomic_dec(&adapter->pending);
+	ipsec_eip93Adapter_try_release(adapter);
+}
+EXPORT_SYMBOL(ipsec_eip93Adapter_cmd_done);
+
+static void ipsec_eip93Adapter_release(ipsecEip93Adapter_t *adapter)
+{
+	struct sk_buff *skb;
+	struct xfrm_state *x = adapter->x;
+
+	while ((skb = skb_dequeue(&adapter->skbQueue)) != NULL)
+		kfree_skb(skb);
+	if (adapter->addrsPreCompute && ipsec_addrsDigestPreCompute_free)
+		ipsec_addrsDigestPreCompute_free(adapter);
+	if (adapter->cmdHandler && ipsec_cmdHandler_free)
+		ipsec_cmdHandler_free(adapter->cmdHandler);
+	if (x)
+		xfrm_state_put(x);
+	kfree(adapter);
+}
+
+static void ipsec_eip93Adapter_try_release(ipsecEip93Adapter_t *adapter)
+{
+	if (atomic_read(&adapter->state) != 1 ||
+	    atomic_read(&adapter->refs) != 0 ||
+	    atomic_read(&adapter->pending) != 0)
+		return;
+	if (atomic_cmpxchg(&adapter->state, 1, 2) == 1)
+		ipsec_eip93Adapter_release(adapter);
+}
+
 #ifdef MCRYPTO_DBG
 #define ra_dbg 	printk
 #else
@@ -400,10 +466,16 @@ ipsec_hashDigest_preCompute(
 	}
 
 	spin_lock(&cryptoLock);
-	while (ipsec_eip93CmdResCnt_check())
-	{	
-	ipsec_packet_put(addrsPreCompute->cmdHandler, NULL); //mtk_packet_put()
-		break;
+	if (!ipsec_eip93CmdResCnt_check()) {
+		spin_unlock(&cryptoLock);
+		return -EBUSY;
+	}
+	ipsec_eip93Adapter_cmd_submit(currAdapterPtr);
+	errVal = ipsec_packet_put(addrsPreCompute->cmdHandler, NULL);
+	if (errVal != 0) {
+		ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+		spin_unlock(&cryptoLock);
+		return errVal;
 	}
 	spin_unlock(&cryptoLock);
 	
@@ -415,10 +487,16 @@ ipsec_hashDigest_preCompute(
 	}
 	
 	spin_lock(&cryptoLock);
-	while (ipsec_eip93CmdResCnt_check())
-	{		
-	ipsec_packet_put(addrsPreCompute->cmdHandler, NULL); //mtk_packet_put()
-		break;
+	if (!ipsec_eip93CmdResCnt_check()) {
+		spin_unlock(&cryptoLock);
+		return -EBUSY;
+	}
+	ipsec_eip93Adapter_cmd_submit(currAdapterPtr);
+	errVal = ipsec_packet_put(addrsPreCompute->cmdHandler, NULL);
+	if (errVal != 0) {
+		ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+		spin_unlock(&cryptoLock);
+		return errVal;
 	}
 	spin_unlock(&cryptoLock);
 
@@ -436,8 +514,8 @@ free_ipad:
 free_hashKeyTank:
 	kfree(hashKeyTank);
 free_addrsPreCompute:
+	currAdapterPtr->addrsPreCompute = NULL;
 	kfree(addrsPreCompute);
-	currAdapterPtr->addrsPreCompute = NULL;	
 
 	return errVal;	
 }
@@ -636,7 +714,8 @@ ipsec_esp_preProcess(
 )
 {
 	ipsecEip93Adapter_t **ipsecEip93AdapterList;
-	unsigned int i, usedEntryNum = 0;
+	unsigned int i;
+	bool found = false;
 	ipsecEip93Adapter_t *currAdapterPtr;
 	unsigned int spi = x->id.spi;
 	int currAdapterIdx = -1;
@@ -663,9 +742,9 @@ ipsec_esp_preProcess(
 			if (currAdapterPtr->spi == spi)
 			{
 				currAdapterIdx = i;
+				found = true;
 				break;
 			}
-			usedEntryNum++;
 		}
 		else
 		{	//try to record the first unused entry in ipsecEip93AdapterList
@@ -676,7 +755,7 @@ ipsec_esp_preProcess(
 		}
 	}
 	
-	if (usedEntryNum == IPESC_EIP93_ADAPTERS)
+	if (!found && currAdapterIdx == -1)
 	{
 		printk("\n\n !The ipsecEip93AdapterList table is full! \n\n");
 		err = -EPERM;
@@ -685,7 +764,7 @@ ipsec_esp_preProcess(
 	}
 
 	//no ipsecEip93Adapter matched, so create a new one for the ipsec flow. Only the first packet of a ipsec flow will encounter this.
-	if (i == IPESC_EIP93_ADAPTERS)
+	if (!found)
 	{
 		if (x->aalg == NULL)
 		{
@@ -697,6 +776,7 @@ ipsec_esp_preProcess(
 		{
 			printk("\n\n !please set a cipher algorithm! \n\n");
 			err = -EPERM;
+			spin_unlock(&ipsec_adapters_lock);
 			goto EXIT;
 		}
 	
@@ -705,8 +785,14 @@ ipsec_esp_preProcess(
 		{
 			printk("\n\n !!kmalloc for new ipsecEip93Adapter failed!! \n\n");
 			err = -ENOMEM;
+			spin_unlock(&ipsec_adapters_lock);
 			goto EXIT;
 		}
+		atomic_set(&currAdapterPtr->refs, 1);
+		atomic_set(&currAdapterPtr->pending, 0);
+		atomic_set(&currAdapterPtr->state, 0);
+		xfrm_state_hold(x);
+		currAdapterPtr->x = x;
 		
 		spin_lock_init(&currAdapterPtr->lock);
 		skb_queue_head_init(&currAdapterPtr->skbQueue);	
@@ -715,16 +801,20 @@ ipsec_esp_preProcess(
 		if (err < 0)
 		{
 			printk("\n\n !ipsec_hashDigest_preCompute for direction:%d failed! \n\n", direction);
-			kfree(currAdapterPtr);
 			spin_unlock_irqrestore(&currAdapterPtr->lock, flags);
+			spin_unlock(&ipsec_adapters_lock);
+			atomic_set(&currAdapterPtr->state, 1);
+			ipsec_eip93Adapter_put(currAdapterPtr);
 			goto EXIT;
 		}			
 		err = ipsec_cmdHandler_prepare(x, currAdapterPtr, direction);
 		if (err < 0)
 		{
 			printk("\n\n !ipsec_cmdHandler_prepare for direction:%d failed! \n\n", direction);
-			kfree(currAdapterPtr);
 			spin_unlock_irqrestore(&currAdapterPtr->lock, flags);
+			spin_unlock(&ipsec_adapters_lock);
+			atomic_set(&currAdapterPtr->state, 1);
+			ipsec_eip93Adapter_put(currAdapterPtr);
 			goto EXIT;
 		}		
 		currAdapterPtr->spi = spi;
@@ -734,20 +824,17 @@ ipsec_esp_preProcess(
 				currAdapterPtr->isEncryptOrDecrypt = CRYPTO_DECRYPTION;
 
 		else
-				currAdapterPtr->isEncryptOrDecrypt = CRYPTO_ENCRYPTION;	
+			currAdapterPtr->isEncryptOrDecrypt = CRYPTO_ENCRYPTION;
 		spin_unlock_irqrestore(&currAdapterPtr->lock, flags);
-		
-		
 	}
-	spin_unlock(&ipsec_adapters_lock);
-	
-	currAdapterPtr = ipsecEip93AdapterList[currAdapterIdx];
-
-
-	if (direction == HASH_DIGEST_IN)
+	if (atomic_read(&currAdapterPtr->state) != 0)
 	{
-		currAdapterPtr->x = x;
+		spin_unlock(&ipsec_adapters_lock);
+		err = -ESHUTDOWN;
+		goto EXIT;
 	}
+	ipsec_eip93Adapter_get(currAdapterPtr);
+	spin_unlock(&ipsec_adapters_lock);
 
 #if !defined (FEATURE_AVOID_QUEUE_PACKET)
 	//Hash Digests are ready
@@ -784,22 +871,60 @@ ipsec_esp_pktPut(
 	struct dst_entry *dst;
 	unsigned int *addrCurrAdapter;
 	unsigned long flags;
+	bool packet_ref = false;
 	
 
 	spin_lock_bh(&cryptoLock);
 	
 	if (currAdapterPtr!=NULL)
 	{
+		if (atomic_read(&currAdapterPtr->state) != 0)
+		{
+			spin_unlock_bh(&cryptoLock);
+			return HWCRYPTO_NOMEM;
+		}
 		cmdHandler = currAdapterPtr->cmdHandler;
 		addedLen = currAdapterPtr->addedLen;
+		if (cmdHandler == NULL)
+		{
+			spin_unlock_bh(&cryptoLock);
+			return HWCRYPTO_NOMEM;
+		}
 		goto DEQUEUE;
 	}		
+	else if (skb == NULL)
+	{
+		spin_unlock_bh(&cryptoLock);
+		return -EINVAL;
+	}
+	else
+	{
+		addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
+		currAdapterPtr = (ipsecEip93Adapter_t *)(*addrCurrAdapter);
+		packet_ref = true;
+		if (currAdapterPtr == NULL || atomic_read(&currAdapterPtr->state) != 0)
+		{
+			if (skb)
+				kfree_skb(skb);
+			spin_unlock_bh(&cryptoLock);
+			if (currAdapterPtr)
+				ipsec_eip93Adapter_put(currAdapterPtr);
+			return HWCRYPTO_NOMEM;
+		}
+		cmdHandler = currAdapterPtr->cmdHandler;
+		addedLen = currAdapterPtr->addedLen;
+	}
+	if (cmdHandler == NULL)
+	{
+		if (skb)
+			kfree_skb(skb);
+		spin_unlock_bh(&cryptoLock);
+		if (packet_ref)
+			ipsec_eip93Adapter_put(currAdapterPtr);
+		return HWCRYPTO_NOMEM;
+	}
 
 	dst = skb_dst(skb);
-	addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
-	currAdapterPtr = (ipsecEip93Adapter_t *)(*addrCurrAdapter);
-	cmdHandler = currAdapterPtr->cmdHandler;
-	addedLen = currAdapterPtr->addedLen;
 
 	//resemble paged packets if needed
 	if (skb_is_nonlinear(skb)) 
@@ -810,6 +935,8 @@ ipsec_esp_pktPut(
 		{
 			printk("\n !resembling paged packets failed! \n");
 			spin_unlock_bh(&cryptoLock);
+			if (packet_ref)
+				ipsec_eip93Adapter_put(currAdapterPtr);
 			return -EPERM;
 		}
 		
@@ -825,11 +952,13 @@ ipsec_esp_pktPut(
 
 		kfree_skb(skb); //free old skb
 
-		if (skb2 == NULL)
+			if (skb2 == NULL)
 		{
 			printk("\n !skb_copy_expand failed! \n");
-			spin_unlock_bh(&cryptoLock);
-			return -EPERM;
+				spin_unlock_bh(&cryptoLock);
+				if (packet_ref)
+					ipsec_eip93Adapter_put(currAdapterPtr);
+				return -EPERM;
 		}
 		
 		skb = skb2; //the new skb
@@ -870,7 +999,13 @@ DEQUEUE:
 		//spin_lock(&cryptoLock);	
 		while (ipsec_eip93CmdResCnt_check() && ((pSkb = skb_dequeue(&currAdapterPtr->skbQueue)) != NULL))
 		{
-			ipsec_packet_put(cmdHandler, pSkb); //mtk_packet_put
+			ipsec_eip93Adapter_cmd_submit(currAdapterPtr);
+			if (ipsec_packet_put(cmdHandler, pSkb) != 0)
+			{
+				ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+				kfree_skb(pSkb);
+				ipsec_eip93Adapter_put(currAdapterPtr);
+			}
 		}	
 		//spin_unlock(&cryptoLock);
 	
@@ -895,11 +1030,15 @@ DEQUEUE:
 		{	
 			kfree_skb(skb2);
 			spin_unlock_bh(&cryptoLock);
+			if (packet_ref)
+				ipsec_eip93Adapter_put(currAdapterPtr);
 			return HWCRYPTO_NOMEM;
 		}
 		else
 		{
 			spin_unlock_bh(&cryptoLock);
+			if (packet_ref)
+				ipsec_eip93Adapter_put(currAdapterPtr);
 			return -ENOMEM; //drop the packet
 	}
 }
@@ -1583,40 +1722,45 @@ ipsec_eip93Adapter_free(
 	unsigned int spi
 )
 {
-	unsigned int i;
+	unsigned int i, count = 0;
 	ipsecEip93Adapter_t *currAdapterPtr;
+	ipsecEip93Adapter_t *victims[IPESC_EIP93_ADAPTERS * 2];
+	struct sk_buff *skb;
 
 	spin_lock(&ipsec_adapters_lock);
 	for (i = 0; i < IPESC_EIP93_ADAPTERS; i++)
 	{
-		if ((currAdapterPtr = ipsecEip93AdapterListOut[i]) != NULL)
+		currAdapterPtr = ipsecEip93AdapterListOut[i];
+		if (currAdapterPtr && currAdapterPtr->spi == spi)
 		{
-			if (currAdapterPtr->spi == spi)
-			{
-				ipsec_cmdHandler_free(currAdapterPtr->cmdHandler);
-				kfree(currAdapterPtr);
-				ipsecEip93AdapterListOut[i] = NULL;
-				spin_unlock(&ipsec_adapters_lock);
-				return;
-			}
+			ipsecEip93AdapterListOut[i] = NULL;
+			atomic_set(&currAdapterPtr->state, 1);
+			victims[count++] = currAdapterPtr;
 		}
-	}
-	
-	for (i = 0; i < IPESC_EIP93_ADAPTERS; i++)
-	{
-		if ((currAdapterPtr = ipsecEip93AdapterListIn[i]) != NULL)
+		currAdapterPtr = ipsecEip93AdapterListIn[i];
+		if (currAdapterPtr && currAdapterPtr->spi == spi)
 		{
-			if (currAdapterPtr->spi == spi)
-			{
-				ipsec_cmdHandler_free(currAdapterPtr->cmdHandler);
-				kfree(currAdapterPtr);
-				ipsecEip93AdapterListIn[i] = NULL;
-				spin_unlock(&ipsec_adapters_lock);
-				return;
-			}
+			ipsecEip93AdapterListIn[i] = NULL;
+			atomic_set(&currAdapterPtr->state, 1);
+			victims[count++] = currAdapterPtr;
 		}
 	}
 	spin_unlock(&ipsec_adapters_lock);
+
+	for (i = 0; i < count; i++)
+	{
+		currAdapterPtr = victims[i];
+		spin_lock_bh(&cryptoLock);
+		while ((skb = skb_dequeue(&currAdapterPtr->skbQueue)) != NULL)
+		{
+			kfree_skb(skb);
+			if (atomic_read(&currAdapterPtr->refs) > 0)
+				atomic_dec(&currAdapterPtr->refs);
+		}
+		spin_unlock_bh(&cryptoLock);
+		/* Drop the list reference.  DMA and packet references remain. */
+		ipsec_eip93Adapter_put(currAdapterPtr);
+	}
 }
 
 /*_______________________________________________________________________
@@ -1668,8 +1812,9 @@ ipsec_esp_output(
 #else		
 	/* this is non-NULL only with UDP Encapsulation for NAT-T */
 	if (unlikely(x->encap)) 
-	{		
+	{
 		printk("\n\n NAT-T is not supported yet! \n\n");
+		ipsec_eip93Adapter_drop_packet_ref(skb);
 		return -EPERM;
 	}
 #endif	
@@ -1716,8 +1861,9 @@ int ipsec_esp6_output(
 #else		
 	/* this is non-NULL only with UDP Encapsulation for NAT-T */
 	if (unlikely(x->encap)) 
-	{		
+	{
 		printk("\n\n NAT-T is not supported yet! \n\n");
+		ipsec_eip93Adapter_drop_packet_ref(skb);
 		return -EPERM;
 	}
 #endif	
@@ -1803,6 +1949,7 @@ ipsec_esp_input(
 #endif
 out:
 	printk("\n Something's wrong! Go out! \n");
+	ipsec_eip93Adapter_drop_packet_ref(skb);
 	return -EINVAL;
 }
 
@@ -1857,6 +2004,7 @@ ipsec_esp6_input(
 #endif
 out:
 	printk("\n[%s] Something's wrong! Go out! \n",__func__);
+	ipsec_eip93Adapter_drop_packet_ref(skb);
 	return -EINVAL;
 }
 /************************************************************************
@@ -1958,10 +2106,36 @@ ipsec_BH_handler_resultGet(
 	{
 		memset(&resDescpHandler, 0, sizeof(eip93DescpHandler_t));
 		retVal = ipsec_packet_get(&resDescpHandler);
+		if (retVal < 0)
+		{
+			if (resDescpHandler.userIdIsPacket == 2)
+			{
+				continue;
+			}
+			if (resDescpHandler.userIdIsPacket)
+			{
+				skb = (struct sk_buff *)ipsec_eip93UserId_get(&resDescpHandler);
+				currAdapterPtr = skb ? (ipsecEip93Adapter_t *)
+					(*(unsigned int *)&skb->cb[36]) : NULL;
+				if (skb)
+					kfree_skb(skb);
+			}
+			else
+				currAdapterPtr = (ipsecEip93Adapter_t *)
+					ipsec_eip93UserId_get(&resDescpHandler);
+			ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+			if (resDescpHandler.userIdIsPacket)
+				ipsec_eip93Adapter_put(currAdapterPtr);
+			break;
+		}
 
 		//got the correct result from eip93
 		if (likely(retVal == 1))
 		{
+			if (resDescpHandler.userIdIsPacket == 2)
+			{
+				continue;
+			}
 			//the result is for encrypted or encrypted packet
 			if (ipsec_eip93HashFinal_get(&resDescpHandler) == 0x1)
 			{				
@@ -1982,6 +2156,8 @@ ipsec_BH_handler_resultGet(
 					else
 					{
 						printk("\n\n !can't tell encrypt or decrypt! %08X\n\n",currAdapterPtr->isEncryptOrDecrypt);
+						ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+						ipsec_eip93Adapter_put(currAdapterPtr);
 						return;
 					}
 				}
@@ -1997,10 +2173,14 @@ ipsec_BH_handler_resultGet(
 				}
 				else
 				{
-					printk("\n\n !can't tell encrypt or decrypt! %08X\n\n",currAdapterPtr->isEncryptOrDecrypt);
-					return;
+				printk("\n\n !can't tell encrypt or decrypt! %08X\n\n",currAdapterPtr->isEncryptOrDecrypt);
+				ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+				ipsec_eip93Adapter_put(currAdapterPtr);
+				return;
 				}
 				}
+				ipsec_eip93Adapter_cmd_done(currAdapterPtr);
+				ipsec_eip93Adapter_put(currAdapterPtr);
 				//ipsec_esp_pktPut(currAdapterPtr, NULL);
 			}
 			//the result is for inner and outer hash digest pre-compute
@@ -2043,9 +2223,11 @@ ipsec_BH_handler_resultGet(
 				{
 					printk("\n\n !can't tell inner or outer digests! \n\n");				
 					spin_unlock(&currAdapterPtr->lock);
+					ipsec_eip93Adapter_cmd_done(currAdapterPtr);
 					return;
-				}						
+				}
 				spin_unlock(&currAdapterPtr->lock);
+				ipsec_eip93Adapter_cmd_done(currAdapterPtr);
 			}
 		}
 		//if packet is not done, don't wait! (for speeding up)
@@ -2056,15 +2238,29 @@ ipsec_BH_handler_resultGet(
 			
 			for (i = 0; i < IPESC_EIP93_ADAPTERS; i++)
 			{
+				spin_lock(&ipsec_adapters_lock);
 				currAdapterPtr = ipsecEip93AdapterListIn[i];
-				if (currAdapterPtr!=NULL)
+				if (currAdapterPtr != NULL)
+					ipsec_eip93Adapter_get(currAdapterPtr);
+				spin_unlock(&ipsec_adapters_lock);
+				if (currAdapterPtr != NULL)
+				{
 					ipsec_esp_pktPut(currAdapterPtr, NULL);
+					ipsec_eip93Adapter_put(currAdapterPtr);
+				}
 			}
 			for (i = 0; i < IPESC_EIP93_ADAPTERS; i++)
 			{
+				spin_lock(&ipsec_adapters_lock);
 				currAdapterPtr = ipsecEip93AdapterListOut[i];
-				if (currAdapterPtr!=NULL)
+				if (currAdapterPtr != NULL)
+					ipsec_eip93Adapter_get(currAdapterPtr);
+				spin_unlock(&ipsec_adapters_lock);
+				if (currAdapterPtr != NULL)
+				{
 					ipsec_esp_pktPut(currAdapterPtr, NULL);	
+					ipsec_eip93Adapter_put(currAdapterPtr);
+				}
 			}
 
 			break;

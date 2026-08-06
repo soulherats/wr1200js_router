@@ -245,7 +245,8 @@ ifeq ($(HAS_DOT11K_RRM_SUPPORT),y)
 obj_cmm += \
 	../../common/rrm_tlv.o\
 	../../common/rrm_sanity.o\
-	../../common/rrm.o
+	../../common/rrm.o\
+		../../common/nr_5g_neighbor.o
 endif
 #endif // DOT11K_RRM_SUPPORT //
 

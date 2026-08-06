@@ -604,12 +604,17 @@ nmap_receive_arp(void)
 				if (!item->device_name[0]) {
 					FILE *fp;
 					char buff[30], mac[18], oui[9];
+					char item_mac[18];
+					snprintf(item_mac, sizeof(item_mac), "%02X:%02X:%02X:%02X:%02X:%02X",
+						item->mac_addr[0], item->mac_addr[1], item->mac_addr[2],
+						item->mac_addr[3], item->mac_addr[4], item->mac_addr[5]);
 					fp = popen("/bin/iwpriv rai0 oui", "r");
 					if (fp) {
 						while (fgets(buff, sizeof(buff), fp)) {
-							if (sscanf(buff, "%s %s", mac, oui) != 2)
+							if (sscanf(buff, "%17s %8s", mac, oui) != 2)
 								continue;
-							if (!strcmp(oui, "00:17:F2")) {
+							if (!strcasecmp(mac, item_mac) &&
+							    !strcasecmp(oui, "00:17:F2")) {
 								strcpy(item->device_name, "iphone");
 								break;
 							}

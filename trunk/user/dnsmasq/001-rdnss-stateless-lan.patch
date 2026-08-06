@@ -1,0 +1,33 @@
+--- dnsmasq-2.90/src/radv.c	2026-07-29 00:43:10.227129470 +0800
++++ dnsmasq-2.90/src/radv.c	2026-07-29 01:34:50.892381094 +0800
+@@ -482,6 +482,10 @@
+ 
+ 	  if (len != 0)
+ 	    {
++	      /* In ra-stateless mode skip RDNSS here; link-local fallback below
++	         handles RA RDNSS, while DHCPv6 carries the global DNS address. */
++	      if (!parm.managed && parm.other)
++	        continue;
+ 	      put_opt6_char(ICMP6_OPT_RDNSS);
+ 	      put_opt6_char((len/8) + 1);
+ 	      put_opt6_short(0);
+@@ -524,13 +528,16 @@
+ 	}
+     }
+ 	
+-  if (daemon->port == NAMESERVER_PORT && !done_dns && parm.link_pref_time != 0)
++  if (daemon->port == NAMESERVER_PORT && parm.link_pref_time != 0 &&
++      (!done_dns || (!parm.managed && parm.other)))
+     {
+-      /* default == us, as long as we are supplying DNS service. */
++      /* default == us, as long as we are supplying DNS service.
++         In ra-stateless mode, also force link-local RDNSS in RA so clients
++         have a reachable resolver; global DNS is delivered via DHCPv6. */
+       put_opt6_char(ICMP6_OPT_RDNSS);
+       put_opt6_char(3);
+       put_opt6_short(0);
+-      put_opt6_long(min_pref_time); 
++      put_opt6_long(min_pref_time);
+       put_opt6(&parm.link_local, IN6ADDRSZ);
+     }
+ 

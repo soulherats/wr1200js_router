@@ -29,6 +29,7 @@
 #include <net/mtk_esp.h>
 #include "mtk_ipsec.h"
 #include <linux/skbuff.h>
+#include "mtk_crypto_api.h"
 
 
 extern unsigned int *pCmdRingBase, *pResRingBase; //uncached memory address
@@ -77,6 +78,49 @@ static int pskb_alloc_head(struct sk_buff *skb, u8* data, u32 size, int offset);
 int copy_data_head(struct sk_buff *skb, int offset);
 int copy_data_bottom(struct sk_buff *skb, int offset);
 static int DMAAlign = 0;
+
+/* Fill and publish one complete command descriptor while holding the ring
+ * lock.  CD_COUNT is written only after every word is visible to EIP93. */
+static int
+mtk_cmd_ring_submit(
+	dma_addr_t srcAddr,
+	dma_addr_t dstAddr,
+	dma_addr_t saAddr,
+	dma_addr_t stateAddr,
+	dma_addr_t arc4Addr,
+	unsigned int userId,
+	unsigned int length,
+	unsigned int control
+)
+{
+	unsigned long flags;
+	unsigned int *pCrd;
+	unsigned int count;
+
+	spin_lock_irqsave(&putlock, flags);
+	count = ioread32(pEip93RegBase + (PE_CD_COUNT >> 2)) & (BIT_10 - 1);
+	if (count >= EIP93_RING_SIZE) {
+		spin_unlock_irqrestore(&putlock, flags);
+		return -EBUSY;
+	}
+
+	if (cmdRingIdx == EIP93_RING_SIZE)
+		cmdRingIdx = 0;
+	pCrd = pCmdRingBase + (cmdRingIdx << 3);
+	cmdRingIdx++;
+	pCrd[1] = srcAddr;
+	pCrd[2] = dstAddr;
+	pCrd[3] = saAddr;
+	pCrd[4] = stateAddr;
+	pCrd[5] = arc4Addr;
+	pCrd[6] = userId;
+	pCrd[7] = length;
+	pCrd[0] = control;
+	wmb();
+	iowrite32(1, pEip93RegBase + (PE_CD_COUNT >> 2));
+	spin_unlock_irqrestore(&putlock, flags);
+	return 0;
+}
 
 #ifdef MCRYPTO_DBG
 static void skb_dump(struct sk_buff* sk, const char* func,int line) {
@@ -187,10 +231,8 @@ mtk_addrsDigestPreCompute_free(
 	dma_free_coherent(NULL, blkSize, opad, opadPhyAddr);		
 	dma_free_coherent(NULL, blkSize, ipad, ipadPhyAddr);		
 	kfree(hashKeyTank);
-	kfree(addrsPreCompute);
-	addrsPreCompute->pODigest = NULL;
-	addrsPreCompute->pIDigest = NULL;
 	currAdapterPtr->addrsPreCompute = NULL;
+	kfree(addrsPreCompute);
 }
 
 static void 
@@ -574,26 +616,14 @@ mtk_packet_put(
 	struct sk_buff *skb //skb == NULL when in digestPreCompute
 )
 {
-	unsigned int *pCrd = pCmdRingBase;
 	ipsecEip93Adapter_t *currAdapterPtr;
 	unsigned int addedLen;
 	unsigned int *addrCurrAdapter;
-	unsigned long flags;
 	u32* pData = NULL;
 	dma_addr_t pDataPhy;
-	
-	//spin_lock_irqsave(&putlock, flags);
-
-	if(cmdRingIdx == EIP93_RING_SIZE)
-	{
-		cmdRingIdx = 0;
-	}
-	pCrd += (cmdRingIdx << 3); //cmdRingIdx*8 (a cmdDescp has 8 words!)
-	cmdRingIdx++;
-
-	pCrd[3] = cmdDescp->saAddr.phyAddr;
-	pCrd[4] = cmdDescp->stateAddr.phyAddr;
-	pCrd[5] = cmdDescp->arc4Addr.phyAddr;
+	dma_addr_t srcAddr, dstAddr;
+	unsigned int userId, length;
+	int ret;
 
 	if(likely(skb != NULL))
 	{
@@ -617,12 +647,12 @@ mtk_packet_put(
 			if(pData==NULL)
 			{	
 #if defined (SKB_HEAD_SHIFT)
-				pCrd[1] = K1_TO_PHY(skb->data);
-				pCrd[2] = K1_TO_PHY(skb->data+offset);
+				srcAddr = K1_TO_PHY(skb->data);
+				dstAddr = K1_TO_PHY(skb->data+offset);
 #else
 				printk("mtk_packet_put allocate null\n");
-				pCrd[1] = K1_TO_PHY(skb->data);
-				pCrd[2] = K1_TO_PHY(skb->data);
+				srcAddr = K1_TO_PHY(skb->data);
+				dstAddr = K1_TO_PHY(skb->data);
 #endif
 			}
 			else
@@ -632,18 +662,18 @@ mtk_packet_put(
 				{
 					printk("dma_map_single pDataPhy NULL\n");
 				}
-				pCrd[1] = K1_TO_PHY(skb->data);
-				pCrd[2] = pDataPhy;			
+				srcAddr = K1_TO_PHY(skb->data);
+				dstAddr = pDataPhy;
 			}
 		}
 		else
 #endif
 		{	
-			pCrd[1] = K1_TO_PHY(skb->data);
-			pCrd[2] = K1_TO_PHY(skb->data);
+			srcAddr = K1_TO_PHY(skb->data);
+			dstAddr = K1_TO_PHY(skb->data);
 		}
 
-		pCrd[6] = (unsigned int)skb;
+		userId = (unsigned int)skb;
 #if 0
 	    /*When encryption, it is necessary to consider when the packet size is greater than 200, and in tunnel mode (l2tpeth0), 
  			before the packet length longer (+4), otherwise there will be untied.   */
@@ -659,27 +689,51 @@ mtk_packet_put(
 		else
 #endif		
 		{
-			pCrd[7] = ((skb->len) & (BIT_20 - 1)) | (cmdDescp->peLength.word & (~(BIT_22 - 1)));
+			length = ((skb->len) & (BIT_20 - 1)) |
+				(cmdDescp->peLength.word & (~(BIT_22 - 1)));
 		}
 
 	}
 	else
 	{
-		pCrd[1] = cmdDescp->srcAddr.phyAddr;
-		pCrd[2] = cmdDescp->srcAddr.phyAddr;
-		pCrd[6] = cmdDescp->userId;
-		pCrd[7] = cmdDescp->peLength.word;
+		srcAddr = cmdDescp->srcAddr.phyAddr;
+		dstAddr = cmdDescp->srcAddr.phyAddr;
+		userId = cmdDescp->userId;
+		length = cmdDescp->peLength.word;
 	}
-	pCrd[0] = cmdDescp->peCrtlStat.word;
 
-	//prevent from inconsistency of HW DMA and SW memory access
-	wmb();
-	iowrite32(1, pEip93RegBase + (PE_CD_COUNT >> 2)); //PE_CD_COUNT/4	
-	
-	//spin_unlock_irqrestore(&putlock, flags);
-
-	return 0; //success
+	ret = mtk_cmd_ring_submit(srcAddr, dstAddr, cmdDescp->saAddr.phyAddr,
+				 cmdDescp->stateAddr.phyAddr,
+				 cmdDescp->arc4Addr.phyAddr, userId, length,
+				 cmdDescp->peCrtlStat.word);
+	if (ret && pData) {
+		dma_unmap_single(NULL, pDataPhy, skb->len + addedLen,
+				 PCI_DMA_FROMDEVICE);
+		kfree(pData);
+		*(unsigned int *)&skb->cb[40] = 0;
+	}
+	return ret;
 }
+
+/* Submit a raw Crypto API operation.  Unlike the ESP path this descriptor
+ * already contains linear DMA source and destination buffers, so it must
+ * not inspect skb->cb or an IPsec adapter. */
+int
+mtk_crypto_packet_put(eip93DescpHandler_t *cmdDescp)
+{
+	if (!cmdDescp || !pCmdRingBase || !pEip93RegBase)
+		return -ENODEV;
+
+	return mtk_cmd_ring_submit(cmdDescp->srcAddr.phyAddr,
+				  cmdDescp->dstAddr.phyAddr,
+				  cmdDescp->saAddr.phyAddr,
+				  cmdDescp->stateAddr.phyAddr,
+				  cmdDescp->arc4Addr.phyAddr,
+				  cmdDescp->userId | MTK_EIP93_USERID_GENERIC,
+				  cmdDescp->peLength.word,
+				  cmdDescp->peCrtlStat.word);
+}
+EXPORT_SYMBOL(mtk_crypto_packet_put);
 
 /*_______________________________________________________________________
 **function name: mtk_packet_get
@@ -738,6 +792,13 @@ mtk_packet_get(
 		resDescp->peCrtlStat.word 	= pRrd[0];
 		resDescp->userId		 	= pRrd[6];
 		resDescp->peLength.word 	= pRrd[7];
+		if (resDescp->userId & MTK_EIP93_USERID_GENERIC) {
+			resDescp->userId &= ~MTK_EIP93_USERID_GENERIC;
+			resDescp->userIdIsPacket = 2;
+		} else {
+			resDescp->userIdIsPacket =
+				resDescp->peCrtlStat.bits.hashFinal ? 1 : 0;
+		}
 		//the others are physical addresses, no need to be copied!
 		done1 = resDescp->peCrtlStat.bits.peReady;
 		done2 = resDescp->peLength.bits.peReady;
@@ -748,19 +809,33 @@ mtk_packet_get(
 			if(unlikely(err_sts))
 			{
 				int cmdPktCnt = (ioread32(pEip93RegBase + (PE_CD_COUNT >> 2)) & (BIT_10 - 1));
-				skb = (struct sk_buff *)resDescp->userId;
-				addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
-				currAdapterPtr = (ipsecEip93Adapter_t *)(*addrCurrAdapter);
+				if (resDescp->userIdIsPacket == 1)
+				{
+					skb = (struct sk_buff *)resDescp->userId;
+					addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
+					currAdapterPtr = (ipsecEip93Adapter_t *)(*addrCurrAdapter);
+				}
+				else if (resDescp->userIdIsPacket == 2)
+				{
+					skb = NULL;
+					currAdapterPtr = NULL;
+				}
+				else
+				{
+					skb = NULL;
+					currAdapterPtr = (ipsecEip93Adapter_t *)resDescp->userId;
+				}
 				printk("\n\n !PE Ring[%d] ErrCode=0x%x! status=%x rdn=%d cdn=%d encrypt=%d qlen=%d\n\n", resRingIdx, err_sts, ioread32(pEip93RegBase + (PE_CTRL_STAT >> 2)), PktCnt,\
-						cmdPktCnt,currAdapterPtr->isEncryptOrDecrypt, currAdapterPtr->skbQueue.qlen);
+						cmdPktCnt, currAdapterPtr ? currAdapterPtr->isEncryptOrDecrypt : 0,
+						currAdapterPtr ? currAdapterPtr->skbQueue.qlen : 0);
 				//for encryption/decryption case
 				//if (resDescp->peCrtlStat.bits.hashFinal == 0x1)
 				{
 #if defined (MCRYPTO_DBG)
-					if ((err_sts&0x1)==0x1)
+						if (resDescp->userIdIsPacket && skb && (err_sts&0x1)==0x1)
 					{	
 						{
-							int k;
+						int k;
 							int offset, alloc_size;
 							offset = DMAAlign-(u32)(skb->data)%DMAAlign;
 							printk("ICV[[");
@@ -771,7 +846,7 @@ mtk_packet_get(
 					}
 #endif
 
-					if ((resDescp->userId>>31)&0x1)
+					if (resDescp->userIdIsPacket == 1 && skb)
 					{	
 #if defined (BUFFER_MEMCPY)
 						addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
@@ -789,11 +864,13 @@ mtk_packet_get(
 #endif
 						}
 #endif
-						kfree_skb(skb);
+						/* The BH still needs skb->cb to release the adapter. */
 					}
 					else
 						printk("resDescp->userId = 0x%x\n", resDescp->userId);	
 				}
+				if (resDescp->userIdIsPacket == 2)
+					mtk_crypto_complete(resDescp->userId, -EIO);
 				//else {
 
 				//}	
@@ -801,9 +878,12 @@ mtk_packet_get(
 				retVal = -1;
 				break;
 			}
-			skb = (struct sk_buff *)resDescp->userId;
+			if (resDescp->userIdIsPacket == 1)
+				skb = (struct sk_buff *)resDescp->userId;
+			else
+				skb = NULL;
 #if defined (BUFFER_MEMCPY)
-			if((skb!=NULL)&&(resDescp->peCrtlStat.bits.hashFinal == 0x1))
+			if((skb!=NULL)&&(resDescp->userIdIsPacket == 1))
 			{
 				addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
 				currAdapterPtr = (ipsecEip93Adapter_t *)(*addrCurrAdapter);	
@@ -824,6 +904,8 @@ mtk_packet_get(
 
 			}
 #endif
+			if (resDescp->userIdIsPacket == 2)
+				mtk_crypto_complete(resDescp->userId, 0);
 			retVal = 1;
 			break; 
 		}
@@ -836,8 +918,11 @@ mtk_packet_get(
 				printk("resRingIdx=%d\n",resRingIdx);
 				//if (resDescp->peCrtlStat.bits.hashFinal == 0x1)
 				{
-					skb = (struct sk_buff *)resDescp->userId;
-					if ((resDescp->userId>>31)&0x1)
+					if (resDescp->userIdIsPacket == 1)
+						skb = (struct sk_buff *)resDescp->userId;
+					else
+						skb = NULL;
+					if (resDescp->userIdIsPacket == 1 && skb)
 					{
 #if defined (BUFFER_MEMCPY)
 						addrCurrAdapter = (unsigned int *) &(skb->cb[36]);
@@ -855,11 +940,13 @@ mtk_packet_get(
 #endif
 						}
 #endif
-						kfree_skb(skb);
+						/* The BH still needs skb->cb to release the adapter. */
 					}
 					else
 						printk("resDescp->userId = 0x%x\n", resDescp->userId);		
 				} 
+				if (resDescp->userIdIsPacket == 2)
+					mtk_crypto_complete(resDescp->userId, -EIO);
 			
 				retVal = -1;
 				break;
