@@ -32,6 +32,7 @@
 #include "rc.h"
 
 #define OPENVPN_EXE		"/usr/sbin/openvpn"
+#define OPENVPN_AFALG_ENGINE	"/lib/engines-1.1/afalg.so"
 #define COMMON_TEMP_DIR		"/tmp/openvpn"
 
 #define SERVER_PID_FILE		"/var/run/openvpn_svr.pid"
@@ -281,6 +282,13 @@ openvpn_add_cipher(FILE *fp, int cipher_idx, char *ncp_clist)
 }
 
 static void
+openvpn_add_crypto_engine(FILE *fp)
+{
+	/* AFALG exposes AES-CBC to the EIP93-backed Linux Crypto API. */
+	fprintf(fp, "engine %s\n", OPENVPN_AFALG_ENGINE);
+}
+
+static void
 openvpn_add_compress(FILE *fp, int compress_idx, int is_server_mode)
 {
 	char *alg_str;
@@ -441,6 +449,7 @@ openvpn_create_server_conf(const char *conf_file, int is_tun)
 
 	openvpn_add_auth(fp, nvram_get_int("vpns_ov_mdig"));
 	openvpn_add_cipher(fp, nvram_get_int("vpns_ov_ciph"), nvram_get("vpns_ov_ncp_clist"));
+	openvpn_add_crypto_engine(fp);
 	openvpn_add_compress(fp, nvram_get_int("vpns_ov_compress"), 1);
 
 	i_items = 0;
@@ -597,6 +606,7 @@ openvpn_create_client_conf(const char *conf_file, int is_tun)
 
 	openvpn_add_auth(fp, nvram_get_int("vpnc_ov_mdig"));
 	openvpn_add_cipher(fp, nvram_get_int("vpnc_ov_ciph"), nvram_get("vpnc_ov_ncp_clist"));
+	openvpn_add_crypto_engine(fp);
 	openvpn_add_compress(fp, nvram_get_int("vpnc_ov_compress"), 0);
 
 	if (i_auth == 1) {

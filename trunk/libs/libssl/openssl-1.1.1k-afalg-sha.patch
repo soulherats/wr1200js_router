@@ -1,0 +1,405 @@
+--- a/engines/e_afalg.h	2026-08-07 17:00:47.882843445 +0800
++++ b/engines/e_afalg.h	2026-08-07 16:33:22.757320254 +0800
+@@ -57,6 +57,9 @@
+     int init_done;
+     int sfd;
+     int bfd;
++    unsigned char *hash_data;
++    size_t hash_len;
++    size_t hash_alloc;
+ };
+ typedef struct afalg_ctx_st afalg_ctx;
+ 
+
+--- a/engines/e_afalg.c	2026-08-07 17:00:47.882446297 +0800
++++ b/engines/e_afalg.c	2026-08-07 16:56:10.621793978 +0800
+@@ -20,6 +20,8 @@
+ #include "internal/nelem.h"
+ 
+ #include <sys/socket.h>
++#include <openssl/evp.h>
++#include <openssl/sha.h>
+ #include <linux/if_alg.h>
+ 
+ #include "e_afalg.h"
+@@ -52,6 +54,13 @@
+ static int afalg_do_cipher(EVP_CIPHER_CTX *ctx, unsigned char *out,
+                            const unsigned char *in, size_t inl);
+ static int afalg_cipher_cleanup(EVP_CIPHER_CTX *ctx);
++static int afalg_hash_init(EVP_MD_CTX *ctx);
++static int afalg_hash_update(EVP_MD_CTX *ctx, const void *data, size_t count);
++static int afalg_hash_final(EVP_MD_CTX *ctx, unsigned char *md);
++static int afalg_hash_copy(EVP_MD_CTX *to, const EVP_MD_CTX *from);
++static int afalg_hash_cleanup(EVP_MD_CTX *ctx);
++static int afalg_hash_ctrl(EVP_MD_CTX *ctx, int cmd, int p1, void *p2);
++static void afalg_hash_ctx_free(afalg_ctx *actx);
+ static int afalg_chk_platform(void);
+ 
+ static const char *engine_afalg_id = "afalg";
+@@ -63,10 +72,18 @@
+     NID_aes_256_cbc,
+ };
+ 
++static int afalg_digest_nids[] = {
++    NID_sha1,
++    NID_sha224,
++    NID_sha256,
++};
++
+ static cbc_handles cbc_handle[] = {{AES_KEY_SIZE_128, NULL},
+                                     {AES_KEY_SIZE_192, NULL},
+                                     {AES_KEY_SIZE_256, NULL}};
+ 
++static EVP_MD *afalg_digest_handles[OSSL_NELEM(afalg_digest_nids)];
++
+ static ossl_inline void afalg_set_op_sk(struct cmsghdr *cmsg,
+                                         ALG_OP_TYPE op)
+ {
+@@ -287,6 +304,311 @@
+     return 1;
+ }
+ 
++static const char *afalg_hash_name(int nid)
++{
++    switch (nid) {
++    case NID_sha1:
++        return "sha1";
++    case NID_sha224:
++        return "sha224";
++    case NID_sha256:
++        return "sha256";
++    default:
++        return NULL;
++    }
++}
++
++static int afalg_hash_send(afalg_ctx *actx, const unsigned char *data,
++                           size_t len, int flags)
++{
++    size_t done = 0;
++    ssize_t ret;
++
++    while (done < len || (len == 0 && done == 0)) {
++        ret = send(actx->sfd, data ? data + done : NULL, len - done, flags);
++        if (ret < 0 && errno == EINTR)
++            continue;
++        if (ret < 0 || (len != 0 && ret == 0))
++            return 0;
++        done += (size_t)ret;
++        if (len == 0)
++            break;
++    }
++    return 1;
++}
++
++static int afalg_hash_finish_send(afalg_ctx *actx)
++{
++    size_t done = 0;
++    size_t chunk;
++    ssize_t ret;
++    int flags;
++
++    if (actx->hash_len == 0)
++        return afalg_hash_send(actx, NULL, 0, 0);
++
++    while (done < actx->hash_len) {
++        chunk = actx->hash_len - done;
++        if (chunk > 4096)
++            chunk = 4096;
++        flags = done + chunk < actx->hash_len ? MSG_MORE : 0;
++        do {
++            ret = send(actx->sfd, actx->hash_data + done, chunk, flags);
++        } while (ret < 0 && errno == EINTR);
++        if (ret < 0 || ret == 0 || (flags == 0 && (size_t)ret != chunk))
++            return 0;
++        done += (size_t)ret;
++    }
++    return 1;
++}
++
++static int afalg_hash_init(EVP_MD_CTX *ctx)
++{
++    afalg_ctx *actx;
++    const char *hashname;
++
++    if (ctx == NULL)
++        return 0;
++    actx = EVP_MD_CTX_md_data(ctx);
++    if (actx == NULL)
++        return 0;
++
++    memset(actx, 0, sizeof(*actx));
++    actx->sfd = -1;
++    actx->bfd = -1;
++    hashname = afalg_hash_name(EVP_MD_CTX_type(ctx));
++    if (hashname == NULL || !afalg_create_sk(actx, "hash", hashname))
++        return 0;
++
++    actx->init_done = MAGIC_INIT_NUM;
++    return 1;
++}
++
++static int afalg_hash_update(EVP_MD_CTX *ctx, const void *data, size_t count)
++{
++    afalg_ctx *actx;
++    size_t new_len;
++    size_t new_alloc;
++    unsigned char *new_data;
++
++    if (ctx == NULL || (data == NULL && count != 0))
++        return 0;
++    if (count == 0)
++        return 1;
++
++    actx = EVP_MD_CTX_md_data(ctx);
++    if (actx == NULL || actx->init_done != MAGIC_INIT_NUM)
++        return 0;
++    if (count > (size_t)-1 - actx->hash_len)
++        return 0;
++
++    new_len = actx->hash_len + count;
++    new_alloc = actx->hash_alloc;
++    if (new_alloc < new_len) {
++        new_alloc = new_alloc ? new_alloc : 256;
++        while (new_alloc < new_len) {
++            if (new_alloc > (size_t)-1 / 2) {
++                new_alloc = new_len;
++                break;
++            }
++            new_alloc *= 2;
++        }
++        new_data = OPENSSL_realloc(actx->hash_data, new_alloc);
++        if (new_data == NULL)
++            return 0;
++        actx->hash_data = new_data;
++        actx->hash_alloc = new_alloc;
++    }
++
++    memcpy(actx->hash_data + actx->hash_len, data, count);
++    actx->hash_len = new_len;
++    return 1;
++}
++
++static int afalg_hash_final(EVP_MD_CTX *ctx, unsigned char *md)
++{
++    afalg_ctx *actx;
++    size_t digest_len;
++    size_t done = 0;
++    ssize_t ret;
++
++    if (ctx == NULL || md == NULL)
++        return 0;
++    actx = EVP_MD_CTX_md_data(ctx);
++    if (actx == NULL || actx->init_done != MAGIC_INIT_NUM)
++        return 0;
++    digest_len = (size_t)EVP_MD_size(EVP_MD_CTX_md(ctx));
++    if (digest_len == 0 || digest_len > EVP_MAX_MD_SIZE)
++        return 0;
++
++    if (!afalg_hash_finish_send(actx))
++        return 0;
++    while (done < digest_len) {
++        ret = recv(actx->sfd, md + done, digest_len - done, 0);
++        if (ret < 0 && errno == EINTR)
++            continue;
++        if (ret <= 0)
++            return 0;
++        done += (size_t)ret;
++    }
++    return 1;
++}
++
++static void afalg_hash_ctx_free(afalg_ctx *actx)
++{
++    if (actx == NULL)
++        return;
++    if (actx->sfd >= 0)
++        close(actx->sfd);
++    if (actx->bfd >= 0)
++        close(actx->bfd);
++    actx->sfd = actx->bfd = -1;
++    OPENSSL_free(actx->hash_data);
++    actx->hash_data = NULL;
++    actx->hash_len = 0;
++    actx->hash_alloc = 0;
++    actx->init_done = 0;
++}
++
++static int afalg_hash_copy(EVP_MD_CTX *to, const EVP_MD_CTX *from)
++{
++    afalg_ctx *to_ctx;
++    const afalg_ctx *from_ctx;
++    const char *hashname;
++    unsigned char *saved = NULL;
++    size_t saved_len = 0;
++
++    if (to == NULL || from == NULL)
++        return 0;
++    to_ctx = EVP_MD_CTX_md_data(to);
++    from_ctx = EVP_MD_CTX_md_data(from);
++
++    /* HMAC outer context: NO_INIT skips md_data allocation  */
++    if (to_ctx == NULL && from_ctx == NULL)
++        return 1;
++
++    if (to_ctx == NULL || from_ctx == NULL ||
++        from_ctx->init_done != MAGIC_INIT_NUM)
++        return 0;
++
++    /*
++     * EVP_MD_CTX_copy_ex first raw-memcpy's from->md_data into to->md_data,
++     * so to_ctx's socket fds and hash_data pointer alias from_ctx's.  The
++     * resources still belong to `from` - we must NOT release them here or
++     * `from`'s later cleanup will double-free.  Snapshot the source bytes,
++     * then give `to` a fresh socket and an independent copy.
++     */
++    if (from_ctx->hash_len != 0) {
++        saved = OPENSSL_malloc(from_ctx->hash_len);
++        if (saved == NULL)
++            return 0;
++        memcpy(saved, from_ctx->hash_data, from_ctx->hash_len);
++        saved_len = from_ctx->hash_len;
++    }
++
++    hashname = afalg_hash_name(EVP_MD_CTX_type(from));
++    if (hashname == NULL || !afalg_create_sk(to_ctx, "hash", hashname)) {
++        OPENSSL_free(saved);
++        return 0;
++    }
++
++    to_ctx->hash_data = saved;
++    to_ctx->hash_len = saved_len;
++    to_ctx->hash_alloc = saved_len;
++    to_ctx->init_done = MAGIC_INIT_NUM;
++    return 1;
++}
++
++static int afalg_hash_cleanup(EVP_MD_CTX *ctx)
++{
++    afalg_ctx *actx;
++
++    if (ctx == NULL)
++        return 0;
++    actx = EVP_MD_CTX_md_data(ctx);
++    if (actx == NULL)
++        return 0;
++
++    afalg_hash_ctx_free(actx);
++    return 1;
++}
++
++static int afalg_hash_ctrl(EVP_MD_CTX *ctx, int cmd, int p1, void *p2)
++{
++    /* Accept any ctrl the HMAC/sign layer sends us.  The actual HMAC
++     * keying and two-stage hash copying is done through init/update/
++     * final/copy; the ctrl path is only probed. */
++    (void)ctx;
++    (void)cmd;
++    (void)p1;
++    (void)p2;
++    return 1;
++}
++
++static EVP_MD *afalg_hash_md(int nid)
++{
++    EVP_MD *md;
++    int i;
++    int pkey_nid;
++    int digest_size;
++
++    for (i = 0; i < (int)OSSL_NELEM(afalg_digest_nids); i++)
++        if (afalg_digest_nids[i] == nid)
++            break;
++    if (i == (int)OSSL_NELEM(afalg_digest_nids))
++        return NULL;
++    if (afalg_digest_handles[i] != NULL)
++        return afalg_digest_handles[i];
++
++    switch (nid) {
++    case NID_sha1:
++        pkey_nid = NID_sha1WithRSAEncryption;
++        digest_size = SHA_DIGEST_LENGTH;
++        break;
++    case NID_sha224:
++        pkey_nid = NID_sha224WithRSAEncryption;
++        digest_size = SHA224_DIGEST_LENGTH;
++        break;
++    case NID_sha256:
++        pkey_nid = NID_sha256WithRSAEncryption;
++        digest_size = SHA256_DIGEST_LENGTH;
++        break;
++    default:
++        return NULL;
++    }
++
++    md = EVP_MD_meth_new(nid, pkey_nid);
++    if (md == NULL ||
++        !EVP_MD_meth_set_result_size(md, digest_size) ||
++        !EVP_MD_meth_set_input_blocksize(md, SHA_CBLOCK) ||
++        !EVP_MD_meth_set_app_datasize(md, sizeof(afalg_ctx)) ||
++        !EVP_MD_meth_set_flags(md, EVP_MD_FLAG_DIGALGID_ABSENT) ||
++        !EVP_MD_meth_set_init(md, afalg_hash_init) ||
++        !EVP_MD_meth_set_update(md, afalg_hash_update) ||
++        !EVP_MD_meth_set_final(md, afalg_hash_final) ||
++        !EVP_MD_meth_set_copy(md, afalg_hash_copy) ||
++        !EVP_MD_meth_set_cleanup(md, afalg_hash_cleanup) ||
++        !EVP_MD_meth_set_ctrl(md, afalg_hash_ctrl)) {
++        EVP_MD_meth_free(md);
++        return NULL;
++    }
++    afalg_digest_handles[i] = md;
++    return md;
++}
++
++static int afalg_digests(ENGINE *e, const EVP_MD **digest,
++                         const int **nids, int nid)
++{
++    if (digest == NULL) {
++        *nids = afalg_digest_nids;
++        return (int)OSSL_NELEM(afalg_digest_nids);
++    }
++
++    *digest = afalg_hash_md(nid);
++    return *digest != NULL;
++}
++
++
+ static cbc_handles *get_cipher_handle(int nid)
+ {
+     switch (nid) {
+@@ -355,7 +677,12 @@
+         if (afalg_aes_cbc(afalg_cipher_nids[i]) == NULL)
+             return 0;
+     }
+-    return ENGINE_set_ciphers(e, afalg_ciphers);
++    for (i = 0; i < OSSL_NELEM(afalg_digest_nids); i++) {
++        if (afalg_hash_md(afalg_digest_nids[i]) == NULL)
++            return 0;
++    }
++    return ENGINE_set_ciphers(e, afalg_ciphers) &&
++           ENGINE_set_digests(e, afalg_digests);
+ }
+ 
+ #ifndef OPENSSL_NO_DYNAMIC_ENGINE
+@@ -432,9 +759,21 @@
+     return 1;
+ }
+ 
++static int free_digests(void)
++{
++    unsigned int i;
++
++    for (i = 0; i < OSSL_NELEM(afalg_digest_handles); i++) {
++        EVP_MD_meth_free(afalg_digest_handles[i]);
++        afalg_digest_handles[i] = NULL;
++    }
++    return 1;
++}
++
+ static int afalg_destroy(ENGINE *e)
+ {
+     ERR_unload_AFALG_strings();
+     free_cbc();
++    free_digests();
+     return 1;
+ }
