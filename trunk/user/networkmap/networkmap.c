@@ -378,8 +378,17 @@ resolve_hostname(struct in_addr *dst_ip, NET_CLIENT *pnet_client)
 	strncpy(pnet_client->device_name, hname, 18);
 	fixup_hostname(pnet_client);
 
-	if (!pnet_client->device_name[0])
+	/*
+	 * Some resolvers (e.g. uClibc getnameinfo) return the numeric
+	 * address itself even with NI_NAMEREQD.  That is not a useful
+	 * hostname: report failure so the caller falls back to the static
+	 * DHCP list instead of storing the IP as the device name.
+	 */
+	if (!pnet_client->device_name[0] ||
+	    !strcmp(pnet_client->device_name, inet_ntoa(*dst_ip))) {
+		pnet_client->device_name[0] = '\0';
 		return -1;
+	}
 
 	return 0;
 }
