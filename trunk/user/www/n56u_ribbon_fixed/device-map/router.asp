@@ -138,26 +138,36 @@ function domore_create(){
 
 function wps_pbc(){
 	var $button = $j('#btn_connect');
-	$button.button('loading');
+	$button.button('loading');	// spin (teal) via disabled state
 	$j.getJSON('/wps_action.asp',function(response){
+		var idTimeOut;
 		if(response.status == 0) {
-			$button.data('complete-text','Success')
-			       .removeClass('btn-info')
-			       .addClass('btn-success');
+			// trigger accepted: pairing feedback up to 30s (practical WPS window),
+			// then success (teal) for 2s and reset
+			idTimeOut = setTimeout(function(){
+				clearTimeout(idTimeOut);
+				$button.removeClass('btn-info').addClass('btn-success');
+				$button.button('reset');
+				$button.addClass('wps-done');
+				var idTimeOut2 = setTimeout(function(){
+					clearTimeout(idTimeOut2);
+					$button.removeClass('wps-done')
+					       .removeClass('btn-success')
+					       .removeClass('btn-info')
+					       .addClass('btn-success');
+				}, 2000);
+			}, 30000);
 		} else {
-			$button.data('complete-text','Error')
-			       .removeClass('btn-success')
-			       .addClass('btn-info');
+			// trigger failed: error (amber) for 2s and reset
+			$button.removeClass('btn-success').addClass('btn-info');
+			idTimeOut = setTimeout(function(){
+				clearTimeout(idTimeOut);
+				$button.button('reset');
+				$button.removeClass('btn-success')
+				       .removeClass('btn-info')
+				       .addClass('btn-success');
+			}, 2000);
 		}
-		$button.button('complete');
-
-                var idTimeOut = setTimeout(function(){
-                    clearTimeout(idTimeOut);
-                    $button.button('reset');
-		    $button.removeClass('btn-success')
-			   .removeClass('btn-info')
-			   .addClass('btn-success');
-                }, 1500);
 	})
 }
 
