@@ -693,7 +693,10 @@ textarea[readonly] {
 #internetStatus.badge-important i.icon-remove::before {
     content: none;
 }
-/* ===== WPS circular icon button (one SVG, color via CSS color) ===== */
+/* ===== WPS circular icon button (one SVG mask + CSS colors) ===== */
+:root {
+    --wps-mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBmaWxsPSIjMDAwIj48cGF0aCBkPSJNIDUyLjUgMTcuMiBDIDQ1LjIgMTcuMiAzNi44IDIwLjggMzAuNSAyNy4xIEMgMjEuMiAzNi40IDE4LjUgNDkuOCAyMi44IDYxLjUgQyAyMy44IDY0LjIgMjUuNSA2Ny44IDI4LjIgNzEuMiBDIDI5LjUgNzIuOCAzMC44IDcyLjIgMjkuOCA3MC4xIEMgMjYuMiA2Mi44IDI1LjggNTUuMiAyOC4xIDQ3LjggQyAzMS41IDM2LjggNDEuMiAyOS41IDUyLjggMjkuNSBDIDU0LjggMjkuNSA1Ni41IDI5LjggNTYuNSAyNy4yIEMgNTYuNSAyMy41IDU1LjIgMTcuMiA1Mi41IDE3LjIgWiIvPjxwYXRoIGQ9Ik0gNDQuNSAxMS4yIEMgNDQuNSAxMC4yIDQ2LjIgMTAuMiA0Ny41IDExLjUgTCA2MC41IDI0LjUgQyA2MS44IDI1LjggNjEuOCAyNy4yIDYwLjUgMjguNSBMIDQ3LjUgNDEuNSBDIDQ2LjIgNDIuOCA0NC41IDQxLjggNDQuNSA0MC44IFoiLz48cGF0aCBkPSJNIDQ3LjUgODIuOCBDIDU0LjggODIuOCA2My4yIDc5LjIgNjkuNSA3Mi45IEMgNzguOCA2My42IDgxLjUgNTAuMiA3Ny4yIDM4LjUgQyA3Ni4yIDM1LjggNzQuNSAzMi4yIDcxLjggMjguOCBDIDcwLjUgMjcuMiA2OS4yIDI3LjggNzAuMiAyOS45IEMgNzMuOCAzNy4yIDc0LjIgNDQuOCA3MS45IDUyLjIgQyA2OC41IDYzLjIgNTguOCA3MC41IDQ3LjIgNzAuNSBDIDQ1LjIgNzAuNSA0My41IDcwLjIgNDMuNSA3Mi44IEMgNDMuNSA3Ni41IDQ0LjggODIuOCA0Ny41IDgyLjggWiIvPjxwYXRoIGQ9Ik0gNTUuNSA4OC44IEMgNTUuNSA4OS44IDUzLjggODkuOCA1Mi41IDg4LjUgTCAzOS41IDc1LjUgQyAzOC4yIDc0LjIgMzguMiA3Mi44IDM5LjUgNzEuNSBMIDUyLjUgNTguNSBDIDUzLjggNTcuMiA1NS41IDU4LjIgNTUuNSA1OS4yIFoiLz48L2c+PC9zdmc+");
+}
 .btn-wps {
     width: 32px;
     height: 32px;
@@ -705,7 +708,17 @@ textarea[readonly] {
     text-shadow: none;
     box-shadow: none;
     background-color: transparent;
-    color: #ffffff;
+}
+.btn-wps::before,
+input#btn_connect {
+    -webkit-mask-image: var(--wps-mask);
+    mask-image: var(--wps-mask);
+    -webkit-mask-size: 22px 22px;
+    mask-size: 22px 22px;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
 }
 .btn-wps::before {
     content: "";
@@ -713,7 +726,7 @@ textarea[readonly] {
     width: 22px;
     height: 22px;
     vertical-align: middle;
-    background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0gNTIuNSwxNy4yIEMgNDUuMiwxNy4yIDM2LjgsMjAuOCAzMC41LDI3LjEgQyAyMS4yLDM2LjQgMTguNSw0OS44IDIyLjgsNjEuNSBDIDIzLjgsNjQuMiAyNS41LDY3LjggMjguMiw3MS4yIEMgMjkuNSw3Mi44IDMwLjgsNzIuMiAyOS44LDcwLjEgQyAyNi4yLDYyLjggMjUuOCw1NS4yIDI4LjEsNDcuOCBDIDMxLjUsMzYuOCA0MS4yLDI5LjUgNTIuOCwyOS41IEMgNTQuOCwyOS41IDU2LjUsMjkuOCA1Ni41LDI3LjIgQyA1Ni41LDIzLjUgNTUuMiwxNy4yIDUyLjUsMTcuMiBaIi8+PHBhdGggZD0iTSA0NC41LDExLjIgQyA0NC41LDEwLjIgNDYuMiwxMC4yIDQ3LjUsMTEuNSBMIDYwLjUsMjQuNSBDIDYxLjgsMjUuOCA2MS44LDI3LjIgNjAuNSwyOC41IEwgNDcuNSw0MS41IEMgNDYuMiw0Mi44IDQ0LjUsNDEuOCA0NC41LDQwLjggWiIvPjxwYXRoIGQ9Ik0gNDcuNSw4Mi44IEMgNTQuOCw4Mi44IDYzLjIsNzkuMiA2OS41LDcyLjkgQyA3OC44LDYzLjYgODEuNSw1MC4yIDc3LjIsMzguNSBDIDc2LjIsMzUuOCA3NC41LDMyLjIgNzEuOCwyOC44IEMgNzAuNSwyNy4yIDY5LjIsMjcuOCA3MC4yLDI5LjkgQyA3My44LDM3LjIgNzQuMiw0NC44IDcxLjksNTIuMiBDIDY4LjUsNjMuMiA1OC44LDcwLjUgNDcuMiw3MC41IEMgNDUuMiw3MC41IDQzLjUsNzAuMiA0My41LDcyLjggQyA0My41LDc2LjUgNDQuOCw4Mi44IDQ3LjUsODIuOCBaIi8+PHBhdGggZD0iTSA1NS41LDg4LjggQyA1NS41LDg5LjggNTMuOCw4OS44IDUyLjUsODguNSBMIDM5LjUsNzUuNSBDIDM4LjIsNzQuMiAzOC4yLDcyLjggMzkuNSw3MS41IEwgNTIuNSw1OC41IEMgNTMuOCw1Ny4yIDU1LjUsNTguMiA1NS41LDU5LjIgWiIvPjwvZz48L3N2Zz4=") no-repeat center / contain;
+    background-color: #ffffff;
 }
 .btn-wps:hover,
 .btn-wps:focus {
@@ -721,13 +734,13 @@ textarea[readonly] {
 }
 .btn-wps[disabled]::before,
 .btn-wps.wps-done::before {
-    color: #0E8F80;
+    background-color: #0E8F80;
 }
 .btn-wps[disabled]::before {
     animation: wps-spin 1.2s linear infinite;
 }
 .btn-wps.btn-info::before {
-    color: #E8A33D;
+    background-color: #E8A33D;
     animation: none;
 }
 input#btn_connect {
@@ -741,25 +754,20 @@ input#btn_connect {
     text-indent: -9999px;
     text-shadow: none;
     box-shadow: none;
-    background-color: transparent;
-    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0gNTIuNSwxNy4yIEMgNDUuMiwxNy4yIDM2LjgsMjAuOCAzMC41LDI3LjEgQyAyMS4yLDM2LjQgMTguNSw0OS44IDIyLjgsNjEuNSBDIDIzLjgsNjQuMiAyNS41LDY3LjggMjguMiw3MS4yIEMgMjkuNSw3Mi44IDMwLjgsNzIuMiAyOS44LDcwLjEgQyAyNi4yLDYyLjggMjUuOCw1NS4yIDI4LjEsNDcuOCBDIDMxLjUsMzYuOCA0MS4yLDI5LjUgNTIuOCwyOS41IEMgNTQuOCwyOS41IDU2LjUsMjkuOCA1Ni41LDI3LjIgQyA1Ni41LDIzLjUgNTUuMiwxNy4yIDUyLjUsMTcuMiBaIi8+PHBhdGggZD0iTSA0NC41LDExLjIgQyA0NC41LDEwLjIgNDYuMiwxMC4yIDQ3LjUsMTEuNSBMIDYwLjUsMjQuNSBDIDYxLjgsMjUuOCA2MS44LDI3LjIgNjAuNSwyOC41IEwgNDcuNSw0MS41IEMgNDYuMiw0Mi44IDQ0LjUsNDEuOCA0NC41LDQwLjggWiIvPjxwYXRoIGQ9Ik0gNDcuNSw4Mi44IEMgNTQuOCw4Mi44IDYzLjIsNzkuMiA2OS41LDcyLjkgQyA3OC44LDYzLjYgODEuNSw1MC4yIDc3LjIsMzguNSBDIDc2LjIsMzUuOCA3NC41LDMyLjIgNzEuOCwyOC44IEMgNzAuNSwyNy4yIDY5LjIsMjcuOCA3MC4yLDI5LjkgQyA3My44LDM3LjIgNzQuMiw0NC44IDcxLjksNTIuMiBDIDY4LjUsNjMuMiA1OC44LDcwLjUgNDcuMiw3MC41IEMgNDUuMiw3MC41IDQzLjUsNzAuMiA0My41LDcyLjggQyA0My41LDc2LjUgNDQuOCw4Mi44IDQ3LjUsODIuOCBaIi8+PHBhdGggZD0iTSA1NS41LDg4LjggQyA1NS41LDg5LjggNTMuOCw4OS44IDUyLjUsODguNSBMIDM5LjUsNzUuNSBDIDM4LjIsNzQuMiAzOC4yLDcyLjggMzkuNSw3MS41IEwgNTIuNSw1OC41IEMgNTMuOCw1Ny4yIDU1LjUsNTguMiA1NS41LDU5LjIgWiIvPjwvZz48L3N2Zz4=");
-    background-size: 22px 22px;
-    background-repeat: no-repeat;
-    background-position: center;
-    color: #ffffff;
+    background-color: #ffffff;
 }
 input#btn_connect:hover {
     opacity: 0.8;
 }
 input#btn_connect.disabled,
 input#btn_connect.wps-done {
-    color: #0E8F80;
+    background-color: #0E8F80;
 }
 input#btn_connect.disabled {
     animation: wps-spin 1.2s linear infinite;
 }
 input#btn_connect.btn-info {
-    color: #E8A33D;
+    background-color: #E8A33D;
     animation: none;
 }
 @keyframes wps-spin {
