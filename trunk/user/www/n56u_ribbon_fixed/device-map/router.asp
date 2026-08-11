@@ -789,7 +789,7 @@ window.onunload  = function(){
   <tr id="wps_button">
     <th width="50%"><#WPSControl#></th>
     <td>
-      <input type="button" id="btn_connect" class="btn btn-success" data-loading-text="WPS" value="<#WPS_Trigger#>" onclick="wps_pbc()" />
+      <button type="button" id="btn_connect" class="btn btn-success btn-wps" title="<#WPS_Trigger#>" onclick="wps_pbc()"></button>
     </td>
   </tr>
   <tr>
