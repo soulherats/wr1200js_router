@@ -119,6 +119,7 @@ ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	#$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-local /usr/bin/ssr-local
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/shared/bin/ss-redir /usr/bin/ss-orig-redir
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/shared/bin/ss-local /usr/bin/ss-local
+	cp -fP $(STAGEDIR)/lib/libpcre2-8.so* $(ROMFSDIR)/lib
 	ln -sf /var/ss-redir $(ROMFSDIR)/usr/bin/ss-redir
 	#ln -sf /var/ss-tunnel $(ROMFSDIR)/usr/bin/ss-local
 endif
