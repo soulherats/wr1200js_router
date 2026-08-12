@@ -51,7 +51,7 @@ config_test: config_ss
 endif
 
 config_ss:
-	( if [ -f ./ss_config_done ]; then \
+	( if [ -f $(SRC_SS_NAME)/build/Makefile ]; then \
 		echo "the same configuration"; \
 	else \
 		make configure_ss && touch ss_config_done; \
@@ -83,8 +83,10 @@ configure_ss:
                 cmake \
                         -DCMAKE_TOOLCHAIN_FILE=../../cross-mipsel-linux.cmake \
                         -DCMAKE_INSTALL_PREFIX=/usr \
-                        -DENABLE_DOCUMENTATION=OFF \
-                        -DENABLE_SSP=OFF \
+                        -DWITH_DOC_MAN=OFF \
+                        -DWITH_DOC_HTML=OFF \
+                        -DDISABLE_SSP=ON \
+                        -DWITH_STATIC=OFF \
                         -DBUILD_TESTING=OFF \
                         -DCMAKE_BUILD_TYPE=Release \
                         -DCMAKE_C_FLAGS="-O2 -fno-stack-protector -U_FORTIFY_SOURCE" \
@@ -93,7 +95,6 @@ configure_ss:
 			-DCMAKE_SHARED_LINKER_FLAGS="-fno-stack-protector" \
                         -DMBEDTLS_INCLUDE_DIR=$(STAGEDIR)/include \
                         -DCARES_INCLUDE_DIR=$(STAGEDIR)/include \
-                        -DWITH_MBEDTLS=ON \
                         .. ; \
 	)
 
@@ -107,9 +108,7 @@ clean_ssr:
 	fi )
 
 clean_ss:
-	( if [ -f $(SRC_SS_NAME)/Makefile ] ; then \
-		$(MAKE) -C $(SRC_SS_NAME) distclean ; \
-	fi )
+	rm -rf $(SRC_SS_NAME)/build
 
 romfs:
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
@@ -118,11 +117,11 @@ ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	$(ROMFSINST) $(THISDIR)/gfwlist/gfwlist.bz2 /etc_ro/gfwlist.bz2
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-redir /usr/bin/ssr-redir
 	#$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-local /usr/bin/ssr-local
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/bin/ss-redir /usr/bin/ss-orig-redir
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/bin/ss-local /usr/bin/ss-local
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/shared/bin/ss-redir /usr/bin/ss-orig-redir
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/shared/bin/ss-local /usr/bin/ss-local
 	ln -sf /var/ss-redir $(ROMFSDIR)/usr/bin/ss-redir
 	#ln -sf /var/ss-tunnel $(ROMFSDIR)/usr/bin/ss-local
 endif
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SSSERVER),y)
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/src/ss-server /usr/bin/ss-server
+	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/build/shared/bin/ss-server /usr/bin/ss-server
 endif
