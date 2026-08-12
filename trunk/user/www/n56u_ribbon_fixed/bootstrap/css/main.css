@@ -730,7 +730,7 @@ input#btn_connect {
 }
 .btn-wps:hover,
 .btn-wps:focus {
-    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 2px rgba(14, 143, 128, 0.45);
 }
 .btn-wps[disabled]::before,
 .btn-wps.wps-done::before {
@@ -757,7 +757,7 @@ input#btn_connect {
     background-color: #ffffff;
 }
 input#btn_connect:hover {
-    opacity: 0.8;
+    box-shadow: 0 0 0 2px rgba(14, 143, 128, 0.45);
 }
 input#btn_connect.disabled,
 input#btn_connect.wps-done {
