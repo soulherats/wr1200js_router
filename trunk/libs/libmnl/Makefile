@@ -1,5 +1,5 @@
 SRC_NAME=libmnl-1.0.4
-SRC_URL=http://www.netfilter.org/projects/libmnl/files/$(SRC_NAME).tar.bz2
+SRC_URL=https://www.netfilter.org/projects/libmnl/files/$(SRC_NAME).tar.bz2
 
 all: download_test extract_test config_test
 	$(MAKE) -C $(SRC_NAME)
