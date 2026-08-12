@@ -286,10 +286,31 @@ function submitInternet(v){
     font-size:14px;
     font-weight:500;
 }
-#tbl_info .mono{
-    font-family:"Cascadia Code",Consolas,"Courier New",Menlo,"DejaVu Sans Mono",monospace;
+#tbl_info .ip-address{
     font-size:13px;
     font-weight:400;
+}
+/* ===== WAN 操作按钮与状态徽章配色 ===== */
+#tbl_info .btn-info{
+    background-color:#E8A33D;
+    background-image:none;
+    border-color:#C98A2E;
+    color:#fff;
+}
+#tbl_info .btn-info:hover{
+    background-color:#D8952F;
+}
+#tbl_info .btn-danger{
+    background-color:#C0392B;
+    background-image:none;
+    border-color:#96291E;
+    color:#fff;
+}
+#tbl_info .btn-danger:hover{
+    background-color:#A93226;
+}
+#tbl_info .label-success{
+    background-color:#4CAF50;
 }
 </style>
 </head>
@@ -350,35 +371,35 @@ function submitInternet(v){
   </tr>
   <tr>
     <th><#IP4_Addr#> WAN:</th>
-    <td colspan="3"><span id="WANIP4" class="mono"></span></td>
+    <td colspan="3"><span id="WANIP4" class="ip-address"></span></td>
   </tr>
   <tr id="row_man_ip4" style="display:none">
     <th><#IP4_Addr#> MAN:</th>
-    <td colspan="3"><span id="MANIP4" class="mono"></span></td>
+    <td colspan="3"><span id="MANIP4" class="ip-address"></span></td>
   </tr>
   <tr id="row_wan_ip6" style="display:none">
     <th><#IP6_Addr#> WAN:</th>
-    <td colspan="3"><span id="WANIP6" class="mono"></span></td>
+    <td colspan="3"><span id="WANIP6" class="ip-address"></span></td>
   </tr>
   <tr id="row_lan_ip6" style="display:none">
     <th><#IP6_Addr#> LAN:</th>
-    <td colspan="3"><span id="LANIP6" class="mono"></span></td>
+    <td colspan="3"><span id="LANIP6" class="ip-address"></span></td>
   </tr>
   <tr>
     <th><#Gateway#> WAN:</th>
-    <td colspan="3"><span id="WANGW4" class="mono"></span></td>
+    <td colspan="3"><span id="WANGW4" class="ip-address"></span></td>
   </tr>
   <tr id="row_man_gw4" style="display:none">
     <th><#Gateway#> MAN:</th>
-    <td colspan="3"><span id="MANGW4" class="mono"></span></td>
+    <td colspan="3"><span id="MANGW4" class="ip-address"></span></td>
   </tr>
   <tr>
     <th>DNS:</th>
-    <td colspan="3"><span id="WANDNS" class="mono"></span></td>
+    <td colspan="3"><span id="WANDNS" class="ip-address"></span></td>
   </tr>
   <tr>
     <th><#MAC_Address#></th>
-    <td colspan="3"><span id="WANMAC" class="mono"></span></td>
+    <td colspan="3"><span id="WANMAC" class="ip-address"></span></td>
   </tr>
   <tr id="row_more_links">
     <td style="padding-bottom: 0px;">&nbsp;</td>

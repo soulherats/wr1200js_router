@@ -700,24 +700,25 @@ textarea[readonly] {
     --wps-mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBmaWxsPSIjMDAwIj48cGF0aCBkPSJNIDUyLjUgMTcuMiBDIDQ1LjIgMTcuMiAzNi44IDIwLjggMzAuNSAyNy4xIEMgMjEuMiAzNi40IDE4LjUgNDkuOCAyMi44IDYxLjUgQyAyMy44IDY0LjIgMjUuNSA2Ny44IDI4LjIgNzEuMiBDIDI5LjUgNzIuOCAzMC44IDcyLjIgMjkuOCA3MC4xIEMgMjYuMiA2Mi44IDI1LjggNTUuMiAyOC4xIDQ3LjggQyAzMS41IDM2LjggNDEuMiAyOS41IDUyLjggMjkuNSBDIDU0LjggMjkuNSA1Ni41IDI5LjggNTYuNSAyNy4yIEMgNTYuNSAyMy41IDU1LjIgMTcuMiA1Mi41IDE3LjIgWiIvPjxwYXRoIGQ9Ik0gNDQuNSAxMS4yIEMgNDQuNSAxMC4yIDQ2LjIgMTAuMiA0Ny41IDExLjUgTCA2MC41IDI0LjUgQyA2MS44IDI1LjggNjEuOCAyNy4yIDYwLjUgMjguNSBMIDQ3LjUgNDEuNSBDIDQ2LjIgNDIuOCA0NC41IDQxLjggNDQuNSA0MC44IFoiLz48cGF0aCBkPSJNIDQ3LjUgODIuOCBDIDU0LjggODIuOCA2My4yIDc5LjIgNjkuNSA3Mi45IEMgNzguOCA2My42IDgxLjUgNTAuMiA3Ny4yIDM4LjUgQyA3Ni4yIDM1LjggNzQuNSAzMi4yIDcxLjggMjguOCBDIDcwLjUgMjcuMiA2OS4yIDI3LjggNzAuMiAyOS45IEMgNzMuOCAzNy4yIDc0LjIgNDQuOCA3MS45IDUyLjIgQyA2OC41IDYzLjIgNTguOCA3MC41IDQ3LjIgNzAuNSBDIDQ1LjIgNzAuNSA0My41IDcwLjIgNDMuNSA3Mi44IEMgNDMuNSA3Ni41IDQ0LjggODIuOCA0Ny41IDgyLjggWiIvPjxwYXRoIGQ9Ik0gNTUuNSA4OC44IEMgNTUuNSA4OS44IDUzLjggODkuOCA1Mi41IDg4LjUgTCAzOS41IDc1LjUgQyAzOC4yIDc0LjIgMzguMiA3Mi44IDM5LjUgNzEuNSBMIDUyLjUgNTguNSBDIDUzLjggNTcuMiA1NS41IDU4LjIgNTUuNSA1OS4yIFoiLz48L2c+PC9zdmc+");
 }
 .btn-wps {
-    width: 32px;
-    height: 32px;
+    position: relative;
+    width: 26px;
+    height: 26px;
     padding: 0;
-    border: 0;
+    border: 1.5px solid #2FA8D8;
     border-radius: 50%;
     font-size: 0;
-    line-height: 32px;
+    line-height: 26px;
     text-shadow: none;
     box-shadow: none;
-    background-color: #2FA8D8;
+    background-color: transparent;
     background-image: none;
 }
 .btn-wps::before,
 input#btn_connect {
     -webkit-mask-image: var(--wps-mask);
     mask-image: var(--wps-mask);
-    -webkit-mask-size: 16px 16px;
-    mask-size: 16px 16px;
+    -webkit-mask-size: 19px 19px;
+    mask-size: 19px 19px;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-position: center;
@@ -725,31 +726,46 @@ input#btn_connect {
 }
 .btn-wps::before {
     content: "";
-    display: inline-block;
-    width: 22px;
-    height: 22px;
-    vertical-align: middle;
-    background-color: #ffffff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 19px;
+    height: 19px;
+    transform: translate(-50%, -50%);
+    background-color: #2FA8D8;
 }
 .btn-wps:hover,
 .btn-wps:focus {
     box-shadow: none;
     background-color: #2FA8D8;
 }
+.btn-wps:hover::before,
+.btn-wps:focus::before {
+    background-color: #ffffff;
+}
 .btn-wps:focus-visible {
     outline: 2px solid rgba(255,255,255,.55);
     outline-offset: 2px;
 }
+.btn-wps[disabled],
+.btn-wps.wps-done {
+    background-color: #2FA8D8;
+}
 .btn-wps[disabled]::before,
 .btn-wps.wps-done::before {
-    background-color: #2FA8D8;
+    background-color: #ffffff;
 }
 .btn-wps[disabled]::before {
     animation: wps-spin 1.2s linear infinite;
 }
-.btn-wps.btn-info::before {
+.btn-wps.btn-info {
     background-color: #E8A33D;
-    animation: none;
+}
+.btn-wps.btn-info::before {
+    background-color: #ffffff;
+}
+#wps_button td {
+    padding: 11px 8px;
 }
 input#btn_connect {
     width: 32px;
@@ -784,4 +800,9 @@ input#btn_connect.btn-info {
 }
 
 /* ===== typography: monospace for technical values (IP/MAC/GW/DNS) ===== */
-.mono{font-family:"Cascadia Code",Consolas,"Courier New",Menlo,"DejaVu Sans Mono",monospace;font-variant-numeric:tabular-nums;}
+.ip-address{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-0.02em;
+    word-break:break-all;
+}

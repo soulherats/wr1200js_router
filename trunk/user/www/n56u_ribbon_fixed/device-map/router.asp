@@ -27,6 +27,8 @@ $j(document).ready(function() {
 	init_itoggle('wl_radio_x', wl_wps_change);
 	init_itoggle('wl_closed', wl_wps_change);
 	init_itoggle('wl_WPS', wl_wps_change);
+	wps_status_poll();
+	setInterval(wps_status_poll, 10000);
 });
 
 </script>
@@ -138,10 +140,12 @@ function domore_create(){
 
 function wps_pbc(){
 	var $button = $j('#btn_connect');
+	if($button.hasClass('disabled') || $button.prop('disabled')) return;	// 配对中禁止重复触发
 	$button.button('loading');	// spin (teal) via disabled state
 	$j.getJSON('/wps_action.asp',function(response){
 		var idTimeOut;
 		if(response.status == 0) {
+			$j('#wps_status_txt').text('配对中…');
 			// trigger accepted: pairing feedback up to 30s (practical WPS window),
 			// then success (teal) for 2s and reset
 			idTimeOut = setTimeout(function(){
@@ -158,6 +162,7 @@ function wps_pbc(){
 				}, 2000);
 			}, 30000);
 		} else {
+			$j('#wps_status_txt').text('配对失败');
 			// trigger failed: error (amber) for 2s and reset
 			$button.removeClass('btn-success').addClass('btn-info');
 			idTimeOut = setTimeout(function(){
@@ -169,6 +174,24 @@ function wps_pbc(){
 			}, 2000);
 		}
 	})
+}
+
+function wps_status_poll(){
+	$j.getJSON('/wps_status.asp',function(res){
+		var el = $j('#wps_status_txt');
+		if(!el.length) return;
+		var btn = $j('#btn_connect');
+		var s = res.status;
+		if(s >= 3){
+			el.text('配对中…');
+			if(!btn.hasClass('disabled')) btn.button('loading');
+		} else {
+			if(s == 2) el.text('配对失败');
+			else if(s == 34) el.text('已完成');
+			else el.text('空闲');
+			if(btn.hasClass('disabled')) btn.button('reset');
+		}
+	});
 }
 
 function wl_wps_change(){
@@ -800,6 +823,7 @@ window.onunload  = function(){
     <th width="50%"><#WPSControl#></th>
     <td>
       <button type="button" id="btn_connect" class="btn btn-success btn-wps" title="<#WPS_Trigger#>" onclick="wps_pbc()"></button>
+      <span id="wps_status_txt" style="margin-left:10px;font-size:12px;color:#8FD4EF"></span>
     </td>
   </tr>
   <tr>

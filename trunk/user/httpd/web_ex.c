@@ -2084,6 +2084,26 @@ exit:
 	return 0;
 }
 
+static int
+wps_status_hook(int eid, webs_t wp, int argc, char **argv)
+{
+	FILE *fp = NULL;
+	char buf[128];
+	int status = -1;
+
+	doSystem("/bin/iwpriv rai0 get_wsc_status > /tmp/wsc_status 2>&1");
+	fp = fopen("/tmp/wsc_status", "r");
+	if (fp) {
+		while (fgets(buf, sizeof(buf), fp)) {
+			if (sscanf(buf, "WSC_Status=%d", &status) == 1)
+				break;
+		}
+		fclose(fp);
+	}
+	websWrite(wp, "{\"status\": %d}", status);
+	return 0;
+}
+
 int
 ej_decode_link(int eid, webs_t wp, int argc, char **argv)
 {
@@ -4133,6 +4153,7 @@ struct ej_handler ej_handlers[] =
 	{ "wan_action", wan_action_hook},
 	{ "wol_action", wol_action_hook},
 	{ "wps_action", wps_action_hook},
+	{ "wps_status", wps_status_hook},
 	{ "ss_link_list", ej_decode_link},
 	{ "nf_values", nf_values_hook},
 	{ "get_parameter", ej_get_parameter},
