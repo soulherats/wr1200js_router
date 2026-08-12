@@ -1,5 +1,6 @@
 body{
     background-image: radial-gradient(#667eeaa8, #764ba2);
+    font-family: "Segoe UI", "Ubuntu", "Helvetica Neue", Arial, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 body.body_iframe{
     background-color: rgba(34, 34, 34, 0);
@@ -510,6 +511,7 @@ textarea[readonly] {
 }
 
 .table th, .table td{vertical-align: middle;}
+.table{font-variant-numeric:tabular-nums;}
 .table input, .table select{margin-bottom: 0px;}
 
 .syslog_panel {
@@ -707,14 +709,15 @@ textarea[readonly] {
     line-height: 32px;
     text-shadow: none;
     box-shadow: none;
-    background-color: transparent;
+    background-color: #2FA8D8;
+    background-image: none;
 }
 .btn-wps::before,
 input#btn_connect {
     -webkit-mask-image: var(--wps-mask);
     mask-image: var(--wps-mask);
-    -webkit-mask-size: 22px 22px;
-    mask-size: 22px 22px;
+    -webkit-mask-size: 16px 16px;
+    mask-size: 16px 16px;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-position: center;
@@ -730,11 +733,16 @@ input#btn_connect {
 }
 .btn-wps:hover,
 .btn-wps:focus {
-    box-shadow: 0 0 0 2px rgba(14, 143, 128, 0.45);
+    box-shadow: none;
+    background-color: #2FA8D8;
+}
+.btn-wps:focus-visible {
+    outline: 2px solid rgba(255,255,255,.55);
+    outline-offset: 2px;
 }
 .btn-wps[disabled]::before,
 .btn-wps.wps-done::before {
-    background-color: #0E8F80;
+    background-color: #2FA8D8;
 }
 .btn-wps[disabled]::before {
     animation: wps-spin 1.2s linear infinite;
@@ -774,3 +782,6 @@ input#btn_connect.btn-info {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
+
+/* ===== typography: monospace for technical values (IP/MAC/GW/DNS) ===== */
+.mono{font-family:"Cascadia Code",Consolas,"Courier New",Menlo,"DejaVu Sans Mono",monospace;font-variant-numeric:tabular-nums;}

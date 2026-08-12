@@ -271,12 +271,33 @@ function submitInternet(v){
 }
 
 </script>
+<style>
+/* ===== typography: external network status (scoped) ===== */
+#tbl_info th{
+    width:150px;
+    text-align:right;
+    padding-right:14px;
+    font-size:13px;
+    font-weight:400;
+    color:rgba(255,255,255,0.55);
+    white-space:nowrap;
+}
+#tbl_info td{
+    font-size:14px;
+    font-weight:500;
+}
+#tbl_info .mono{
+    font-family:"Cascadia Code",Consolas,"Courier New",Menlo,"DejaVu Sans Mono",monospace;
+    font-size:13px;
+    font-weight:400;
+}
+</style>
 </head>
 
 <body class="body_iframe" onload="initial();">
 <table width="100%" align="center" cellpadding="4" cellspacing="0" class="table" id="tbl_info">
   <tr>
-    <th width="50%" style="border-top: 0 none;"><#InetControl#></th>
+    <th style="border-top: 0 none;"><#InetControl#></th>
     <td style="border-top: 0 none;" colspan="3">
       <input type="button" id="btn_connect_1" class="btn btn-info" value="<#Connect#>" onclick="submitInternet('Connect');">
       <input type="button" id="btn_connect_0" class="btn btn-danger" value="<#Disconnect#>" onclick="submitInternet('Disconnect');">
@@ -329,35 +350,35 @@ function submitInternet(v){
   </tr>
   <tr>
     <th><#IP4_Addr#> WAN:</th>
-    <td colspan="3"><span id="WANIP4"></span></td>
+    <td colspan="3"><span id="WANIP4" class="mono"></span></td>
   </tr>
   <tr id="row_man_ip4" style="display:none">
     <th><#IP4_Addr#> MAN:</th>
-    <td colspan="3"><span id="MANIP4"></span></td>
+    <td colspan="3"><span id="MANIP4" class="mono"></span></td>
   </tr>
   <tr id="row_wan_ip6" style="display:none">
     <th><#IP6_Addr#> WAN:</th>
-    <td colspan="3"><span id="WANIP6"></span></td>
+    <td colspan="3"><span id="WANIP6" class="mono"></span></td>
   </tr>
   <tr id="row_lan_ip6" style="display:none">
     <th><#IP6_Addr#> LAN:</th>
-    <td colspan="3"><span id="LANIP6"></span></td>
+    <td colspan="3"><span id="LANIP6" class="mono"></span></td>
   </tr>
   <tr>
     <th><#Gateway#> WAN:</th>
-    <td colspan="3"><span id="WANGW4"></span></td>
+    <td colspan="3"><span id="WANGW4" class="mono"></span></td>
   </tr>
   <tr id="row_man_gw4" style="display:none">
     <th><#Gateway#> MAN:</th>
-    <td colspan="3"><span id="MANGW4"></span></td>
+    <td colspan="3"><span id="MANGW4" class="mono"></span></td>
   </tr>
   <tr>
     <th>DNS:</th>
-    <td colspan="3"><span id="WANDNS"></span></td>
+    <td colspan="3"><span id="WANDNS" class="mono"></span></td>
   </tr>
   <tr>
     <th><#MAC_Address#></th>
-    <td colspan="3"><span id="WANMAC"></span></td>
+    <td colspan="3"><span id="WANMAC" class="mono"></span></td>
   </tr>
   <tr id="row_more_links">
     <td style="padding-bottom: 0px;">&nbsp;</td>
