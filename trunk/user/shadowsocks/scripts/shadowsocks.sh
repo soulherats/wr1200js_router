@@ -13,6 +13,10 @@ SS_LOCAL="/usr/bin/ss-local"
 SS_UOT="/usr/bin/uote"
 ss_uot_local_port="1053"
 ss_uot_redir_port="1090"
+ss_uot_log="/tmp/ss-uotd.log"
+ss_lock_dir="/tmp/shadowsocks.lock"
+ss_obfs_pid=""
+ss_obfs_port=""
 
 #/usr/bin/ss-redir -> /var/ss-redir -> /usr/bin/ss-orig-redir or /usr/bin/ssr-redir
 
@@ -46,6 +50,33 @@ ss_uot=$(nvram get ss_uot) #0:off;1:UOTD DNS
 
 loger() {
 	logger -st "$1" "$2"
+}
+
+release_lock() {
+	rm -f "$ss_lock_dir/pid"
+	rmdir "$ss_lock_dir" 2>/dev/null
+}
+
+acquire_lock() {
+	local lock_pid tries=0
+	while ! mkdir "$ss_lock_dir" 2>/dev/null; do
+		lock_pid=$(cat "$ss_lock_dir/pid" 2>/dev/null)
+		if [ -z "$lock_pid" ]; then
+			tries=$((tries + 1))
+			[ "$tries" -ge 30 ] && return 1
+			sleep 1
+		elif ! kill -0 "$lock_pid" 2>/dev/null; then
+			rm -f "$ss_lock_dir/pid"
+			rmdir "$ss_lock_dir" 2>/dev/null
+		else
+			tries=$((tries + 1))
+			[ "$tries" -ge 30 ] && return 1
+			sleep 1
+		fi
+	done
+	echo "$$" > "$ss_lock_dir/pid"
+	trap release_lock EXIT
+	trap 'release_lock; exit 1' INT TERM
 }
 
 get_arg_udp() {
@@ -83,29 +114,64 @@ get_gfw_ext(){
 	fi
 }
 
-get_plugin_ext(){
-        if [ "${ss_type:-0}" = "0" -a "${ss_simple_obfs:-0}" = '1' ]; then
-                printf "--plugin obfs-local --plugin-opts \"%s\"\n" $(nvram get ss_obfs_param)
-        fi
+get_obfs_pid(){
+	local pid parent_pid
+	for pid in $(pidof obfs-local); do
+		parent_pid=$(awk '{print $4}' "/proc/$pid/stat" 2>/dev/null)
+		[ "$parent_pid" = "$ss_pid" ] && {
+			echo "$pid"
+			return 0
+		}
+	done
+	return 1
 }
 
 get_obfs_port(){
-	# 从 /proc/net/tcp 按 socket inode 匹配 obfs-local 的真实监听端口
-	local obfs_pid inode hexport
-	obfs_pid=$(pidof obfs-local | awk '{print $1}')
+	# Match the listening socket owned by this ss-redir plugin instance.
+	local obfs_pid="$1" inode hexport
 	[ -z "$obfs_pid" ] && return 1
 	for inode in $(ls -l /proc/$obfs_pid/fd 2>/dev/null | grep -o 'socket:\[[0-9]*\]' | grep -o '[0-9]*'); do
-		hexport=$(awk -v i="$inode" '$10 == i && $4 == "0A" { print $2 }' /proc/net/tcp /proc/net/tcp6 | head -1 | cut -d: -f2)
+		hexport=$(awk -v i="$inode" '$10 == i && $4 == "0A" { print $2 }' /proc/net/tcp /proc/net/tcp6 2>/dev/null | head -1 | cut -d: -f2)
 		[ -n "$hexport" ] && break
 	done
 	[ -z "$hexport" ] && return 1
 	echo $((0x$hexport))
 }
 
+wait_obfs_port(){
+	local tries=0
+	while [ "$tries" -lt 10 ]; do
+		kill -0 "$ss_pid" 2>/dev/null || return 1
+		ss_obfs_pid=$(get_obfs_pid)
+		[ -n "$ss_obfs_pid" ] && ss_obfs_port=$(get_obfs_port "$ss_obfs_pid")
+		[ -n "$ss_obfs_port" ] && return 0
+		tries=$((tries + 1))
+		sleep 1
+	done
+	return 1
+}
+
 func_start_ss_redir(){
-	sh -c "$ss_bin -c $ss_json_file $(get_arg_udp) $(get_plugin_ext)" &
+	: > /tmp/ss-redir.log
+	if [ "${ss_type:-0}" = "0" ] && [ "${ss_simple_obfs:-0}" = "1" ]; then
+		"$ss_bin" -c "$ss_json_file" $(get_arg_udp) --plugin obfs-local \
+			--plugin-opts "$(nvram get ss_obfs_param)" >>/tmp/ss-redir.log 2>&1 &
+	else
+		"$ss_bin" -c "$ss_json_file" $(get_arg_udp) >>/tmp/ss-redir.log 2>&1 &
+	fi
 	ss_pid=$!
-	return $?
+	sleep 1
+	if ! kill -0 "$ss_pid" 2>/dev/null; then
+		loger "$ss_bin" "process exited during startup, see /tmp/ss-redir.log"
+		return 1
+	fi
+	if [ "${ss_type:-0}" = "0" ] && [ "${ss_simple_obfs:-0}" = "1" ]; then
+		if ! wait_obfs_port; then
+			loger "$ss_bin" "obfs-local did not become ready, see /tmp/ss-redir.log"
+			return 1
+		fi
+	fi
+	return 0
 }
 
 func_dl_list(){
@@ -153,8 +219,7 @@ EOF
 }
 
 func_start_ss_dns(){
-	local pid=`pgrep -P $ss_pid`
-	if [ -z $pid ]; then
+	if ! kill -0 "$ss_pid" 2>/dev/null; then
 		return 1;
 	fi
 	dns=`echo -n $(awk '!/127.0.0.1/{print $2}' /etc/resolv.conf)| tr -s " " ","`
@@ -234,7 +299,11 @@ func_gen_uot_json(){
 	local uot_server_port="$ss_server_port"
 
         if [ "$ss_simple_obfs" = "1" ]; then
-                uot_server_port=$(get_obfs_port)
+		uot_server_port="$ss_obfs_port"
+		if [ -z "$uot_server_port" ]; then
+			wait_obfs_port
+			uot_server_port="$ss_obfs_port"
+		fi
                 if [ -z "$uot_server_port" ]; then
                         loger "ss-uotd" "obfs-local port not found, abort UOTD"
                         return 1
@@ -270,18 +339,22 @@ func_start_ss_uotd(){
 
 	func_gen_uot_json || return 1
 
-	"$SS_LOCAL" -c "/tmp/ss-uot.json" >/dev/null 2>&1 &
+	: > "$ss_uot_log"
+	"$SS_LOCAL" -c "/tmp/ss-uot.json" >>"$ss_uot_log" 2>&1 &
+	local ss_local_pid
+	ss_local_pid=$!
 	sleep 1
-        if [ -z "$(pidof ss-local)" ]; then
-                loger "ss-uotd" "ss-local failed to start"
-                return 1
-        fi
+	if ! kill -0 "$ss_local_pid" 2>/dev/null; then
+		loger "ss-uotd" "ss-local failed to start, see $ss_uot_log"
+		return 1
+	fi
 
-	sleep 5
-	"$SS_UOT" -l "$ss_uot_local_port" -p "$ss_uot_redir_port" &
+	"$SS_UOT" -l "$ss_uot_local_port" -p "$ss_uot_redir_port" >>"$ss_uot_log" 2>&1 &
+	local uote_pid
+	uote_pid=$!
 	sleep 1
-	if [ -z "$(pidof uote)" ]; then
-		loger "ss-uotd" "uote failed to start"
+	if ! kill -0 "$uote_pid" 2>/dev/null; then
+		loger "ss-uotd" "uote failed to start, see $ss_uot_log"
 		func_stop_ss_uotd
 		return 1
 	fi
@@ -325,14 +398,27 @@ func_start(){
 		ss_udp=1
 	fi
 	ulimit -n 65536
-	func_gen_ss_json && \
-	func_start_ss_redir && \
-	func_dl_list && \
-	func_start_ss_rules && \
-	func_start_ss_dns && \
-	func_start_ss_uotd && \
-	loger $ss_bin "start done" || { ss-rules -f && func_stop && loger $ss_bin "start fail!";}
+	if func_gen_ss_json && \
+		func_start_ss_redir && \
+		func_dl_list && \
+		func_start_ss_rules && \
+		func_start_ss_dns; then
+		if ! func_start_ss_uotd; then
+			func_stop_ss_uotd
+			loger "ss-uotd" "start failed; Shadowsocks continues without UOTD"
+		fi
+		loger $ss_bin "start done"
+	else
+		ss-rules -f
+		func_stop
+		loger $ss_bin "start fail!"
+	fi
 }
+
+if ! acquire_lock; then
+	loger "$ss_bin" "another start/stop operation is still running"
+	exit 1
+fi
 
 case "$1" in
 start)
