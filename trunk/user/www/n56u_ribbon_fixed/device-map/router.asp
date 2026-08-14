@@ -138,6 +138,8 @@ function domore_create(){
 	}
 }
 
+var wpsFailUntil = 0;	// 触发失败后的显示窗口, 期间轮询不覆盖
+
 function wps_pbc(){
 	var $button = $j('#btn_connect');
 	if($button.hasClass('disabled') || $button.prop('disabled')) return;	// 配对中禁止重复触发
@@ -162,8 +164,9 @@ function wps_pbc(){
 				}, 2000);
 			}, 30000);
 		} else {
+			// trigger failed: error (amber), 失败窗口内轮询不查询/不覆盖
+			wpsFailUntil = Date.now() + 4000;
 			$j('#wps_status_txt').text('配对失败');
-			// trigger failed: error (amber) for 2s and reset
 			$button.removeClass('btn-success').addClass('btn-info');
 			idTimeOut = setTimeout(function(){
 				clearTimeout(idTimeOut);
@@ -182,6 +185,7 @@ function wps_status_poll(){
 		if(!el.length) return;
 		var btn = $j('#btn_connect');
 		var s = res.status;
+		if(Date.now() < wpsFailUntil) return;	// 触发失败窗口: 保持琥珀失败态
 		if(s >= 3){
 			el.text('配对中…');
 			if(!btn.hasClass('disabled')) btn.button('loading');
@@ -647,6 +651,10 @@ window.onunload  = function(){
 </script>
 
 <style>
+/* ===== WPS circular icon button (one SVG mask + CSS colors) ===== */
+:root {
+    --wps-mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBmaWxsPSIjMDAwIj48cGF0aCBkPSJNIDUyLjUgMTcuMiBDIDQ1LjIgMTcuMiAzNi44IDIwLjggMzAuNSAyNy4xIEMgMjEuMiAzNi40IDE4LjUgNDkuOCAyMi44IDYxLjUgQyAyMy44IDY0LjIgMjUuNSA2Ny44IDI4LjIgNzEuMiBDIDI5LjUgNzIuOCAzMC44IDcyLjIgMjkuOCA3MC4xIEMgMjYuMiA2Mi44IDI1LjggNTUuMiAyOC4xIDQ3LjggQyAzMS41IDM2LjggNDEuMiAyOS41IDUyLjggMjkuNSBDIDU0LjggMjkuNSA1Ni41IDI5LjggNTYuNSAyNy4yIEMgNTYuNSAyMy41IDU1LjIgMTcuMiA1Mi41IDE3LjIgWiIvPjxwYXRoIGQ9Ik0gNDQuNSAxMS4yIEMgNDQuNSAxMC4yIDQ2LjIgMTAuMiA0Ny41IDExLjUgTCA2MC41IDI0LjUgQyA2MS44IDI1LjggNjEuOCAyNy4yIDYwLjUgMjguNSBMIDQ3LjUgNDEuNSBDIDQ2LjIgNDIuOCA0NC41IDQxLjggNDQuNSA0MC44IFoiLz48cGF0aCBkPSJNIDQ3LjUgODIuOCBDIDU0LjggODIuOCA2My4yIDc5LjIgNjkuNSA3Mi45IEMgNzguOCA2My42IDgxLjUgNTAuMiA3Ny4yIDM4LjUgQyA3Ni4yIDM1LjggNzQuNSAzMi4yIDcxLjggMjguOCBDIDcwLjUgMjcuMiA2OS4yIDI3LjggNzAuMiAyOS45IEMgNzMuOCAzNy4yIDc0LjIgNDQuOCA3MS45IDUyLjIgQyA2OC41IDYzLjIgNTguOCA3MC41IDQ3LjIgNzAuNSBDIDQ1LjIgNzAuNSA0My41IDcwLjIgNDMuNSA3Mi44IEMgNDMuNSA3Ni41IDQ0LjggODIuOCA0Ny41IDgyLjggWiIvPjxwYXRoIGQ9Ik0gNTUuNSA4OC44IEMgNTUuNSA4OS44IDUzLjggODkuOCA1Mi41IDg4LjUgTCAzOS41IDc1LjUgQyAzOC4yIDc0LjIgMzguMiA3Mi44IDM5LjUgNzEuNSBMIDUyLjUgNTguNSBDIDUzLjggNTcuMiA1NS41IDU4LjIgNTUuNSA1OS4yIFoiLz48L2c+PC9zdmc+");
+}
     .table th{vertical-align: middle;}
     .table input, .table select{margin-bottom: 0px;}
 </style>
@@ -823,7 +831,7 @@ window.onunload  = function(){
     <th width="50%"><#WPSControl#></th>
     <td>
       <button type="button" id="btn_connect" class="btn btn-success btn-wps" title="<#WPS_Trigger#>" onclick="wps_pbc()"></button>
-      <span id="wps_status_txt" style="margin-left:10px;font-size:12px;color:#8FD4EF"></span>
+      <span id="wps_status_txt" style="margin-left:10px;font-size:12px;color:#8FD4EF;vertical-align:middle"></span>
     </td>
   </tr>
   <tr>

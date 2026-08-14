@@ -90,11 +90,16 @@ get_plugin_ext(){
 }
 
 get_obfs_port(){
-	local obfs_pid
-	set -- $(pidof obfs-local)
-	obfs_pid="$1"
-        [ -z "$obfs_pid" ] && return 1
-        tr '\0' '\n' < /proc/$obfs_pid/environ | awk -F= '/^SS_LOCAL_PORT/{print $2}'
+	# 从 /proc/net/tcp 按 socket inode 匹配 obfs-local 的真实监听端口
+	local obfs_pid inode hexport
+	obfs_pid=$(pidof obfs-local | awk '{print $1}')
+	[ -z "$obfs_pid" ] && return 1
+	for inode in $(ls -l /proc/$obfs_pid/fd 2>/dev/null | grep -o 'socket:\[[0-9]*\]' | grep -o '[0-9]*'); do
+		hexport=$(awk -v i="$inode" '$10 == i && $4 == "0A" { print $2 }' /proc/net/tcp /proc/net/tcp6 | head -1 | cut -d: -f2)
+		[ -n "$hexport" ] && break
+	done
+	[ -z "$hexport" ] && return 1
+	echo $((0x$hexport))
 }
 
 func_start_ss_redir(){
@@ -231,7 +236,7 @@ func_gen_uot_json(){
         if [ "$ss_simple_obfs" = "1" ]; then
                 uot_server_port=$(get_obfs_port)
                 if [ -z "$uot_server_port" ]; then
-                        loger "ss-uotd" "obfs-local port not found in /proc environ, abort UOTD"
+                        loger "ss-uotd" "obfs-local port not found, abort UOTD"
                         return 1
                 fi
                 uot_server="127.0.0.1"

@@ -358,6 +358,16 @@ fixup_hostname(NET_CLIENT* pnet_client)
 
 	hname[18] = '\0';
 	trim_r(hname);
+
+	/* strip lan domain suffix (e.g. "wlan0.lan" -> "wlan0") */
+	{
+		char *dot = strchr(hname, '.');
+		if (dot) {
+			const char *dom = nvram_safe_get("lan_domain");
+			if (dom && *dom && !strcmp(dot + 1, dom))
+				*dot = '\0';
+		}
+	}
 }
 
 static int

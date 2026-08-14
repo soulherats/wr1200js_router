@@ -1,6 +1,7 @@
 body{
     background-image: radial-gradient(#667eeaa8, #764ba2);
-    font-family: "Segoe UI", "Ubuntu", "Helvetica Neue", Arial, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    font-family: "Inter", "Segoe UI", "Ubuntu", "Helvetica Neue", Arial, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    font-feature-settings: "tnum" 1;
 }
 body.body_iframe{
     background-color: rgba(34, 34, 34, 0);
@@ -668,8 +669,8 @@ textarea[readonly] {
 }
 #internetStatus.badge-success i.icon-ok {
     display: inline-block;
-    width: 13px;
-    height: 13px;
+    width: 16px;
+    height: 16px;
     font-size: 0;
     vertical-align: middle;
     background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMiAxMic+PHBhdGggZD0nTTMuMiA1LjQgUTMuOCA3LjggNS42IDcuOSBROC44IDYuNiAxMC40IDMuMCcgZmlsbD0nbm9uZScgc3Ryb2tlPSd3aGl0ZScgc3Ryb2tlLXdpZHRoPScyJyBzdHJva2UtbGluZWNhcD0ncm91bmQnIHN0cm9rZS1saW5lam9pbj0ncm91bmQnLz48L3N2Zz4=") no-repeat center / contain;
@@ -680,8 +681,8 @@ textarea[readonly] {
 #internetStatus.badge-warning i.icon-minus,
 #internetStatus.badge-important i.icon-remove {
     display: inline-block;
-    width: 13px;
-    height: 13px;
+    width: 16px;
+    height: 16px;
     font-size: 0;
     vertical-align: middle;
 }
@@ -694,10 +695,6 @@ textarea[readonly] {
 #internetStatus.badge-warning i.icon-minus::before,
 #internetStatus.badge-important i.icon-remove::before {
     content: none;
-}
-/* ===== WPS circular icon button (one SVG mask + CSS colors) ===== */
-:root {
-    --wps-mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBmaWxsPSIjMDAwIj48cGF0aCBkPSJNIDUyLjUgMTcuMiBDIDQ1LjIgMTcuMiAzNi44IDIwLjggMzAuNSAyNy4xIEMgMjEuMiAzNi40IDE4LjUgNDkuOCAyMi44IDYxLjUgQyAyMy44IDY0LjIgMjUuNSA2Ny44IDI4LjIgNzEuMiBDIDI5LjUgNzIuOCAzMC44IDcyLjIgMjkuOCA3MC4xIEMgMjYuMiA2Mi44IDI1LjggNTUuMiAyOC4xIDQ3LjggQyAzMS41IDM2LjggNDEuMiAyOS41IDUyLjggMjkuNSBDIDU0LjggMjkuNSA1Ni41IDI5LjggNTYuNSAyNy4yIEMgNTYuNSAyMy41IDU1LjIgMTcuMiA1Mi41IDE3LjIgWiIvPjxwYXRoIGQ9Ik0gNDQuNSAxMS4yIEMgNDQuNSAxMC4yIDQ2LjIgMTAuMiA0Ny41IDExLjUgTCA2MC41IDI0LjUgQyA2MS44IDI1LjggNjEuOCAyNy4yIDYwLjUgMjguNSBMIDQ3LjUgNDEuNSBDIDQ2LjIgNDIuOCA0NC41IDQxLjggNDQuNSA0MC44IFoiLz48cGF0aCBkPSJNIDQ3LjUgODIuOCBDIDU0LjggODIuOCA2My4yIDc5LjIgNjkuNSA3Mi45IEMgNzguOCA2My42IDgxLjUgNTAuMiA3Ny4yIDM4LjUgQyA3Ni4yIDM1LjggNzQuNSAzMi4yIDcxLjggMjguOCBDIDcwLjUgMjcuMiA2OS4yIDI3LjggNzAuMiAyOS45IEMgNzMuOCAzNy4yIDc0LjIgNDQuOCA3MS45IDUyLjIgQyA2OC41IDYzLjIgNTguOCA3MC41IDQ3LjIgNzAuNSBDIDQ1LjIgNzAuNSA0My41IDcwLjIgNDMuNSA3Mi44IEMgNDMuNSA3Ni41IDQ0LjggODIuOCA0Ny41IDgyLjggWiIvPjxwYXRoIGQ9Ik0gNTUuNSA4OC44IEMgNTUuNSA4OS44IDUzLjggODkuOCA1Mi41IDg4LjUgTCAzOS41IDc1LjUgQyAzOC4yIDc0LjIgMzguMiA3Mi44IDM5LjUgNzEuNSBMIDUyLjUgNTguNSBDIDUzLjggNTcuMiA1NS41IDU4LjIgNTUuNSA1OS4yIFoiLz48L2c+PC9zdmc+");
 }
 .btn-wps {
     position: relative;
@@ -795,14 +792,22 @@ input#btn_connect.btn-info {
     animation: none;
 }
 @keyframes wps-spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 /* ===== typography: monospace for technical values (IP/MAC/GW/DNS) ===== */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    src: url('https://cdn.jsdelivr.net/npm/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
+    font-display: swap;
+}
 .ip-address{
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+    font-feature-settings:"tnum" 1,"cv05" 1;
     font-variant-numeric:tabular-nums;
-    letter-spacing:-0.02em;
+    letter-spacing:0.03em;
     word-break:break-all;
 }

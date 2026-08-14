@@ -278,39 +278,69 @@ function submitInternet(v){
     text-align:right;
     padding-right:14px;
     font-size:13px;
-    font-weight:400;
+    font-weight:500;
     color:rgba(255,255,255,0.55);
     white-space:nowrap;
 }
 #tbl_info td{
-    font-size:14px;
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+    font-size:13px;
     font-weight:500;
+    font-feature-settings:"tnum" 1;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:0.01em;
 }
 #tbl_info .ip-address{
     font-size:13px;
-    font-weight:400;
+    font-weight:500;
+    letter-spacing:0.01em;
+    white-space:nowrap;
+    color:#CBD5E1;
 }
 /* ===== WAN 操作按钮与状态徽章配色 ===== */
 #tbl_info .btn-info{
-    background-color:#E8A33D;
+    background-color:#F59E0B;
     background-image:none;
-    border-color:#C98A2E;
+    border-color:#D97706;
     color:#fff;
+    font-size:13px;
+    font-weight:600;
+    line-height:18px;
+    padding:3px 12px;
 }
 #tbl_info .btn-info:hover{
-    background-color:#D8952F;
+    background-color:#D97706;
 }
 #tbl_info .btn-danger{
-    background-color:#C0392B;
+    background-color:#DC2626;
     background-image:none;
-    border-color:#96291E;
+    border-color:#B91C1C;
     color:#fff;
+    font-size:13px;
+    font-weight:600;
+    line-height:18px;
+    padding:3px 12px;
 }
 #tbl_info .btn-danger:hover{
-    background-color:#A93226;
+    background-color:#B91C1C;
+}
+#WANBytesRX, #WANBytesTX, #WANBRateRX, #WANBRateTX{
+    white-space:nowrap;
 }
 #tbl_info .label-success{
-    background-color:#4CAF50;
+    background-color:#10B981;
+    padding:3px 10px;
+    font-size:13px;
+    line-height:18px;
+    border-radius:10px;
+}
+#tbl_info .label-warning{
+    background-color:#F59E0B;
+    padding:3px 10px;
+    font-size:13px;
+    line-height:18px;
+    border-radius:10px;
+    color:#fff;
 }
 </style>
 </head>

@@ -15290,6 +15290,9 @@ INT RTMP_AP_IoctlHandle(
 		case CMD_RTPRIV_IOCTL_WSC_PROFILE:
 		    RTMPIoctlWscProfile(pAd, wrq);
 		    break;
+		case CMD_RTPRIV_IOCTL_WSC_STATUS:
+		    RTMPIoctlWscStatus(pAd, wrq);
+		    break;
 #endif /* WSC_AP_SUPPORT */
 
 #ifdef DOT11_N_SUPPORT
@@ -16493,4 +16496,21 @@ INT Set_Airplay_Enable(RTMP_ADAPTER	*pAd, PSTRING arg)
 }
 
 #endif /* AIRPLAY_SUPPORT*/
+VOID RTMPIoctlWscStatus(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	RTMP_IOCTL_INPUT_STRUCT	*wrq)
+{
+	char *msg;
+	POS_COOKIE  pObj = (POS_COOKIE) pAd->OS_Cookie;
+	UCHAR	    apidx = pObj->ioctl_if;
 
+	os_alloc_mem(NULL, (UCHAR **)&msg, sizeof(CHAR) * 128);
+	if (msg == NULL) {
+		return;
+	}
+	memset(msg, 0x00, 128);
+	sprintf(msg, "WSC_Status=%d\n", pAd->ApCfg.MBSSID[apidx].WscControl.WscStatus);
+	wrq->u.data.length = strlen(msg);
+	copy_to_user(wrq->u.data.pointer, msg, wrq->u.data.length);
+	os_free_mem(NULL, msg);
+}

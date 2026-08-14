@@ -2091,11 +2091,12 @@ wps_status_hook(int eid, webs_t wp, int argc, char **argv)
 	char buf[128];
 	int status = -1;
 
-	doSystem("/bin/iwpriv rai0 get_wsc_status > /tmp/wsc_status 2>&1");
+	doSystem("/bin/iwpriv %s get_wsc_status > /tmp/wsc_status 2>&1", IFNAME_5G_MAIN);
 	fp = fopen("/tmp/wsc_status", "r");
 	if (fp) {
 		while (fgets(buf, sizeof(buf), fp)) {
-			if (sscanf(buf, "WSC_Status=%d", &status) == 1)
+			char *p = strstr(buf, "WSC_Status=");
+			if (p && sscanf(p, "WSC_Status=%d", &status) == 1)
 				break;
 		}
 		fclose(fp);

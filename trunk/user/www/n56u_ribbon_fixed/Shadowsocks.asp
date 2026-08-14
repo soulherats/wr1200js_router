@@ -127,6 +127,61 @@ function fill_ss_status(status_code){
     padding-left: 6px;
 }
 
+/* ===== 按钮与状态胶囊 = internet.asp 同款 ===== */
+#btn_connect_1{
+    background-color:#C0392B;
+    background-image:none;
+    border-color:#96291E;
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    line-height:18px;
+    padding:3px 12px;
+}
+#btn_connect_1:hover{
+    background-color:#A93226;
+}
+#ss_status .label-success{
+    background-color:#10B981;
+    padding:3px 10px;
+    font-size:13px;
+    line-height:18px;
+    border-radius:10px;
+}
+#ss_status .label-warning{
+    background-color:#F59E0B;
+    padding:3px 10px;
+    font-size:13px;
+    line-height:18px;
+    border-radius:10px;
+    color:#fff;
+}
+
+.table td{
+    font-size:13px;
+}
+.table th:not([colspan]){
+    width:50%;
+}
+#ss_status{
+    padding:11px 17px;
+}
+#btn_connect_3,
+#btn_connect_4{
+    background-color:#C0392B;
+    background-image:none;
+    border-color:#96291E;
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    line-height:18px;
+    padding:3px 12px;
+}
+#btn_connect_3:hover,
+#btn_connect_4:hover{
+    background-color:#A93226;
+}
+
 </style>
 </head>
 
@@ -192,8 +247,8 @@ function fill_ss_status(status_code){
                                         </tr>
                                     
                                         <tr>
-                                            <th><#running_status#></th>
-                                            <td id="ss_status" colspan="3"></td>
+                                            <th width="50%"><#running_status#></th>
+                                            <td id="ss_status" colspan="2"></td>
                                         </tr>
 
                                         <tr> <th><#menu5_16_2#></th>

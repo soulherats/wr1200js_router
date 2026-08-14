@@ -217,11 +217,11 @@ function showLANIPList(){
 			show_name = clients_info[i][0];
 		
 		if(clients_info[i][2]){
-			code += '<a href="javascript:void(0)"><div onclick="setClientMAC('+i+');"><strong>'+clients_info[i][1]+'</strong>';
-			code += ' ['+clients_info[i][2]+']';
-			if(show_name && show_name.length > 0)
-				code += ' ('+show_name+')';
-			code += ' </div></a>';
+			code += '<a href="javascript:void(0)"><div onclick="setClientMAC('+i+');">'
+				+ '<span class="dip">'+clients_info[i][1]+'</span>'
+				+ '<span class="dmac">'+clients_info[i][2]+'</span>'
+				+ '<span class="dname">'+show_name+'</span>'
+				+ '</div></a>';
 		}
 	}
 	if (code == "")
@@ -308,9 +308,9 @@ function showMDHCPList(){
 	else{
 	    for(var i = 0; i < m_dhcp.length; i++){
 		code +='<tr id="row' + i + '">';
-		code +='<td width="25%">&nbsp;' + m_dhcp[i][0] + '</td>';
-		code +='<td width="25%">&nbsp;' + m_dhcp[i][1] + '</td>';
-		code +='<td width="45%">&nbsp;' + m_dhcp[i][2] + '</td>';
+		code +='<td width="25%">' + m_dhcp[i][0] + '</td>';
+		code +='<td width="25%">' + m_dhcp[i][1] + '</td>';
+		code +='<td width="45%">' + m_dhcp[i][2] + '</td>';
 		code +='<td width="5%" style="text-align: center;"><input type="checkbox" name="ManualDHCPList_s" value="' + m_dhcp[i][mdhcp_ifield] + '" onClick="changeBgColor(this,' + i + ');" id="check' + m_dhcp[i][mdhcp_ifield] + '"></td>';
 		code +='</tr>';
 	    }
@@ -324,7 +324,14 @@ function showMDHCPList(){
 }
 
 function changeBgColor(obj, num){
-	$("row" + num).style.background=(obj.checked)?'#D9EDF7':'whiteSmoke';
+	var row = $("row" + num);
+	if (obj.checked) {
+		row.style.background = 'linear-gradient(90deg, rgba(32, 160, 152, 0.20), rgba(32, 160, 152, 0.06) 70%)';
+		row.style.boxShadow = 'inset 3px 0 0 #20A098';
+	} else {
+		row.style.background = 'transparent';
+		row.style.boxShadow = 'none';
+	}
 }
 
 </script>
@@ -337,6 +344,112 @@ function changeBgColor(obj, num){
     margin-top: 0px;
     margin-bottom: 0px;
 }
+/* chevron 下拉按钮贴齐输入框右侧 */
+.input-append {
+    display: inline-flex;
+    align-items: stretch;
+    vertical-align: middle;
+}
+.input-append input[type="text"] {
+    float: none !important;
+    border-radius: 4px 0 0 4px !important;
+}
+.input-append .btn-chevron {
+    border-radius: 0 4px 4px 0 !important;
+    margin-left: -1px;
+    border-left: 0;
+    padding: 4px 8px;
+}
+.input-append .btn-chevron .icon-chevron-down::after {
+    display: none !important;
+}
+/* 复选框与 toggle 同色 (消除系统橙色 accent) */
+input[type="checkbox"] {
+    accent-color: #1ABC9C;
+}
+/* 下拉列表: 现代化深色浮层 */
+/* 下拉列表: 浅色醒目浮层 (深色页面中高对比弹出) */
+#ClientList_Block {
+    background: rgba(247, 245, 252, 0.98);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(30, 27, 46, 0.1);
+    color: #2A2740;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+    padding: 6px;
+    font-size: 13px;
+}
+#ClientList_Block a {
+    color: #4A4565;
+    display: block;
+    border-radius: 6px;
+    padding: 0 4px;
+    text-decoration: none;
+}
+#ClientList_Block a:hover {
+    background: rgba(38, 198, 218, 0.15);
+    color: #0E7C86;
+}
+#ClientList_Block a div {
+    height: auto;
+    line-height: 30px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#ClientList_Block .dip {
+    color: #1E1B2E;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 112px;
+}
+#ClientList_Block .dmac {
+    color: #6B6685;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.3px;
+    min-width: 118px;
+}
+#ClientList_Block .dname {
+    color: #8A85A0;
+    margin-left: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* B: 静态 IP 表头弱化 + 左对齐统一 */
+#row_static_caption th {
+    font-size: 13px;
+    color: #B0A8C9;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 8px;
+    text-align: left;
+}
+#row_static_caption th a {
+    color: #8A85A0;
+    margin-left: 4px;
+}
+/* 输入行与数据行对齐 + 加高 */
+#row_static_header td {
+    text-align: left;
+    padding: 8px;
+}
+#row_static_header input[type="text"] {
+    height: 26px;
+    padding: 4px 8px;
+    margin-bottom: 0;
+}
+.table-list td {
+    padding: 8px;
+    text-align: left;
+}
+.table-list tr {
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
 </style>
 </head>
 

@@ -85,6 +85,9 @@ struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_WSC_PROFILE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_wsc_profile"},
+{ RTPRIV_IOCTL_WSC_STATUS,
+  IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
+  "get_wsc_status"},
 #endif /* WSC_AP_SUPPORT */
 { RTPRIV_IOCTL_QUERY_BATABLE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
@@ -393,6 +396,9 @@ INT rt28xx_ap_ioctl(struct net_device *net_dev, struct ifreq *rq, int cmd)
 #ifdef WSC_AP_SUPPORT
 		case RTPRIV_IOCTL_WSC_PROFILE:
 			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_WSC_PROFILE, 0, NULL, 0);
+		    break;
+		case RTPRIV_IOCTL_WSC_STATUS:
+			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_WSC_STATUS, 0, NULL, 0);
 		    break;
 #endif /* WSC_AP_SUPPORT */
 #ifdef DOT11_N_SUPPORT

@@ -145,6 +145,23 @@ function remove_disk(){
 <style>
     .table {margin-bottom: 0px;}
     .table th, .table td{vertical-align: middle;}
+    .table th{
+        padding:11px 12px 11px 8px;
+        font-family:"Inter","Segoe UI","Ubuntu","Helvetica Neue",Arial,"PingFang SC","Noto Sans CJK SC","Noto Sans SC","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+        font-size:13px;
+        font-weight:400;
+        line-height:1.5;
+        color:rgba(255,255,255,0.62);
+        white-space:nowrap;
+    }
+    .table td{
+        padding:11px 8px;
+        font-family:"Inter","Segoe UI","Ubuntu","Helvetica Neue",Arial,"PingFang SC","Noto Sans CJK SC","Noto Sans SC","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+        font-size:13px;
+        font-weight:500;
+        line-height:1.5;
+        color:#FFFFFF;
+    }
     .alert-link {margin: 8px 0px 0px 0px; padding: 8px 8px 8px 8px;}
     .progress {
         background-image: -moz-linear-gradient(top, #f3f3f3, #dddddd);

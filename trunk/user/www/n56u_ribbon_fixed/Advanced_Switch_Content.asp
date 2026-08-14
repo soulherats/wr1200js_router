@@ -15,6 +15,47 @@
 <script type="text/javascript" src="/jquery.js"></script>
 <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/bootstrap/js/engage.itoggle.min.js"></script>
+<style>
+/* 链路状态: 圆点 + 深色胶囊 */
+.linkstate {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    letter-spacing: 0.3px;
+}
+.linkstate .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+.linkstate.up {
+    color: #20A098;
+    background: rgba(32, 160, 152, 0.12);
+    border-color: rgba(32, 160, 152, 0.35);
+}
+.linkstate.warn {
+    color: #E6A23C;
+    background: rgba(230, 162, 60, 0.12);
+    border-color: rgba(230, 162, 60, 0.35);
+}
+.linkstate.other {
+    color: #4A9EDA;
+    background: rgba(74, 158, 218, 0.12);
+    border-color: rgba(74, 158, 218, 0.35);
+}
+.linkstate.down {
+    color: #8A85A0;
+    background: rgba(138, 133, 160, 0.10);
+    border-color: rgba(138, 133, 160, 0.25);
+}
+</style>
 <script type="text/javascript" src="/state.js"></script>
 <script type="text/javascript" src="/general.js"></script>
 <script type="text/javascript" src="/itoggle.js"></script>
@@ -152,7 +193,16 @@ function show_port_link(oname,idx,led0,led1){
 		port_text = ether_link_status(idx);
 		port_speed = parseInt(port_text);
 	}
-	o.innerHTML = '<span class="label ' + (port_speed == arr_speeds[led1] ? 'label-warning">' : (port_speed == arr_speeds[led0] ? 'label-success">' : 'label-info">')) + port_text + '</span>';
+	var cls;
+	if (port_speed == arr_speeds[led1])
+		cls = 'warn';
+	else if (port_speed == arr_speeds[led0])
+		cls = 'up';
+	else if (port_speed > 0)
+		cls = 'other';
+	else
+		cls = 'down';
+	o.innerHTML = '<span class="linkstate ' + cls + '"><i class="dot"></i>' + port_text + '</span>';
 }
 
 function applyRule(){

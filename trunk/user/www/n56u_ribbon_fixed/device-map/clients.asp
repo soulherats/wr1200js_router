@@ -161,8 +161,12 @@ function add_client_row(table, atIndex, client, blocked, j){
 	typeCell.style.textAlign = "center";
 	typeCell.innerHTML = "<img title='"+ DEVICE_TYPE[client[5]]+"' src='/bootstrap/img/wl_device/" + client[5] +".gif'>";
 	nameCell.innerHTML = (client[6] == "1") ? "<a href=http://" + client[0] + " target='blank'>" + client[0] + "</a>" : client[0];
+	nameCell.title = client[0];
+	var nameLen = client[0].length;
+	nameCell.style.fontSize = (nameLen <= 16 ? "12px" : (nameLen <= 20 ? "11px" : "10px"));
 	ipCell.innerHTML = (client[6] == "1") ? "<a href=http://" + client[1] + " target='blank'>" + client[1] + "</a>" : client[1];
-	macCell.innerHTML = "<a target='_blank' href='https://services13.ieee.org/RST/standards-ra-web/rest/assignments/?registry=MAC&text=" + client[2].substr(0,6) + "'>" + mac_add_delimiters(client[2]) + "</a>";
+		macCell.innerHTML = "<a target='_blank' href='https://services13.ieee.org/RST/standards-ra-web/rest/assignments/?registry=MAC&text=" + client[2].substr(0,6) + "'>" + mac_add_delimiters(client[2]) + "</a>";
+		macCell.style.display = "";
 	if (client[3] == 10){
 		rssiCell.innerHTML = client[4].toString();
 	}
@@ -336,23 +340,74 @@ function networkmap_update(s){
 </script>
 
 <style>
-    .table th, .table td {
-        vertical-align: middle;
-        text-align: center;
-        height: 28px;
-    }
+    .table th, .table td{vertical-align: middle; text-align: center; height: 28px; }
+body.body_iframe {
+    margin: 0 2px;
+    overflow-x: hidden;
+}
+#Clients_table, #xClients_table {
+    table-layout: fixed;
+    max-width: 100%;
+}
+#Clients_table th, #Clients_table td,
+#xClients_table th, #xClients_table td {
+    white-space: nowrap;
+    padding: 8px 8px;
+    font-size: 13px;
+}
+#Clients_table td:nth-child(1) img, #xClients_table td:nth-child(1) img {
+    max-width: 14px;
+    max-height: 14px;
+}
+#Clients_table td:nth-child(2), #xClients_table td:nth-child(2) {
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    letter-spacing: 0.15px;
+    font-size: 12px;
+}
+/* 美化: 表头弱化 */
+#Clients_table thead tr:nth-child(2) th,
+#xClients_table thead tr:nth-child(2) th {
+    color: #B0A8C9;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: 500;
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+#Clients_table td:nth-child(3), #Clients_table td:nth-child(4),
+#xClients_table td:nth-child(3), #xClients_table td:nth-child(4) {
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    font-variant-numeric: tabular-nums;
+}
+/* 美化: RSSI 居中 + 等宽数字 */
+#Clients_table td:nth-child(5), #xClients_table td:nth-child(5) {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
 
-    :is(#Clients_table, #xClients_table) :is(th, td, a) {
-        font-size: clamp(11px, 1.1vw + 3px, 14px) !important;
-        line-height: 1.25 !important;
-        white-space: normal !important;
-        word-break: break-all !important; /* 默认允许其他列（如名称、MAC）自由斩断折行 */
-    }
-
-    :is(#Clients_table, #xClients_table) :is(th:nth-child(3), td:nth-child(3), td:nth-child(3) a, th:nth-child(5), td:nth-child(5)) {
-        word-break: keep-all !important;
-        white-space: nowrap !important;
-    }
+/* 美化: 行细分隔线 */
+#Clients_table tbody td, #xClients_table tbody td {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+/* 美化: 斑马纹 + hover */
+#Clients_table tbody tr:nth-child(even),
+#xClients_table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
+}
+#Clients_table tbody tr:hover,
+#xClients_table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+/* 美化: 阻止 × hover 变红 */
+#Clients_table td:nth-child(6) .icon:hover,
+#xClients_table td:nth-child(6) .icon:hover {
+    color: #E74C3C;
+}
 </style>
 
 </head>
@@ -384,16 +439,24 @@ function networkmap_update(s){
 <div id="unBlockedClients_table"></div>
 
 <table id="Clients_table" width="100%" align="center" cellpadding="1" class="table">
+<colgroup>
+            <col style="width:34px">
+            <col style="width:130px">
+            <col style="width:25%">
+            <col style="width:27%">
+            <col style="width:44px">
+            <col style="width:32px">
+        </colgroup>
     <thead>
         <tr>
-            <th colspan="6" style="text-align: center;"><#ConnectedClient#></th>
+            <th colspan="5" style="text-align: center;"><#ConnectedClient#></th>
         </tr>
         <tr>
-            <th width="8%"><a href="javascript:sort(0)"><#Type#></a></th>
-            <th><a href="javascript:sort(1)"><#Computer_Name#></a></th>
-            <th width="20%"><a href="javascript:sort(2)">IP</a></th>
-            <th width="24%"><a href="javascript:sort(3)">MAC</a></th>
-            <th width="8%" id="col_rssi"><a href="javascript:sort(4)"><i class="icon-signal" title="RSSI"></i></a></th>
+            <th width="5%"><a href="javascript:sort(0)"><#Type#></a></th>
+            <th width="24%"><a href="javascript:sort(1)"><#Computer_Name#></a></th>
+            <th><a href="javascript:sort(2)">IP</a></th>
+            <th><a href="javascript:sort(3)">MAC</a></th>
+            <th width="6%" id="col_rssi"><a href="javascript:sort(4)">RSSI</a></th>
             <th width="0%" id="col_block"></th>
         </tr>
     </thead>
@@ -403,16 +466,24 @@ function networkmap_update(s){
 
 <div id="blockedClients_table"></div>
 <table id="xClients_table" width="100%" align="center" class="table">
+<colgroup>
+            <col style="width:34px">
+            <col style="width:130px">
+            <col style="width:25%">
+            <col style="width:27%">
+            <col style="width:44px">
+            <col style="width:32px">
+        </colgroup>
     <thead>
         <tr>
-            <th colspan="6" style="text-align: center;"><#BlockedClient#></th>
+            <th colspan="5" style="text-align: center;"><#BlockedClient#></th>
         </tr>
         <tr>
-            <th width="8%"><#Type#></th>
-            <th><#Computer_Name#></th>
-            <th width="20%">IP</th>
-            <th width="24%">MAC</th>
-            <th width="8%" id="col_unrssi"><i class="icon-signal" title="RSSI"></i></th>
+            <th width="5%"><#Type#></th>
+            <th width="24%"><#Computer_Name#></th>
+            <th>IP</th>
+            <th>MAC</th>
+            <th width="6%" id="col_unrssi">RSSI</th>
             <th width="0%" id="col_unblock"></th>
         </tr>
     </thead>
