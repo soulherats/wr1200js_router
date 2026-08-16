@@ -2888,6 +2888,33 @@ static int ej_get_static_client(int eid, webs_t wp, int argc, char **argv)
 	return 0;
 }
 
+static int ej_ipv6_neigh_list(int eid, webs_t wp, int argc, char **argv)
+{
+	FILE *fp;
+	char line[256], addr[128], ll[16], mac[32];
+	int first;
+
+	first = 1;
+	fp = popen("ip -6 neigh show dev br0 2>/dev/null", "r");
+	if (fp) {
+		while (fgets(line, sizeof(line), fp)) {
+			/* format: ADDR lladdr MAC STATE */
+			if (sscanf(line, "%127s %15s %31s", addr, ll, mac) == 3
+				&& strcmp(ll, "lladdr") == 0
+				&& strncmp(addr, "fe80:", 5) != 0) {
+				if (first)
+					first = 0;
+				else
+					websWrite(wp, ",");
+				websWrite(wp, "[\"%s\",\"%s\"]", mac, addr);
+			}
+		}
+		pclose(fp);
+	}
+
+	return 0;
+}
+
 static int ej_get_static_ccount(int eid, webs_t wp, int argc, char **argv)
 {
 	FILE *fp;
@@ -4161,6 +4188,7 @@ struct ej_handler ej_handlers[] =
 	{ "get_nvram_list", ej_get_nvram_list},
 	{ "get_flash_time", ej_get_flash_time},
 	{ "get_static_client", ej_get_static_client},
+	{ "ipv6_neigh_list", ej_ipv6_neigh_list},
 	{ "get_static_ccount", ej_get_static_ccount},
 #ifndef WEBUI_HIDE_VPN
 	{ "get_vpns_client", ej_get_vpns_client},
