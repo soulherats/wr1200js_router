@@ -23,6 +23,9 @@ var $j = jQuery.noConflict();
 var ipmonitor = [<% get_static_client(); %>];
 var m_dhcp = [<% get_nvram_list("LANHostConfig", "ManualDHCPList"); %>];
 
+var wol_saved = <% wol_maclist(); %>;
+var wol_saved_by_mac = {};
+
 var staticClients = get_resolved_clients();
 
 var devices = {};
@@ -107,38 +110,30 @@ function getVendors()
 
 function sendWakeUp(mac, $button)
 {
-    var $respClass = $button.parents('td').find('div.wol_response');
     if(mac != '')
     {
+        $button.prop('disabled', true);
+
         $j.getJSON('/wol_action.asp', {dstmac: mac},
             function(response){
                 var respMac = (response != null && typeof response === 'object' && "wol_mac" in response)
                               ? response.wol_mac.toUpperCase()
                               : null;
 
-                $button.hide();
+                $j('#wol_mac').val(mac);
 
                 if(respMac == mac)
                 {
-                    $respClass.removeClass('alert-error')
-                              .addClass('alert-success')
-                              .html('Success')
-                              .show();
-
-                    $j('#wol_mac').val(mac);
+                    $button.removeClass('btn-info').addClass('btn-success').text('成功');
                 }
                 else
                 {
-                    $respClass.removeClass('alert-success')
-                              .addClass('alert-error')
-                              .html('Error')
-                              .show();
+                    $button.removeClass('btn-info').addClass('btn-danger').text('失败');
                 }
 
                 var idTimeOut = setTimeout(function(){
                     clearTimeout(idTimeOut);
-                    $respClass.hide();
-                    $button.show();
+                    $button.removeClass('btn-success btn-danger').addClass('btn-info').text('<#WOL_Wake_up#>').prop('disabled', false);
                 }, 1500);
             }
         );
@@ -148,21 +143,80 @@ function sendWakeUp(mac, $button)
 function getDevices()
 {
     var mergedDevices = {};
-    for(var i = 0; i < staticClients.length; i++)
+    var i, mac, name;
+    for(i = 0; i < staticClients.length; i++)
     {
-        var mac  = staticClients[i][1];
-        var name = staticClients[i][2];
+        mac  = staticClients[i][1];
+        name = staticClients[i][2];
         mergedDevices[mac] = name ? name : '';
     }
 
     for(i = 0; i < m_dhcp.length; i++)
     {
-        var mac  = mac_add_delimiters(m_dhcp[i][0]);
-        var name = m_dhcp[i][2];
+        mac  = mac_add_delimiters(m_dhcp[i][0]);
+        name = m_dhcp[i][2];
         mergedDevices[mac] = name ? name : '';
     }
 
+    for(i = 0; i < wol_saved.length; i++)
+    {
+        if(wol_saved[i] && wol_saved[i][0])
+        {
+            mac = wol_saved[i][0].toUpperCase();
+            wol_saved_by_mac[mac] = 1;
+            if(!mergedDevices[mac])
+                mergedDevices[mac] = wol_saved[i][1] ? wol_saved[i][1] : '';
+        }
+    }
+
     return mergedDevices;
+}
+
+function saveDevice(mac, name){
+    mac = mac.toUpperCase();
+    var exists = false;
+    for(var i = 0; i < wol_saved.length; i++)
+    {
+        if(wol_saved[i] && wol_saved[i][0].toUpperCase() == mac)
+        {
+            exists = true;
+            break;
+        }
+    }
+    if(!exists){
+        if (wol_saved.length >= 5)
+            wol_saved.shift();
+        wol_saved.push([mac, name]);
+    }
+    wol_saved_by_mac[mac] = 1;
+    $j('.wol-save[data-mac="'+mac+'"]').replaceWith('<button class="btn btn-danger wol-remove" data-mac="'+mac+'">删除</button>');
+    saveWolList();
+}
+
+function removeDevice(mac){
+    mac = mac.toUpperCase();
+    for(var i = 0; i < wol_saved.length; i++)
+    {
+        if(wol_saved[i] && wol_saved[i][0].toUpperCase() == mac)
+        {
+            wol_saved.splice(i, 1);
+            break;
+        }
+    }
+    delete wol_saved_by_mac[mac];
+    $j('.wol-remove[data-mac="'+mac+'"]').replaceWith('<button class="btn btn-primary wol-save" data-mac="'+mac+'" data-name="">保存</button>');
+    saveWolList();
+}
+
+function saveWolList(){
+    $j.ajax({
+        url: '/start_apply.htm',
+        type: 'POST',
+        data: 'sid_list=' + encodeURIComponent(document.form.sid_list.value) +
+              '&current_page=' + encodeURIComponent(document.form.current_page.value) +
+              '&action_mode=Apply' +
+              '&wol_maclist=' + encodeURIComponent(JSON.stringify(wol_saved))
+    });
 }
 
 $j(document).ready(function() {
@@ -193,11 +247,15 @@ $j(document).ready(function() {
 
         $j.each(devices, function(mac, name){
             var vendor = '';
-            var btn = '<button class="btn btn-info btn_wakeup"><#WOL_Wake_up#></button><div class="wol_response" class="alert"></div>';
+            var offline = '';
+            var saveBtn = wol_saved_by_mac[mac]
+                ? '<button class="btn btn-danger wol-remove" data-mac="'+mac+'" title="从保存列表删除">删除</button>'
+                : '<button class="btn btn-primary wol-save" data-mac="'+mac+'" data-name="'+name.replace(/"/g, '&quot;')+'">保存</button>';
+            var btn = '<span style="white-space:nowrap;">' + saveBtn + '<button class="btn btn-info btn_wakeup" style="margin-left:5px;"><#WOL_Wake_up#></button></span><div class="wol_response" class="alert"></div>';
 
             t_body += '<tr>\n';
             t_body += '  <td class="mac">'+mac+'</td>\n';
-            t_body += '  <td>'+name+'</td>\n';
+            t_body += '  <td>'+name+offline+'</td>\n';
             t_body += '  <td class="vendor">'+vendor+'</td>\n';
             t_body += '  <td>'+btn+'</td>\n';
             t_body += '</tr>\n';
@@ -206,6 +264,14 @@ $j(document).ready(function() {
 
         setTimeout("getVendors()", 200);
     }
+
+    // event click "Save / Remove"
+    $j('#wol_table').on('click', '.wol-save', function(){
+        saveDevice($j(this).attr('data-mac'), $j(this).attr('data-name'));
+    });
+    $j('#wol_table').on('click', '.wol-remove', function(){
+        removeDevice($j(this).attr('data-mac'));
+    });
 
     // event click "Wake up"
     $j('#wol_btn, .btn_wakeup').click(function(){
@@ -242,6 +308,28 @@ $j(document).ready(function() {
         text-align: center;
         border-radius: 5px;
     }
+#wol_table td {
+    font-weight: normal;
+}
+#wol_table .mac {
+    font-family: Consolas, Menlo, 'DejaVu Sans Mono', 'Courier New', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.3px;
+    font-weight: normal;
+}
+#wol_mac { font-weight: normal; }
+
+.wol_response {
+    display: inline-block !important;
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
+    margin: 0 0 0 5px !important;
+    vertical-align: middle;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 3px !important;
+}
 </style>
 </head>
 
@@ -270,6 +358,7 @@ $j(document).ready(function() {
     <input type="hidden" name="group_id" value="">
     <input type="hidden" name="action_mode" value="">
     <input type="hidden" name="action_script" value="">
+    <input type="hidden" name="wol_maclist" value="<% nvram_get_x("", "wol_maclist"); %>">
 
     <div class="container-fluid">
         <div class="row-fluid">
@@ -300,7 +389,7 @@ $j(document).ready(function() {
                                         <tr>
                                             <th width="25%" style="border-top: 0 none; "><#MAC_Address#></th>
                                             <td width="395px" style="border-top: 0 none; ">
-                                                <input style="float: left; margin-right: 5px; font-family: monospace" id="wol_mac" type="text" maxlength="17" class="span12 mac" size="15" name="wol_mac" value="<% nvram_get_x("","wol_mac_last"); %>"/>
+                                                <input style="float: left; margin-right: 5px; font-family: Consolas, Menlo, 'DejaVu Sans Mono', 'Courier New', monospace; letter-spacing: 0.3px;" id="wol_mac" type="text" maxlength="17" class="span12 mac" size="15" name="wol_mac" value="<% nvram_get_x("","wol_mac_last"); %>"/>
                                             </td>
                                             <td style="border-top: 0 none; ">
                                                 <input type="button" id="wol_btn" class="btn btn-primary" value="<#WOL_Wake_up#>" />

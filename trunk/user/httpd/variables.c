@@ -473,6 +473,7 @@
 		};
 
 	struct variable variables_LANHostConfig[] = {
+			{"wol_maclist", "", NULL, FALSE},
 			{"lan_proto_x", "", NULL, EVM_RESTART_LAN},
 			{"lan_dhcpd_x", "", NULL, EVM_RESTART_DHCPD},
 			{"lan_ipaddr", "", NULL, EVM_RESTART_LAN},

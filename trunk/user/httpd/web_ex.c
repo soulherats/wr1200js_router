@@ -2894,6 +2894,9 @@ static int ej_ipv6_neigh_list(int eid, webs_t wp, int argc, char **argv)
 	char line[256], addr[128], ll[16], mac[32];
 	int first;
 
+	/* actively refresh IPv6 neighbors (multicast NS to all nodes) */
+	system("ping6 -c 1 -W 1 -I br0 ff02::1 >/dev/null 2>&1");
+
 	first = 1;
 	fp = popen("ip -6 neigh show dev br0 2>/dev/null", "r");
 	if (fp) {
@@ -2912,6 +2915,12 @@ static int ej_ipv6_neigh_list(int eid, webs_t wp, int argc, char **argv)
 		pclose(fp);
 	}
 
+	return 0;
+}
+
+static int ej_wol_maclist(int eid, webs_t wp, int argc, char **argv)
+{
+	websWrite(wp, "%s", nvram_safe_get("wol_maclist"));
 	return 0;
 }
 
@@ -4189,6 +4198,7 @@ struct ej_handler ej_handlers[] =
 	{ "get_flash_time", ej_get_flash_time},
 	{ "get_static_client", ej_get_static_client},
 	{ "ipv6_neigh_list", ej_ipv6_neigh_list},
+	{ "wol_maclist", ej_wol_maclist},
 	{ "get_static_ccount", ej_get_static_ccount},
 #ifndef WEBUI_HIDE_VPN
 	{ "get_vpns_client", ej_get_vpns_client},
