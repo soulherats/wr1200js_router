@@ -27,7 +27,8 @@ var cpu_chart = {
     chart: {
         renderTo: 'cpu_chart',
         zoomType: 'x',
-        spacingRight: 15
+        spacingRight: 15,
+        height: 400
     },
     title : {
         text : '<#menu5_8_1#> (%)',
@@ -104,6 +105,8 @@ var cpu_chart = {
     series: [{
         type: 'areaspline',
         name: 'Busy',
+        color: '#20A098',
+        lineWidth: 2,
         gapSize: 5,
         threshold: null,
         fillColor: {
@@ -119,18 +122,24 @@ var cpu_chart = {
     },{
         type: 'spline',
         name: 'User',
+        color: '#4EA8DE',
+        lineWidth: 1.5,
         gapSize: 5,
         threshold: null,
         data: (prepare_array_chart)()
     },{
         type: 'spline',
         name: 'System',
+        color: '#FF9F1C',
+        lineWidth: 1.5,
         gapSize: 5,
         threshold: null,
         data: (prepare_array_chart)()
     },{
         type: 'spline',
         name: 'Sirq',
+        color: '#B0A8C9',
+        lineWidth: 1.5,
         gapSize: 5,
         threshold: null,
         data: (prepare_array_chart)()
@@ -141,7 +150,8 @@ var mem_chart = {
     chart: {
         renderTo: 'mem_chart',
         zoomType: 'x',
-        spacingRight: 15
+        spacingRight: 15,
+        height: 400
     },
     title : {
         text : '<#menu5_8_2#> (MB)',
@@ -206,16 +216,22 @@ var mem_chart = {
     series: [{
         type: 'spline',
         name: 'Used',
+        color: '#20A098',
+        lineWidth: 2,
         gapSize: 5,
         data: (prepare_array_chart)()
     },{
         type: 'spline',
         name: 'Buffers',
+        color: '#4EA8DE',
+        lineWidth: 1.5,
         gapSize: 5,
         data: (prepare_array_chart)()
     },{
         type: 'spline',
         name: 'Cached',
+        color: '#FF9F1C',
+        lineWidth: 1.5,
         gapSize: 5,
         data: (prepare_array_chart)()
     }]
@@ -231,6 +247,88 @@ Highcharts.setOptions({
         weekdays: ['<#WF_Sun#>', '<#WF_Mon#>', '<#WF_Tue#>', '<#WF_Wed#>', '<#WF_Thu#>', '<#WF_Fri#>', '<#WF_Sat#>'],
         rangeSelectorZoom: '<#HSTOCK_Zoom#>'
     }
+});
+
+/* 深色仪表盘主题 */
+Highcharts.setOptions({
+    chart: {
+        backgroundColor: 'rgba(0,0,0,0)',
+        plotBackgroundColor: 'rgba(0,0,0,0)',
+        borderWidth: 0,
+        borderRadius: 0,
+        plotBorderWidth: 0,
+        plotShadow: false,
+        style: { fontFamily: 'Inter, sans-serif' }
+    },
+    title: { style: { color: '#E8E4F2', fontWeight: '600', fontSize: '14px' } },
+    subtitle: { style: { color: '#8B84A3', fontSize: '12px' } },
+    xAxis: {
+        gridLineWidth: 0,
+        lineColor: 'rgba(255,255,255,0.15)',
+        tickColor: 'rgba(255,255,255,0.18)',
+        labels: { style: { color: '#8B84A3', fontSize: '11px' } },
+        title: { style: { color: '#8B84A3', fontSize: '11px' } }
+    },
+    yAxis: {
+        gridLineColor: 'rgba(255,255,255,0.055)',
+        gridLineWidth: 1,
+        minorGridLineWidth: 0,
+        lineColor: 'rgba(255,255,255,0.15)',
+        tickWidth: 0,
+        labels: { style: { color: '#8B84A3', fontSize: '11px' } },
+        title: { style: { color: '#8B84A3', fontSize: '11px' } }
+    },
+    legend: {
+        backgroundColor: 'rgba(0,0,0,0)',
+        itemStyle: { color: '#C9C3DB', fontSize: '12px' },
+        itemHoverStyle: { color: '#FFFFFF' },
+        itemHiddenStyle: { color: '#5A5470' }
+    },
+    tooltip: {
+        backgroundColor: 'rgba(24,21,38,0.96)',
+        borderColor: 'rgba(255,255,255,0.16)',
+        borderRadius: 5,
+        borderWidth: 1,
+        style: { color: '#E8E4F2', fontSize: '12px' },
+        crosshairs: { color: 'rgba(255,255,255,0.25)' }
+    },
+    rangeSelector: {
+        buttonTheme: {
+            fill: 'rgba(255,255,255,0.045)',
+            stroke: 'rgba(255,255,255,0.14)',
+            'stroke-width': 1,
+            r: 4,
+            style: { color: '#B0A8C9', fontSize: '11px', fontWeight: '400' },
+            states: {
+                hover: { fill: 'rgba(255,255,255,0.10)', stroke: 'rgba(255,255,255,0.25)', style: { color: '#E8E4F2' } },
+                select: { fill: 'rgba(32,160,152,0.22)', stroke: '#20A098', style: { color: '#FFFFFF', fontWeight: '600' } }
+            }
+        },
+        inputStyle: { color: '#E8E4F2', backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '11px' },
+        labelStyle: { color: '#B0A8C9' },
+        inputBoxBorderColor: 'rgba(255,255,255,0.18)',
+        inputBoxWidth: 92
+    },
+    navigator: {
+        outlineColor: 'rgba(255,255,255,0.10)',
+        maskFill: 'rgba(255,255,255,0.06)',
+        handles: {
+            backgroundColor: '#1A1826',
+            borderColor: 'rgba(255,255,255,0.25)'
+        },
+        xAxis: { gridLineColor: 'rgba(255,255,255,0.05)', labels: { style: { color: '#8B84A3' } } }
+    },
+    scrollbar: {
+        barBackgroundColor: 'rgba(255,255,255,0.06)',
+        barBorderColor: 'rgba(255,255,255,0.14)',
+        buttonBackgroundColor: 'rgba(255,255,255,0.05)',
+        buttonBorderColor: 'rgba(255,255,255,0.14)',
+        buttonArrowColor: '#B0A8C9',
+        rifleColor: 'rgba(255,255,255,0.14)',
+        trackBackgroundColor: 'rgba(255,255,255,0.03)',
+        trackBorderColor: 'rgba(255,255,255,0.08)'
+    },
+    credits: { enabled: false }
 });
 
 $j(document).ready(function(){
@@ -312,7 +410,74 @@ function getSystemJsonData(cpu,ram){
 }
 </script>
 <style>
-    #tabs {margin-bottom: 0px;}
+/* ==== 深色工业风: CPU / 内存监控 ==== */
+#tabs {margin-bottom: 0px;}
+
+/* Tab 样式与全站统一 */
+#tab-area {margin-bottom: 0px !important;}
+#tabs {
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+    margin-bottom: 10px;
+}
+#tabs > li > a {
+    color: #9A93B5;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+}
+#tabs > li > a:hover {
+    color: #E8E4F2;
+    background: rgba(255,255,255,0.04);
+    border: none;
+}
+#tabs > .active > a,
+#tabs > .active > a:hover {
+    color: #E8E4F2;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #20A098;
+    font-weight: 600;
+}
+
+/* 图表卡片 */
+.tm-chart {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 10px 12px 4px 8px;
+    box-sizing: border-box;
+}
+.tm-chart + .tm-chart {margin-top: 12px;}
+
+/* navigator 时间轴缩放区: 迷你系列压成低调灰, 遮罩近透明 */
+.highcharts-navigator-series path,
+#highcharts-navigator-series .highcharts-area,
+.highcharts-navigator .highcharts-area,
+.highcharts-navigator-series .highcharts-area {
+    stroke: rgba(255,255,255,0.28) !important;
+    fill: rgba(255,255,255,0.05) !important;
+}
+.highcharts-navigator-series .highcharts-graph {
+    stroke: rgba(255,255,255,0.28) !important;
+}
+.highcharts-navigator-mask,
+.highcharts-navigator rect[fill*="128,179,236"],
+.highcharts-navigator rect[fill*="128, 179, 236"] {
+    fill: rgba(255,255,255,0.04) !important;
+}
+.highcharts-navigator .highcharts-navigator-handle rect,
+.highcharts-navigator-handle rect {
+    fill: #1A1826 !important;
+    stroke: rgba(255,255,255,0.30) !important;
+}
+.highcharts-navigator-outline {
+    stroke: rgba(255,255,255,0.10) !important;
+}
 </style>
 </head>
 <body onload="initial();">
@@ -363,16 +528,8 @@ function getSystemJsonData(cpu,ram){
                                         </ul>
                                     </div>
 
-                                    <center>
-                                        <table style="width: 100%; margin-top: 6px; margin-bottom: 6px;">
-                                            <tr>
-                                                <td width="100%" align="center" style="text-align: center">
-                                                    <div id="cpu_chart" style="width: 670px; padding-left: 5px;"></div>
-                                                    <div id="mem_chart" style="width: 670px; padding-left: 5px;"></div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </center>
+                                    <div id="cpu_chart" class="tm-chart"></div>
+                                    <div id="mem_chart" class="tm-chart"></div>
 
                                 </div>
                             </div>

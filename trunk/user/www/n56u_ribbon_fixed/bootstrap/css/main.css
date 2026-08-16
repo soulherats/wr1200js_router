@@ -811,3 +811,53 @@ input#btn_connect.btn-info {
     letter-spacing:0.03em;
     word-break:break-all;
 }
+.side_nav {
+    background: rgba(46, 44, 80, 0.92);
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 6px;
+}
+.side_nav ul li a,
+.side_nav div.accordion a {
+    padding: 0 10px !important;
+    line-height: 30px !important;
+    font-size: 12px !important;
+    margin: 0 4px 1px;
+    border-radius: 4px !important;
+    color: #b9c1d4 !important;
+    border: none !important;
+    transition: background .15s, color .15s;
+}
+.side_nav div.accordion a {
+    color: #9aa3b5 !important;
+    font-weight: normal !important;
+    padding-left: 16px !important;
+}
+.side_nav div.accordion a[style*="005580"] {
+    color: #9B8FD4 !important;
+    background: transparent !important;
+    font-weight: bold !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.side_nav ul a img {
+    height: 18px !important;
+    width: auto !important;
+    margin: 0 7px 0 0 !important;
+    vertical-align: middle !important;
+    position: static !important;
+    top: auto !important;
+    opacity: .8;
+}
+.side_nav ul li a:hover,
+.side_nav div.accordion a:hover {
+    background: rgba(255,255,255,.06) !important;
+    color: #ffffff !important;
+}
+.side_nav ul li.active > a {
+    background: rgba(255,255,255,.07) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+.side_nav ul li.active > a img,
+.side_nav ul li a:hover img {
+    opacity: 1;
+}

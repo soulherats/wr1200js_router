@@ -637,7 +637,7 @@ function showACLList(vnet_show,rnet_show,is_openvpn){
 			
 			if (is_openvpn){
 				if (openssl_util_found() && openvpn_srv_cert_found() && login_safe())
-					acl_pass = '<a href="javascript:export_client_ovpn(\'' + ACLList[i][0] + '\');"><#VPNS_Export#></a>';
+					acl_pass = '<a href="javascript:export_client_ovpn(\'' + ACLList[i][0] + '\');" style="white-space:nowrap;"><#VPNS_Export#></a>';
 			}else
 				acl_pass = '*****';
 			
@@ -647,9 +647,9 @@ function showACLList(vnet_show,rnet_show,is_openvpn){
 				acl_addr = addr_part + ACLList[i][2];
 			
 			code += '<tr id="row' + i + '">';
-			code += '<td width="20%">&nbsp;' + ACLList[i][0] + '</td>';
-			code += '<td width="20%">&nbsp;' + acl_pass + '</td>';
-			code += '<td width="20%">&nbsp;' + acl_addr + '</td>';
+			code += '<td width="18%">&nbsp;' + ACLList[i][0] + '</td>';
+			code += '<td width="24%">&nbsp;' + acl_pass + '</td>';
+			code += '<td width="18%">&nbsp;' + acl_addr + '</td>';
 			code += '<td width="35%">&nbsp;' + acl_rnet + '</td>';
 			code += '<td width="5%" style="text-align: center;"><input type="checkbox" name="VPNSACLList_s" value="' + i + '" onClick="changeBgColor(this,' + i + ');" id="check' + i + '"></td>';
 			code += '</tr>';
@@ -1228,9 +1228,9 @@ function getHash(){
                             <div id="div_acl_info" class="alert alert-info" style="margin: 10px;"></div>
                             <table class="table">
                                 <tr>
-                                    <th width="20%" style="border-top: 0 none;"><#VPNS_CName#>:</th>
-                                    <th width="20%" style="border-top: 0 none;" id="col_pass"><#ISP_Authentication_pass#></th>
-                                    <th width="20%" style="border-top: 0 none;"><#VPNS_FixIP#></th>
+                                    <th width="18%" style="border-top: 0 none;"><#VPNS_CName#>:</th>
+                                    <th width="24%" style="border-top: 0 none;" id="col_pass"><#ISP_Authentication_pass#></th>
+                                    <th width="18%" style="border-top: 0 none;"><#VPNS_FixIP#></th>
                                     <th width="35%" style="border-top: 0 none;"><#VPNS_RNet#></th>
                                     <th width="5%"  style="border-top: 0 none;">&nbsp;</th>
                                 </tr>
@@ -1241,14 +1241,8 @@ function getHash(){
                                     <td>
                                         <input type="text" size="14" class="span12" autocomplete="off" maxlength="32" name="vpns_pass_x_0" onkeypress="return is_string(this,event);" />
                                     </td>
-                                    <td style="padding-right:inherit;">
-                                        <span id="vpnip3"></span>
-                                        <input type="text" size="2" maxlength="3" style="width: 25px;" name="vpns_addr_x_0" value="<% nvram_get_x("", "vpns_addr_x_0"); %>" onkeypress="return is_number(this,event);" />
-                                    </td>
-                                    <td>
-                                        <input type="text" size="14" maxlength="15" style="width: 90px;" name="vpns_rnet_x_0" value="<% nvram_get_x("", "vpns_rnet_x_0"); %>" onkeypress="return is_ipaddr(this,event);" />&nbsp;/
-                                        <input type="text" size="14" maxlength="15" style="width: 80px;" name="vpns_rmsk_x_0" value="<% nvram_get_x("", "vpns_rmsk_x_0"); %>" onkeypress="return is_ipaddr(this,event);" />
-                                    </td>
+                                    <td style="padding-right:inherit;"><div style="display:flex; align-items:center;"><span id="vpnip3"></span><input type="text" size="2" maxlength="3" style="width: 25px;" name="vpns_addr_x_0" value="<% nvram_get_x("", "vpns_addr_x_0"); %>" onkeypress="return is_number(this,event);" /></div></td>
+                                    <td><input type="text" size="14" maxlength="15" style="width: 90px;" name="vpns_rnet_x_0" value="<% nvram_get_x("", "vpns_rnet_x_0"); %>" onkeypress="return is_ipaddr(this,event);" />&nbsp;/<input type="text" size="14" maxlength="15" style="width: 80px;" name="vpns_rmsk_x_0" value="<% nvram_get_x("", "vpns_rmsk_x_0"); %>" onkeypress="return is_ipaddr(this,event);" /></td>
                                     <td>
                                         <button class="btn" type="submit" onclick="return markGroupACL(this, 50, ' Add ');" name="VPNSACLList2"><i class="icon icon-plus"></i></button>
                                     </td>
