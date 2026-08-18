@@ -6,6 +6,24 @@ PROGCLI=/usr/bin/zerotier-cli
 PROGIDT=/usr/bin/zerotier-idtool
 config_path="/etc/storage/zerotier-one"
 PLANET="/etc/storage/planet"
+
+gen_local_conf() {
+	ip6svc="$(nvram get ip6_service)"
+	[ -z "$ip6svc" ] && return 0
+	wan6_if="$(nvram get wan0_ifname6)"
+	[ -z "$wan6_if" ] && wan6_if="$(nvram get wan0_ifname_t)"
+	[ -z "$wan6_if" ] && return 0
+	ip -6 addr show dev "$wan6_if" scope global 2>/dev/null | grep -q inet6 || return 0
+	cat << EOF > $config_path/local.conf
+{
+  "settings": {
+    "interfacePrefixBlacklist": [ "br", "eth", "ra", "tun", "ppp", "apcli" ]
+    ,"bind": [ "::/9993" ]
+  }
+}
+EOF
+}
+
 start_instance() {
 	cfg="$1"
 	echo $cfg
@@ -14,6 +32,7 @@ start_instance() {
 	moonid="$(nvram get zerotier_moonid)"
 	secret="$(nvram get zerotier_secret)"
 	enablemoonserv="$(nvram get zerotiermoon_enable)"
+	[ -z "$enablemoonserv" ] && enablemoonserv=0
 	planet="$(nvram get zerotier_planet)"
 	
 	if [ ! -d "$config_path" ]; then
@@ -66,6 +85,8 @@ start_instance() {
 
 	add_join $(nvram get zerotier_id)
 
+	gen_local_conf
+
 	$PROG $args $config_path >/dev/null 2>&1 &
 		
 	rules
@@ -92,11 +113,16 @@ add_join() {
 }
 
 rules() {
+	zt_wait=0
 	while [ "$(ifconfig | grep zt | awk '{print $1}')" = "" ]; do
+		zt_wait=$((zt_wait+1))
+		[ "$zt_wait" -gt 30 ] && break
 		sleep 1
 	done
 	nat_enable=$(nvram get zerotier_nat)
+	[ -z "$nat_enable" ] && nat_enable=0
 	zt0=$(ifconfig | grep zt | awk '{print $1}')
+	[ -z "$zt0" ] && return 1
 	logger -t "zerotier" "zt interface $zt0 is started!"
 	del_rules
 	iptables -A INPUT -i $zt0 -j ACCEPT
@@ -104,11 +130,14 @@ rules() {
 	iptables -A FORWARD -i $zt0 -j ACCEPT
 	if [ $nat_enable -eq 1 ]; then
 		iptables -t nat -A POSTROUTING -o $zt0 -j MASQUERADE
+		route_wait=0
 		while [ "$(ip route | grep "dev $zt0  proto kernel" | awk '{print $1}')" = "" ]; do
-		    sleep 1
+			route_wait=$((route_wait+1))
+			[ "$route_wait" -gt 30 ] && break
+			sleep 1
 		done
 		ip_segment="$(ip route | grep "dev $zt0  proto kernel" | awk '{print $1}')"
-		iptables -t nat -A POSTROUTING -s $ip_segment -j MASQUERADE
+		[ -n "$ip_segment" ] && iptables -t nat -A POSTROUTING -s $ip_segment -j MASQUERADE
 		zero_route "add"
 	fi
 
@@ -116,6 +145,7 @@ rules() {
 
 del_rules() {
 	zt0=$(ifconfig | grep zt | awk '{print $1}')
+	[ -z "$zt0" ] && return 0
 	ip_segment=`ip route | grep "dev $zt0  proto kernel" | awk '{print $1}'`
 #	iptables -D FORWARD -i $zt0 -j ACCEPT 2>/dev/null
 #	iptables -D FORWARD -o $zt0 -j ACCEPT 2>/dev/null
@@ -124,24 +154,30 @@ del_rules() {
 	iptables -D FORWARD -i $zt0 -o $zt0 -j ACCEPT 2>/dev/null
 	iptables -D FORWARD -i $zt0 -j ACCEPT 2>/dev/null
 	iptables -t nat -D POSTROUTING -o $zt0 -j MASQUERADE 2>/dev/null
-	iptables -t nat -D POSTROUTING -s $ip_segment -j MASQUERADE 2>/dev/null
+	if [ -n "$ip_segment" ]; then
+		iptables -t nat -D POSTROUTING -s $ip_segment -j MASQUERADE 2>/dev/null
+	fi
 }
 
 zero_route() {
 	rulesnum=`nvram get zero_staticnum_x`
+	[ -z "$rulesnum" ] && return 0
 	for i in $(seq 1 $rulesnum)
 	do
 		j=`expr $i - 1`
 		route_enable=`nvram get zero_enable_x$j`
+		[ -z "$route_enable" ] && route_enable=0
 		zero_ip=`nvram get zero_ip_x$j`
 		zero_route=`nvram get zero_route_x$j`
 		if [ "$1" = "add" ]; then
-			if [ $route_enable -ne 0 ]; then
+			if [ $route_enable -ne 0 ] && [ -n "$zero_ip" ] && [ -n "$zero_route" ]; then
 				ip route add $zero_ip via $zero_route dev $zt0
 				echo "$zt0"
 			fi
 		else
-			ip route del $zero_ip via $zero_route dev $zt0
+			if [ -n "$zero_ip" ] && [ -n "$zero_route" ]; then
+				ip route del $zero_ip via $zero_route dev $zt0
+			fi
 		fi
 	done
 }
