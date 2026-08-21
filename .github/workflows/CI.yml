@@ -50,11 +50,9 @@ jobs:
         if: ${{ matrix.mem_size == '128' }}
         run: |
           CONFIG_FILE="trunk/configs/boards/WR1200JS/kernel-3.4.x.config"
-          sed -i 's/^CONFIG_RT2880_DRAM_.*=y/# \0 is not set/' $CONFIG_FILE
-          sed -i 's/.*CONFIG_RT2880_DRAM_128M.*/CONFIG_RT2880_DRAM_128M=y/' $CONFIG_FILE
-          sed -i 's/^CONFIG_RALINK_RAM_SIZE=.*$/CONFIG_RALINK_RAM_SIZE=128/' $CONFIG_FILE
-          grep -q "CONFIG_RT2880_DRAM_128M" $CONFIG_FILE || echo "CONFIG_RT2880_DRAM_128M=y" >> $CONFIG_FILE
-          grep -q "CONFIG_RALINK_RAM_SIZE" $CONFIG_FILE || echo "CONFIG_RALINK_RAM_SIZE=128" >> $CONFIG_FILE
+          sed -i 's/CONFIG_RT2880_DRAM_512M=y/# CONFIG_RT2880_DRAM_512M is not set/' $CONFIG_FILE
+          sed -i 's/# CONFIG_RT2880_DRAM_128M is not set/CONFIG_RT2880_DRAM_128M=y/' $CONFIG_FILE
+          sed -i 's/CONFIG_RALINK_RAM_SIZE=512/CONFIG_RALINK_RAM_SIZE=128/' $CONFIG_FILE
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
