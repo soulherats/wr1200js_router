@@ -29,7 +29,6 @@ jobs:
         run: sh ./trunk/tools/shellcheck.sh
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event.inputs.debug_enabled == 'yes' }}
         with:
           limit-access-to-actor: true
       - name: Build toolchain
