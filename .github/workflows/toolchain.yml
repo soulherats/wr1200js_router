@@ -39,7 +39,7 @@ jobs:
         if: ${{ success() }}
         run: |
           set -e
-          TOOLCHAIN_DIR="toolchain-mipsel/mipsel-linux-uclibc"
+          TOOLCHAIN_DIR="toolchain-mipsel/toolchain-3.4.x"
           if [ ! -d "$TOOLCHAIN_DIR" ]; then
             echo "toolchain dir not found: $TOOLCHAIN_DIR"
             echo "当前 toolchain-mipsel 目录内容："
@@ -49,7 +49,8 @@ jobs:
           GIT_VERSION=`git rev-parse --short=7 HEAD 2>/dev/null` && [ -n "$GIT_VERSION" ] && \
           archive_name=toolchain-mipsel_${GIT_VERSION} || archive_name=toolchain-mipsel
           mkdir -p /opt/artifacts
-          7z a -mx=9 /opt/artifacts/${archive_name}.7z "$TOOLCHAIN_DIR"
+          # 改用 zip，-r 递归目录，-9 最高压缩比，-q 静默
+          zip -r -9 -q /opt/artifacts/${archive_name}.zip "$TOOLCHAIN_DIR"
           ls -lh /opt/artifacts
           echo "archive_name=${archive_name}" >> $GITHUB_ENV
       - name: Upload toolchain to Artifact
@@ -57,13 +58,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.archive_name }}
-          path: /opt/artifacts/*.7z
+          path: /opt/artifacts/*.zip
       - name: Upload toolchain to Releases
         if: ${{ github.event_name == 'release' && success() }}
         uses: svenstaro/upload-release-action@2.2.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: /opt/artifacts/*.7z
+          file: /opt/artifacts/*.zip
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
