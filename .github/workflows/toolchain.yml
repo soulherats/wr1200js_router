@@ -24,7 +24,7 @@ jobs:
       - name: Prepare environment
         run: |
           sudo apt update
-          sudo apt install libtool gperf python3-docutils autopoint gettext pkg-config bison autoconf libltdl-dev p7zip-full
+          sudo apt install libtool gperf python3-docutils autopoint gettext pkg-config bison autoconf libltdl-dev p7zip-full help2man
       - name: Run shellcheck
         run: sh ./trunk/tools/shellcheck.sh
       - name: Setup tmate session
