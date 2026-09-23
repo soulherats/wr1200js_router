@@ -1,0 +1,71 @@
+name: toolchain
+
+# Controls when the action will run.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: 'no'
+  release:
+    types: [published]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    name: build toolchain
+    runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare environment
+        run: |
+          sudo apt update
+          sudo apt install libtool gperf python3-docutils autopoint gettext pkg-config bison autoconf libltdl-dev p7zip-full
+      - name: Run shellcheck
+        run: sh ./trunk/tools/shellcheck.sh
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
+        with:
+          limit-access-to-actor: true
+      - name: Build toolchain
+        run: |
+          cd toolchain-mipsel
+          sh clean_toolchain
+          sh build_toolchain
+      - name: Create archive
+        if: ${{ success() }}
+        run: |
+          set -e
+          TOOLCHAIN_DIR="toolchain-mipsel/mipsel-linux-uclibc"
+          if [ ! -d "$TOOLCHAIN_DIR" ]; then
+            echo "toolchain dir not found: $TOOLCHAIN_DIR"
+            echo "当前 toolchain-mipsel 目录内容："
+            ls -lh toolchain-mipsel
+            exit 1
+          fi
+          GIT_VERSION=`git rev-parse --short=7 HEAD 2>/dev/null` && [ -n "$GIT_VERSION" ] && \
+          archive_name=toolchain-mipsel_${GIT_VERSION} || archive_name=toolchain-mipsel
+          mkdir -p /opt/artifacts
+          7z a -mx=9 /opt/artifacts/${archive_name}.7z "$TOOLCHAIN_DIR"
+          ls -lh /opt/artifacts
+          echo "archive_name=${archive_name}" >> $GITHUB_ENV
+      - name: Upload toolchain to Artifact
+        if: ${{ github.event_name != 'release' && success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.archive_name }}
+          path: /opt/artifacts/*.7z
+      - name: Upload toolchain to Releases
+        if: ${{ github.event_name == 'release' && success() }}
+        uses: svenstaro/upload-release-action@2.2.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /opt/artifacts/*.7z
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
