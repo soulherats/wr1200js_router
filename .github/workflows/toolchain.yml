@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       debug_enabled:
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        description: 'Run the build with debugging enabled'
         required: false
         default: 'no'
   release:
@@ -24,11 +24,10 @@ jobs:
       - name: Prepare environment
         run: |
           sudo apt update
-          sudo apt install libtool gperf python3-docutils autopoint gettext pkg-config bison autoconf libltdl-dev p7zip-full help2man libtool
-      - name: Run shellcheck
-        run: sh ./trunk/tools/shellcheck.sh
+          sudo apt install libtool gperf python3-docutils autopoint gettext pkg-config bison autoconf libltdl-dev p7zip-full help2man libtool libtool-bin
       - name: Setup upterm session
         uses: owenthereal/action-upterm@v1
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
         with:
           limit-access-to-actor: true
       - name: Build toolchain
